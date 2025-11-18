@@ -1,0 +1,6 @@
+{
+    "name": "botanic-journal/backend",
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    }
+}
