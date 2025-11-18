@@ -6,7 +6,8 @@ const Sidebar = ({ activeView, setActiveView }) => {
       { id: 'dashboard', icon: 'fas fa-home', label: 'Dashboard' },
       { id: 'plants', icon: 'fas fa-leaf', label: 'My Plants', badge: 24 },
       { id: 'tasks', icon: 'fas fa-tasks', label: 'Care Tasks', badge: 12 },
-      { id: 'journal', icon: 'fas fa-book', label: 'Plant Journal' }
+      { id: 'journal', icon: 'fas fa-book', label: 'Plant Journal' },
+      { id: 'encyclopedia', icon: 'fas fa-book-open', label: 'Plant Encyclopedia' }
     ],
     analytics: [
       { id: 'analytics', icon: 'fas fa-chart-line', label: 'Analytics' },

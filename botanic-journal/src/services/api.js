@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost/backend/api';
+const API_BASE_URL = 'http://localhost/botanic-journal/botanic-journal/backend/api';
 
 class ApiService {
     constructor() {
@@ -94,11 +94,11 @@ class ApiService {
     }
 
     async completeTask(taskId) {
-        return this.request('tasks.php', {
-            method: 'PATCH',
-            body: { id: taskId, completed: true }
-        });
-    }
+    return this.request('tasks.php', {
+        method: 'PATCH',
+        body: { id: taskId, completed: true }
+    });
+}
 
     async deleteTask(id) {
         return this.request(`tasks.php?id=${id}`, {
@@ -167,6 +167,10 @@ class ApiService {
             method: 'PUT',
             body: userData
         });
+    }
+
+    async getPlantsEncyclopedia() {
+        return this.request('plants-encyclopedia.php');
     }
 }
 

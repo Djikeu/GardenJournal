@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard/Dashboard';
 import MyPlants from './components/Plants/MyPlants';
 import CareTasks from './components/Tasks/CareTasks';
 import PlantJournal from './components/Journal/PlantJournal';
+import PlantEncyclopedia from './components/Encyclopedia/PlantEncylopedia';
 import Analytics from './components/Analytics/Analytics';
 import GardenPlanner from './components/Planner/GardenPlanner';
 import SeedLibrary from './components/Library/SeedLibrary';
@@ -20,7 +21,7 @@ function App() {
     const id = Date.now();
     const newNotification = { id, title, message, type };
     setNotifications(prev => [...prev, newNotification]);
-    
+
     setTimeout(() => {
       setNotifications(prev => prev.filter(notification => notification.id !== id));
     }, 5000);
@@ -36,6 +37,8 @@ function App() {
         return <CareTasks showNotification={showNotification} />;
       case 'journal':
         return <PlantJournal showNotification={showNotification} />;
+      case 'encyclopedia':
+        return <PlantEncyclopedia showNotification={showNotification} />;
       case 'analytics':
         return <Analytics showNotification={showNotification} />;
       case 'planner':
@@ -54,7 +57,7 @@ function App() {
         <Header />
         {renderContent()}
       </div>
-      
+
       {/* Notification Container */}
       <div className="notification-container">
         {notifications.map(notification => (
