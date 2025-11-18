@@ -1,5 +1,14 @@
 <?php
-require_once '../config/cors.php';
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Content-Type: application/json");
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
 require_once '../config/database.php';
 
 $database = new Database();
@@ -25,32 +34,6 @@ switch($method) {
                 'success' => true,
                 'data' => $user
             ]);
-        } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
-        }
-        break;
-
-    case 'PUT':
-        try {
-            $data = json_decode(file_get_contents("php://input"));
-            
-            $stmt = $db->prepare("UPDATE users SET name = :name, avatar = :avatar WHERE id = :id");
-            $stmt->bindParam(':name', $data->name);
-            $stmt->bindParam(':avatar', $data->avatar);
-            $stmt->bindParam(':id', $user_id);
-            
-            if($stmt->execute()) {
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Profile updated successfully'
-                ]);
-            } else {
-                throw new Exception('Failed to update profile');
-            }
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([

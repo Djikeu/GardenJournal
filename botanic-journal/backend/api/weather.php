@@ -1,5 +1,14 @@
 <?php
-require_once '../config/cors.php';
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Content-Type: application/json");
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
 require_once '../config/database.php';
 
 $database = new Database();
@@ -38,39 +47,6 @@ switch($method) {
             echo json_encode([
                 'success' => false,
                 'message' => 'Failed to fetch weather: ' . $e->getMessage()
-            ]);
-        }
-        break;
-
-    case 'POST':
-        try {
-            $data = json_decode(file_get_contents("php://input"));
-            
-            // Insert new weather data
-            $stmt = $db->prepare("INSERT INTO weather (user_id, location, temperature, condition, humidity, recommendation) 
-                                 VALUES (:user_id, :location, :temperature, :condition, :humidity, :recommendation)");
-            
-            $stmt->bindParam(':user_id', $user_id);
-            $stmt->bindParam(':location', $data->location);
-            $stmt->bindParam(':temperature', $data->temperature);
-            $stmt->bindParam(':condition', $data->condition);
-            $stmt->bindParam(':humidity', $data->humidity);
-            $stmt->bindParam(':recommendation', $data->recommendation);
-            
-            if($stmt->execute()) {
-                http_response_code(201);
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Weather data updated successfully'
-                ]);
-            } else {
-                throw new Exception('Failed to update weather data');
-            }
-        } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
             ]);
         }
         break;
