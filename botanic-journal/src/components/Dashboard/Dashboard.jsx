@@ -6,24 +6,35 @@ import QuickActions from './QuickActions';
 import PlantGrid from '../Plants/PlantGrid';
 import { apiService } from '../../services/api';
 
-const Dashboard = ({ showNotification }) => {
+const Dashboard = ({ showNotification, user }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userStats, setUserStats] = useState(null);
 
   useEffect(() => {
-    loadTasks();
-  }, []);
+    loadDashboardData();
+  }, [user]);
 
-  const loadTasks = async () => {
+  const loadDashboardData = async () => {
     try {
-      const response = await apiService.getTasks();
+      setLoading(true);
+      const [tasksResponse, statsResponse] = await Promise.all([
+        apiService.getTasks(),
+        apiService.getStats()
+      ]);
+      
       // Get only urgent tasks (high priority, not completed)
-      const urgentTasks = response.data.filter(task => 
+      const urgentTasks = tasksResponse.data.filter(task => 
         task.priority === 'high' && !task.completed
-      ).slice(0, 3); // Show only 3 most urgent
+      ).slice(0, 3);
+      
       setTasks(urgentTasks);
+      
+      if (statsResponse.success) {
+        setUserStats(statsResponse.data);
+      }
     } catch (error) {
-      showNotification('Error', 'Failed to load tasks', 'error');
+      showNotification('Error', 'Failed to load dashboard data', 'error');
     } finally {
       setLoading(false);
     }
@@ -52,9 +63,40 @@ const Dashboard = ({ showNotification }) => {
     }
   };
 
+  const getLevelTitle = (level) => {
+    if (level >= 10) return 'Expert Gardener';
+    if (level >= 5) return 'Intermediate Gardener';
+    return 'Beginner Gardener';
+  };
+
   return (
     <>
-      <StatsGrid showNotification={showNotification} />
+      {/* Welcome Section */}
+      <div className="welcome-section">
+        <div className="welcome-content">
+          <h1>Welcome back, {user?.name}!
+            <span className="user-level">
+              <i className="fas fa-seedling"></i>
+              {getLevelTitle(user?.level || 1)} • Level {user?.level || 1}
+            </span>
+          </h1>
+          <p className="welcome-subtitle">
+            {new Date().toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </p>
+        </div>
+        {user?.avatar && (
+          <div className="welcome-avatar">
+            <img src={user.avatar} alt={user.name} />
+          </div>
+        )}
+      </div>
+
+      <StatsGrid showNotification={showNotification} userStats={userStats} />
       
       <div className="dashboard-grid">
         <WeatherWidget showNotification={showNotification} />
@@ -139,7 +181,7 @@ const Dashboard = ({ showNotification }) => {
           </div>
         </div>
 
-        <AnalyticsChart showNotification={showNotification} />
+        <AnalyticsChart showNotification={showNotification} userStats={userStats} />
         <QuickActions showNotification={showNotification} />
         
         {/* Companion Planting Tips */}
@@ -205,7 +247,7 @@ const Dashboard = ({ showNotification }) => {
                 </button>
               </div>
             </div>
-            <PlantGrid showNotification={showNotification} limit={4} />
+            <PlantGrid showNotification={showNotification} limit={4} userId={user?.id} />
           </div>
         </div>
       </div>

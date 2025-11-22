@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Sidebar = ({ activeView, setActiveView }) => {
+const Sidebar = ({ activeView, setActiveView, onLogout }) => {
   const navItems = {
     main: [
       { id: 'dashboard', icon: 'fas fa-home', label: 'Dashboard' },
@@ -19,6 +19,12 @@ const Sidebar = ({ activeView, setActiveView }) => {
       { id: 'help', icon: 'fas fa-question-circle', label: 'Help Center' },
       { id: 'settings', icon: 'fas fa-cog', label: 'Settings' }
     ]
+  };
+
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    }
   };
 
   return (
@@ -104,6 +110,29 @@ const Sidebar = ({ activeView, setActiveView }) => {
           ))}
         </ul>
       </nav>
+
+      {/* Logout Section */}
+      <div className="sidebar-footer">
+        <div className="nav-section">
+          <ul className="nav-links">
+            <li>
+              <a 
+                href="#" 
+                className="logout-btn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLogout();
+                }}
+              >
+                <div className="nav-link-content">
+                  <i className="fas fa-sign-out-alt"></i>
+                  <span>Logout</span>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   );
 };

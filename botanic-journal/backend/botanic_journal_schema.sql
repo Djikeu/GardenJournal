@@ -15,6 +15,11 @@ CREATE TABLE `users` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+----
+INSERT INTO `users` (`email`, `name`, `password`, `role`, `level`) 
+VALUES ('admin@botanicjournal.com', 'Admin', 'admin123', 'admin', 10);
+---
+
 -- Plants table
 CREATE TABLE `plants` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

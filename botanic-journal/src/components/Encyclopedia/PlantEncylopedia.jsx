@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
 
-const PlantEncyclopedia = ({ showNotification }) => {
+const PlantEncyclopedia = ({ showNotification, user }) => {
     const [plants, setPlants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all');
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
-    const [selectedPlant, setSelectedPlant] = useState(null);
+    const [viewMode, setViewMode] = useState('grid');
+    const [addingPlant, setAddingPlant] = useState(null);
 
     useEffect(() => {
         loadPlants();
-    }, []);
+    }, [user]);
 
     const loadPlants = async () => {
         try {
             setLoading(true);
             const response = await apiService.getPlantsEncyclopedia();
-            setPlants(response.data);
+            if (response.success) {
+                setPlants(response.data);
+            } else {
+                throw new Error(response.message);
+            }
         } catch (error) {
             showNotification('Error', 'Failed to load plant encyclopedia', 'error');
         } finally {
@@ -25,6 +29,46 @@ const PlantEncyclopedia = ({ showNotification }) => {
         }
     };
 
+    // In PlantEncyclopedia.jsx - update addPlantToCollection function
+    const addPlantToCollection = async (plant) => {
+        try {
+            setAddingPlant(plant.id);
+
+            const plantData = {
+                name: plant.name,
+                species: plant.species || '',
+                type: plant.type || 'indoor',
+                description: plant.description || '',
+                light_requirements: plant.light_requirements || 'medium',
+                watering_schedule: plant.watering_schedule || 'weekly',
+                image_url: plant.image_url || plant.image || '',
+                status: 'healthy',
+                is_favorite: false,
+                encyclopedia_id: plant.id
+            };
+
+            console.log('➕ Adding plant data:', plantData);
+            console.log('👤 Current user from props:', user);
+            console.log('🔑 User ID from localStorage:', localStorage.getItem('user_id'));
+
+            const response = await apiService.createPlant(plantData);
+            if (response.success) {
+                console.log('✅ Plant added successfully:', response.data);
+                showNotification('Success', `${plant.name} added to your collection!`, 'success');
+                // Update the encyclopedia to show it's added
+                setPlants(prevPlants =>
+                    prevPlants.map(p =>
+                        p.id === plant.id ? { ...p, is_added: true } : p
+                    )
+                );
+            }
+        } catch (error) {
+            console.error('❌ Add plant error:', error);
+            showNotification('Error', `Failed to add plant: ${error.message}`, 'error');
+        } finally {
+            setAddingPlant(null);
+        }
+    };
     const getTypeIcon = (type) => {
         const icons = {
             'outdoor': 'fa-sun',
@@ -67,7 +111,7 @@ const PlantEncyclopedia = ({ showNotification }) => {
     // Filter plants based on search and type
     const filteredPlants = plants.filter(plant => {
         const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (plant.species && plant.species.toLowerCase().includes(searchTerm.toLowerCase()));
+            (plant.species && plant.species.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesType = filterType === 'all' || plant.type === filterType;
         return matchesSearch && matchesType;
     });
@@ -96,7 +140,7 @@ const PlantEncyclopedia = ({ showNotification }) => {
                         Plant Encyclopedia
                     </h1>
                     <p className="hero-subtitle">
-                        Discover, learn, and explore our extensive collection of plants. 
+                        Discover, learn, and explore our extensive collection of plants.
                         Find the perfect additions for your garden.
                     </p>
                 </div>
@@ -108,6 +152,10 @@ const PlantEncyclopedia = ({ showNotification }) => {
                     <div className="stat-item">
                         <div className="stat-number">{filteredPlants.length}</div>
                         <div className="stat-label">Filtered Results</div>
+                    </div>
+                    <div className="stat-item">
+                        <div className="stat-number">{plants.filter(p => p.is_added).length}</div>
+                        <div className="stat-label">In Your Collection</div>
                     </div>
                 </div>
             </div>
@@ -126,7 +174,7 @@ const PlantEncyclopedia = ({ showNotification }) => {
                                 className="search-input-enhanced"
                             />
                             {searchTerm && (
-                                <button 
+                                <button
                                     className="clear-search"
                                     onClick={() => setSearchTerm('')}
                                 >
@@ -137,14 +185,14 @@ const PlantEncyclopedia = ({ showNotification }) => {
                     </div>
 
                     <div className="view-controls">
-                        <button 
+                        <button
                             className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
                             onClick={() => setViewMode('grid')}
                             title="Grid View"
                         >
                             <i className="fas fa-th"></i>
                         </button>
-                        <button 
+                        <button
                             className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
                             onClick={() => setViewMode('list')}
                             title="List View"
@@ -159,7 +207,7 @@ const PlantEncyclopedia = ({ showNotification }) => {
                     <div className="filter-header">
                         <h4>Filter by Category</h4>
                         {filterType !== 'all' && (
-                            <button 
+                            <button
                                 className="clear-filters"
                                 onClick={() => setFilterType('all')}
                             >
@@ -173,7 +221,7 @@ const PlantEncyclopedia = ({ showNotification }) => {
                                 key={type}
                                 className={`filter-chip ${filterType === type ? 'active' : ''}`}
                                 onClick={() => setFilterType(type)}
-                                style={filterType === type ? { 
+                                style={filterType === type ? {
                                     backgroundColor: getTypeColor(type),
                                     borderColor: getTypeColor(type)
                                 } : {}}
@@ -200,8 +248,8 @@ const PlantEncyclopedia = ({ showNotification }) => {
                         </div>
                         <h3>No plants found</h3>
                         <p>We couldn't find any plants matching your criteria. Try adjusting your search or filters.</p>
-                        <button 
-                            className="btn-primary" 
+                        <button
+                            className="btn-primary"
                             onClick={() => { setSearchTerm(''); setFilterType('all'); }}
                         >
                             <i className="fas fa-undo"></i>
@@ -230,19 +278,21 @@ const PlantEncyclopedia = ({ showNotification }) => {
                         <div className={`plants-container ${viewMode}-view`}>
                             {filteredPlants.map(plant => {
                                 const careInfo = getCareLevel(plant.type);
-                                
+                                const isAdding = addingPlant === plant.id;
+                                const isAdded = plant.is_added > 0;
+
                                 return (
                                     <div key={plant.id} className="plant-card-enhanced">
                                         <div className="plant-card-inner">
                                             {/* Plant Image */}
                                             <div className="plant-image-section">
                                                 <div className="plant-image-container">
-                                                    <img 
-                                                        src={plant.image || 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'} 
+                                                    <img
+                                                        src={plant.image_url || plant.image || 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=500'}
                                                         alt={plant.name}
                                                         className="plant-image"
                                                         onError={(e) => {
-                                                            e.target.src = 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
+                                                            e.target.src = 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=500';
                                                         }}
                                                     />
                                                     <div className="plant-image-overlay">
@@ -251,12 +301,12 @@ const PlantEncyclopedia = ({ showNotification }) => {
                                                             {plant.type}
                                                         </div>
                                                         <div className="plant-actions-overlay">
-                                                            <button className="icon-btn favorite-btn" title="Add to favorites">
-                                                                <i className="far fa-heart"></i>
-                                                            </button>
-                                                            <button className="icon-btn share-btn" title="Share plant">
-                                                                <i className="fas fa-share"></i>
-                                                            </button>
+                                                            {isAdded && (
+                                                                <div className="added-badge">
+                                                                    <i className="fas fa-check"></i>
+                                                                    Added
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -283,46 +333,24 @@ const PlantEncyclopedia = ({ showNotification }) => {
                                                         <i className="fas fa-sun" style={{ color: '#f59e0b' }}></i>
                                                         <div>
                                                             <span className="detail-label">Light</span>
-                                                            <span className="detail-value">{plant.light || 'Varies'}</span>
+                                                            <span className="detail-value">{plant.light_requirements || 'Varies'}</span>
                                                         </div>
                                                     </div>
                                                     <div className="detail-item">
                                                         <i className="fas fa-tint" style={{ color: '#3b82f6' }}></i>
                                                         <div>
-                                                            <span className="detail-label">Humidity</span>
-                                                            <span className="detail-value">{plant.humidity || 'Varies'}</span>
+                                                            <span className="detail-label">Water</span>
+                                                            <span className="detail-value">{plant.watering_schedule || 'Varies'}</span>
                                                         </div>
                                                     </div>
-                                                    <div className="detail-item">
-                                                        <i className="fas fa-thermometer-half" style={{ color: '#ef4444' }}></i>
-                                                        <div>
-                                                            <span className="detail-label">Temperature</span>
-                                                            <span className="detail-value">{plant.temperature || 'Varies'}</span>
+                                                    {plant.description && (
+                                                        <div className="plant-description">
+                                                            {plant.description.length > 100
+                                                                ? `${plant.description.substring(0, 100)}...`
+                                                                : plant.description
+                                                            }
                                                         </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Quick Stats */}
-                                                <div className="quick-stats">
-                                                    <div className="stat">
-                                                        <div className="stat-value">
-                                                            {plant.type === 'succulent' ? 'Low' : 
-                                                             plant.type === 'tropical' ? 'High' : 'Moderate'}
-                                                        </div>
-                                                        <div className="stat-label">Water</div>
-                                                    </div>
-                                                    <div className="stat">
-                                                        <div className="stat-value">
-                                                            {plant.type === 'succulent' ? 'Slow' : 'Moderate'}
-                                                        </div>
-                                                        <div className="stat-label">Growth</div>
-                                                    </div>
-                                                    <div className="stat">
-                                                        <div className="stat-value">
-                                                            {plant.type === 'flowering' ? 'Seasonal' : 'Year-round'}
-                                                        </div>
-                                                        <div className="stat-label">Blooms</div>
-                                                    </div>
+                                                    )}
                                                 </div>
 
                                                 {/* Action Buttons */}
@@ -331,10 +359,30 @@ const PlantEncyclopedia = ({ showNotification }) => {
                                                         <i className="fas fa-info-circle"></i>
                                                         Details
                                                     </button>
-                                                    <button className="btn-primary">
-                                                        <i className="fas fa-plus"></i>
-                                                        Add to My Plants
-                                                    </button>
+                                                    {isAdded ? (
+                                                        <button className="btn-success" disabled>
+                                                            <i className="fas fa-check"></i>
+                                                            In Collection
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            className="btn-primary"
+                                                            onClick={() => addPlantToCollection(plant)}
+                                                            disabled={isAdding}
+                                                        >
+                                                            {isAdding ? (
+                                                                <>
+                                                                    <i className="fas fa-spinner fa-spin"></i>
+                                                                    Adding...
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <i className="fas fa-plus"></i>
+                                                                    Add to My Plants
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
