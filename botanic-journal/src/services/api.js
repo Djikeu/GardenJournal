@@ -1,22 +1,15 @@
 const API_BASE_URL = 'http://localhost/botanic-journal/botanic-journal/backend/api';
 
 class ApiService {
+
     constructor() {
         this.baseURL = API_BASE_URL;
     }
 
-    // Helper method to get current user ID with validation
+    // Add this helper method to get current user ID
     getCurrentUserId() {
-        const user_id = localStorage.getItem('user_id');
-        console.log('🔍 Getting current user ID:', user_id);
-        
-        if (!user_id || user_id === 'null' || user_id === 'undefined') {
-            console.error('❌ No valid user_id found in localStorage');
-            // Don't redirect automatically, let the component handle it
-            throw new Error('User not authenticated. Please log in.');
-        }
-        
-        return user_id;
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        return user.id || localStorage.getItem('user_id') || 1;
     }
 
     async request(endpoint, options = {}) {
@@ -33,31 +26,20 @@ class ApiService {
             config.body = JSON.stringify(config.body);
         }
 
-        // DEBUG: Log the request
-        console.log('🔧 API Request:', {
-            url: url,
-            method: config.method || 'GET',
-            body: config.body
-        });
-
         try {
             const response = await fetch(url, config);
-
-            // Check if response is HTML error instead of JSON
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                throw new Error(`Server returned HTML instead of JSON. Response: ${text.substring(0, 100)}`);
+            
+            // First, get the response as text to handle both JSON and HTML
+            const responseText = await response.text();
+            
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                // If it's not JSON, it's probably an HTML error
+                console.error('API returned non-JSON response:', responseText.substring(0, 200));
+                throw new Error(`Server error: Received HTML instead of JSON. Check your API endpoint.`);
             }
-
-            const data = await response.json();
-
-            // DEBUG: Log the response
-            console.log('✅ API Response:', {
-                url: url,
-                status: response.status,
-                data: data
-            });
 
             if (!response.ok) {
                 throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
@@ -65,21 +47,19 @@ class ApiService {
 
             return data;
         } catch (error) {
-            console.error('❌ API Error:', error);
+            console.error('API Error:', error);
             throw error;
         }
     }
 
-    // Plants - DYNAMIC user_id
+    // Plants
     async getPlants() {
         const user_id = this.getCurrentUserId();
-        console.log('🌿 Getting plants for user:', user_id);
         return this.request(`plants.php?user_id=${user_id}`);
     }
 
     async createPlant(plantData) {
         const user_id = this.getCurrentUserId();
-        console.log('➕ Creating plant for user:', user_id, plantData);
         return this.request('plants.php', {
             method: 'POST',
             body: { ...plantData, user_id }
@@ -109,14 +89,7 @@ class ApiService {
         });
     }
 
-    // Plants Encyclopedia - DYNAMIC user_id
-    async getPlantsEncyclopedia() {
-        const user_id = this.getCurrentUserId();
-        console.log('📚 Getting encyclopedia plants for user:', user_id);
-        return this.request(`plants.php?encyclopedia=1&user_id=${user_id}`);
-    }
-
-    // Tasks - DYNAMIC user_id
+    // TASKS - UPDATED METHODS WITH USER_ID
     async getTasks() {
         const user_id = this.getCurrentUserId();
         return this.request(`tasks.php?user_id=${user_id}`);
@@ -131,15 +104,23 @@ class ApiService {
         const user_id = this.getCurrentUserId();
         return this.request('tasks.php', {
             method: 'POST',
-            body: { ...taskData, user_id }
+            body: { 
+                ...taskData, 
+                user_id: user_id
+            }
         });
     }
 
+    // FIXED: Changed from PUT to PATCH for task updates
     async updateTask(id, taskData) {
         const user_id = this.getCurrentUserId();
-        return this.request(`tasks.php?id=${id}`, {
-            method: 'PUT',
-            body: { ...taskData, user_id }
+        return this.request('tasks.php', {
+            method: 'PATCH', // Changed from PUT to PATCH
+            body: { 
+                id: id,
+                ...taskData, 
+                user_id: user_id 
+            }
         });
     }
 
@@ -158,7 +139,7 @@ class ApiService {
         });
     }
 
-    // Journals - DYNAMIC user_id
+    // Journals
     async getJournals() {
         const user_id = this.getCurrentUserId();
         return this.request(`journals.php?user_id=${user_id}`);
@@ -192,13 +173,13 @@ class ApiService {
         });
     }
 
-    // Stats - DYNAMIC user_id
+    // Stats
     async getStats() {
         const user_id = this.getCurrentUserId();
         return this.request(`stats.php?user_id=${user_id}`);
     }
 
-    // Weather - No user_id needed
+    // Weather
     async getWeather() {
         return this.request('weather.php');
     }
@@ -210,13 +191,13 @@ class ApiService {
         });
     }
 
-    // Analytics - DYNAMIC user_id
+    // Analytics
     async getAnalytics() {
         const user_id = this.getCurrentUserId();
         return this.request(`analytics.php?user_id=${user_id}`);
     }
 
-    // User - DYNAMIC user_id
+    // User
     async getUserProfile() {
         const user_id = this.getCurrentUserId();
         return this.request(`user.php?user_id=${user_id}`);
@@ -230,7 +211,11 @@ class ApiService {
         });
     }
 
-    // Profile - DYNAMIC user_id
+    async getPlantsEncyclopedia() {
+        return this.request('plants-encyclopedia.php');
+    }
+
+    // Profile
     async getProfile() {
         const user_id = this.getCurrentUserId();
         return this.request(`profile.php?user_id=${user_id}`);
@@ -245,8 +230,7 @@ class ApiService {
     }
 
     async uploadAvatar(formData) {
-        const user_id = this.getCurrentUserId();
-        const url = `${this.baseURL}/upload-avatar.php?user_id=${user_id}`;
+        const url = `${this.baseURL}/upload-avatar.php`;
         const config = {
             method: 'POST',
             body: formData,
@@ -267,7 +251,7 @@ class ApiService {
         }
     }
 
-    // AUTHENTICATION METHODS - No user_id needed for login/register
+    // AUTHENTICATION METHODS
     async login(loginData) {
         return this.request('auth.php', {
             method: 'POST',
@@ -276,6 +260,7 @@ class ApiService {
     }
 
     async register(registerData) {
+        // Remove confirmPassword before sending to API
         const { confirmPassword, ...dataToSend } = registerData;
         return this.request('auth.php', {
             method: 'POST',
@@ -284,14 +269,13 @@ class ApiService {
     }
 
     async logout() {
-        const user_id = this.getCurrentUserId();
         return this.request('auth.php', {
             method: 'POST',
-            body: { action: 'logout', user_id }
+            body: { action: 'logout' }
         });
     }
 
-    // Additional user-related methods - DYNAMIC user_id
+    // Additional user-related methods
     async changePassword(passwordData) {
         const user_id = this.getCurrentUserId();
         return this.request('user.php', {
@@ -310,7 +294,7 @@ class ApiService {
         return this.request(`user-stats.php?user_id=${user_id}`);
     }
 
-    // Admin methods - No user_id needed (admin endpoints)
+    // Admin methods
     async getAdminUsers() {
         return this.request('admin/users.php');
     }
@@ -331,6 +315,59 @@ class ApiService {
             method: 'PATCH',
             body: { id: userId, role: role }
         });
+    }
+
+    // NEW METHOD: Get sample tasks for demonstration
+    async getSampleTasks() {
+        // This returns sample tasks structure that matches your database
+        return {
+            success: true,
+            data: [
+                {
+                    id: 1,
+                    user_id: this.getCurrentUserId(),
+                    plant_id: 3,
+                    plant_name: 'Cherry Tomato',
+                    title: 'Water Tomato Plants',
+                    description: 'Tomatoes are looking dry and need immediate watering',
+                    priority: 'high',
+                    due_date: new Date().toISOString().split('T')[0],
+                    completed: false,
+                    progress: 15,
+                    type: 'watering',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                },
+                {
+                    id: 2,
+                    user_id: this.getCurrentUserId(),
+                    plant_id: 1,
+                    plant_name: 'Monstera Deliciosa',
+                    title: 'Check for pests on Monstera',
+                    description: 'Look for signs of spider mites or aphids',
+                    priority: 'high',
+                    due_date: new Date().toISOString().split('T')[0],
+                    completed: false,
+                    progress: 5,
+                    type: 'pest_control',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }
+            ]
+        };
+    }
+
+    // NEW METHOD: Test API connection
+    async testConnection() {
+        try {
+            const response = await fetch(`${this.baseURL}/tasks.php?user_id=1`);
+            const text = await response.text();
+            console.log('API Test Response:', text.substring(0, 200));
+            return text;
+        } catch (error) {
+            console.error('API Connection Test Failed:', error);
+            throw error;
+        }
     }
 }
 
