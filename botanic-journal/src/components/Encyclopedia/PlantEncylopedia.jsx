@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
 
-const PlantEncyclopedia = ({ showNotification, user }) => {
+const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
     const [plants, setPlants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -117,6 +117,18 @@ const PlantEncyclopedia = ({ showNotification, user }) => {
     });
 
     const plantTypes = ['all', 'indoor', 'outdoor', 'succulent', 'tropical', 'vegetable', 'flowering', 'herb'];
+
+    const navigateToPlantDetail = (plantId) => {
+        // Method 1: Using React Router (recommended)
+        navigate(`/plants/${plantId}`);
+
+        // Method 2: Using window.location.hash (if you're using hash routing)
+        // window.location.hash = `#plant/${plantId}`;
+
+        // Method 3: Using state in your app
+        // setSelectedPlantId(plantId);
+        // setShowPlantDetail(true);
+    };
 
     if (loading) {
         return (
@@ -355,7 +367,10 @@ const PlantEncyclopedia = ({ showNotification, user }) => {
 
                                                 {/* Action Buttons */}
                                                 <div className="plant-actions">
-                                                    <button className="btn-outline">
+                                                    <button
+                                                        className="btn-outline"
+                                                        onClick={() => onShowPlantDetails(plant.id)} // Changed this line
+                                                    >
                                                         <i className="fas fa-info-circle"></i>
                                                         Details
                                                     </button>

@@ -3,24 +3,38 @@ import { apiService } from '../../services/api';
 
 const PlantJournal = ({ showNotification }) => {
     const [journals, setJournals] = useState([]);
+    const [plants, setPlants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newEntry, setNewEntry] = useState({ title: '', content: '', plant_id: '' });
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+    const [viewMode, setViewMode] = useState('grid');
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedJournal, setSelectedJournal] = useState(null);
+    const [isExpandedView, setIsExpandedView] = useState(false);
+    const [editingJournal, setEditingJournal] = useState(null);
 
     useEffect(() => {
         loadJournals();
+        loadPlants();
     }, []);
 
     const loadJournals = async () => {
         try {
             setLoading(true);
             const response = await apiService.getJournals();
-            setJournals(response.data);
+            setJournals(response.data || []);
         } catch (error) {
             showNotification('Error', 'Failed to load journal entries', 'error');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadPlants = async () => {
+        try {
+            const response = await apiService.getPlants();
+            setPlants(response.data || []);
+        } catch (error) {
+            console.error('Failed to load plants:', error);
         }
     };
 
@@ -40,35 +54,65 @@ const PlantJournal = ({ showNotification }) => {
         }
     };
 
-    const getMoodIcon = (content) => {
-        const text = content.toLowerCase();
-        if (text.includes('happy') || text.includes('thriving') || text.includes('bloom')) {
-            return 'fa-smile-beam';
-        } else if (text.includes('sad') || text.includes('wilting') || text.includes('problem')) {
-            return 'fa-frown';
-        } else if (text.includes('growth') || text.includes('new') || text.includes('sprout')) {
-            return 'fa-seedling';
-        }
-        return 'fa-book';
+    const handleReadMore = (journal) => {
+        setSelectedJournal(journal);
+        setIsExpandedView(true);
     };
 
-    const getMoodColor = (content) => {
-        const text = content.toLowerCase();
-        if (text.includes('happy') || text.includes('thriving') || text.includes('bloom')) {
-            return '#10b981';
-        } else if (text.includes('sad') || text.includes('wilting') || text.includes('problem')) {
-            return '#ef4444';
-        } else if (text.includes('growth') || text.includes('new') || text.includes('sprout')) {
-            return '#3b82f6';
+    const handleCloseExpandedView = () => {
+        setIsExpandedView(false);
+        setSelectedJournal(null);
+        setEditingJournal(null);
+    };
+
+    const handleEditJournal = (journal) => {
+        setEditingJournal({ ...journal });
+        setIsExpandedView(true);
+    };
+
+    const handleUpdateJournal = async () => {
+        if (!editingJournal.title || !editingJournal.content) {
+            showNotification('Error', 'Please fill in title and content', 'error');
+            return;
         }
-        return '#7db36e';
+
+        try {
+            await apiService.updateJournal(editingJournal.id, editingJournal);
+            showNotification('Success', 'Journal entry updated successfully', 'success');
+            setEditingJournal(null);
+            loadJournals();
+            handleCloseExpandedView();
+        } catch (error) {
+            showNotification('Error', 'Failed to update journal entry', 'error');
+        }
+    };
+
+    const handleDeleteJournal = async (journalId) => {
+        if (window.confirm('Are you sure you want to delete this journal entry?')) {
+            try {
+                await apiService.deleteJournal(journalId);
+                showNotification('Success', 'Journal entry deleted successfully', 'success');
+                loadJournals();
+                if (isExpandedView) {
+                    handleCloseExpandedView();
+                }
+            } catch (error) {
+                showNotification('Error', 'Failed to delete journal entry', 'error');
+            }
+        }
+    };
+
+    const getPlantName = (plantId) => {
+        const plant = plants.find(p => p.id == plantId);
+        return plant ? plant.name : null;
     };
 
     // Filter journals based on search
     const filteredJournals = journals.filter(journal => {
-        return journal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        const plantName = getPlantName(journal.plant_id);
+        return journal.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                journal.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               (journal.plant_name && journal.plant_name.toLowerCase().includes(searchTerm.toLowerCase()));
+               (plantName && plantName.toLowerCase().includes(searchTerm.toLowerCase()));
     });
 
     if (loading) {
@@ -85,7 +129,163 @@ const PlantJournal = ({ showNotification }) => {
 
     return (
         <div className="plant-journal">
-            {/* Hero Header */}
+            {/* Expanded View Modal - FIXED */}
+            {isExpandedView && (
+                <div className="modal-overlay" onClick={handleCloseExpandedView}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>
+                                <i className="fas fa-book-open"></i>
+                                {editingJournal ? 'Edit Journal Entry' : 'Journal Entry Details'}
+                            </h3>
+                            <button className="modal-close" onClick={handleCloseExpandedView}>
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <div className="modal-body">
+                            {editingJournal ? (
+                                // Edit Form
+                                <div className="journal-edit-form">
+                                    <div className="form-group">
+                                        <label>Title</label>
+                                        <input
+                                            type="text"
+                                            value={editingJournal.title}
+                                            onChange={(e) => setEditingJournal({ ...editingJournal, title: e.target.value })}
+                                            className="form-input"
+                                            placeholder="Enter journal title"
+                                        />
+                                    </div>
+                                    
+                                    <div className="form-group">
+                                        <label>Connect to Plant (Optional)</label>
+                                        <select
+                                            value={editingJournal.plant_id || ''}
+                                            onChange={(e) => setEditingJournal({ ...editingJournal, plant_id: e.target.value })}
+                                            className="form-select"
+                                        >
+                                            <option value="">No plant selected</option>
+                                            {plants.map(plant => (
+                                                <option key={plant.id} value={plant.id}>
+                                                    {plant.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    
+                                    <div className="form-group">
+                                        <label>Content</label>
+                                        <textarea
+                                            value={editingJournal.content}
+                                            onChange={(e) => setEditingJournal({ ...editingJournal, content: e.target.value })}
+                                            rows="12"
+                                            className="form-textarea"
+                                            placeholder="Write your journal entry..."
+                                        />
+                                    </div>
+
+                                    <div className="form-actions">
+                                        <button className="btn-primary" onClick={handleUpdateJournal}>
+                                            <i className="fas fa-save"></i>
+                                            Save Changes
+                                        </button>
+                                        <button 
+                                            className="btn-outline" 
+                                            onClick={() => setEditingJournal(null)}
+                                        >
+                                            <i className="fas fa-times"></i>
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                // Read View
+                                selectedJournal && (
+                                    <div className="journal-detail-view">
+                                        <div className="journal-header">
+                                            <div className="journal-title-section">
+                                                <h1>{selectedJournal.title || 'Plant Update'}</h1>
+                                                <div className="journal-meta">
+                                                    <span className="journal-date">
+                                                        <i className="fas fa-calendar"></i>
+                                                        {new Date(selectedJournal.created_at).toLocaleDateString('en-US', {
+                                                            year: 'numeric',
+                                                            month: 'long',
+                                                            day: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                    </span>
+                                                    {selectedJournal.plant_id && (
+                                                        <span className="journal-plant">
+                                                            <i className="fas fa-seedling"></i>
+                                                            Related to: {getPlantName(selectedJournal.plant_id)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="journal-content-full">
+                                            <div className="content-text">
+                                                {selectedJournal.content}
+                                            </div>
+                                        </div>
+
+                                        <div className="journal-stats-detailed">
+                                            <div className="stat-item">
+                                                <div className="stat-value">
+                                                    {selectedJournal.content.split(' ').length}
+                                                </div>
+                                                <div className="stat-label">Words</div>
+                                            </div>
+                                            <div className="stat-item">
+                                                <div className="stat-value">
+                                                    {selectedJournal.content.length}
+                                                </div>
+                                                <div className="stat-label">Characters</div>
+                                            </div>
+                                            <div className="stat-item">
+                                                <div className="stat-value">
+                                                    {Math.ceil(selectedJournal.content.split(' ').length / 200)}
+                                                </div>
+                                                <div className="stat-label">Minutes to Read</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="journal-actions-detailed">
+                                            <button 
+                                                className="btn-outline"
+                                                onClick={() => handleEditJournal(selectedJournal)}
+                                            >
+                                                <i className="fas fa-edit"></i>
+                                                Edit Entry
+                                            </button>
+                                            <button 
+                                                className="btn-danger"
+                                                onClick={() => handleDeleteJournal(selectedJournal.id)}
+                                            >
+                                                <i className="fas fa-trash"></i>
+                                                Delete Entry
+                                            </button>
+                                            <button 
+                                                className="btn-secondary"
+                                                onClick={handleCloseExpandedView}
+                                            >
+                                                <i className="fas fa-times"></i>
+                                                Close
+                                            </button>
+                                        </div>
+                                    </div>
+                                )
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Rest of the component */}
             <div className="journal-hero">
                 <div className="hero-content">
                     <h1>
@@ -109,7 +309,6 @@ const PlantJournal = ({ showNotification }) => {
                 </div>
             </div>
 
-            {/* Controls Section */}
             <div className="journal-controls">
                 <div className="controls-main">
                     <div className="search-container">
@@ -152,7 +351,6 @@ const PlantJournal = ({ showNotification }) => {
                 </div>
             </div>
 
-            {/* Main Content Grid */}
             <div className="journal-content-grid">
                 {/* New Entry Form */}
                 <div className="journal-form-card">
@@ -173,6 +371,23 @@ const PlantJournal = ({ showNotification }) => {
                                 className="form-input"
                             />
                         </div>
+                        
+                        <div className="form-group">
+                            <label>Connect to Plant (Optional)</label>
+                            <select
+                                value={newEntry.plant_id}
+                                onChange={(e) => setNewEntry({ ...newEntry, plant_id: e.target.value })}
+                                className="form-select"
+                            >
+                                <option value="">No plant selected</option>
+                                {plants.map(plant => (
+                                    <option key={plant.id} value={plant.id}>
+                                        {plant.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        
                         <div className="form-group">
                             <label>Content</label>
                             <textarea
@@ -240,48 +455,39 @@ const PlantJournal = ({ showNotification }) => {
                             ) : (
                                 <div className={`entries-container ${viewMode}-view`}>
                                     {filteredJournals.map(journal => {
-                                        const moodIcon = getMoodIcon(journal.content);
-                                        const moodColor = getMoodColor(journal.content);
-                                        
+                                        const plantName = getPlantName(journal.plant_id);
                                         return (
                                             <div key={journal.id} className="journal-entry-card">
                                                 <div className="entry-card-inner">
-                                                    {/* Entry Header */}
                                                     <div className="entry-header">
-                                                        <div className="entry-mood" style={{ color: moodColor }}>
-                                                            <i className={`fas ${moodIcon}`}></i>
-                                                        </div>
                                                         <div className="entry-title-section">
-                                                            <h4 className="entry-title">{journal.title}</h4>
+                                                            <h4 className="entry-title">{journal.title || 'Plant Update'}</h4>
                                                             <span className="entry-date">
+                                                                <i className="fas fa-calendar"></i>
                                                                 {new Date(journal.created_at).toLocaleDateString('en-US', {
                                                                     year: 'numeric',
                                                                     month: 'long',
-                                                                    day: 'numeric',
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit'
+                                                                    day: 'numeric'
                                                                 })}
                                                             </span>
                                                         </div>
                                                     </div>
                                                     
-                                                    {/* Plant Association */}
-                                                    {journal.plant_name && (
+                                                    {plantName && (
                                                         <div className="entry-plant-tag">
                                                             <i className="fas fa-seedling"></i>
-                                                            Related to: {journal.plant_name}
+                                                            Related to: {plantName}
                                                         </div>
                                                     )}
                                                     
-                                                    {/* Content Preview */}
                                                     <div className="entry-content-preview">
-                                                        {journal.content.length > 150 ? 
-                                                            `${journal.content.substring(0, 150)}...` : 
-                                                            journal.content
-                                                        }
+                                                        <div className="text-container">
+                                                            <div className="text-content">
+                                                                {journal.content}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     
-                                                    {/* Quick Stats */}
                                                     <div className="entry-stats">
                                                         <div className="entry-stat">
                                                             <div className="stat-value">
@@ -291,29 +497,31 @@ const PlantJournal = ({ showNotification }) => {
                                                         </div>
                                                         <div className="entry-stat">
                                                             <div className="stat-value">
-                                                                {Math.ceil(journal.content.length / 5)}
+                                                                {journal.content.length}
                                                             </div>
-                                                            <div className="stat-label">Characters</div>
-                                                        </div>
-                                                        <div className="entry-stat">
-                                                            <div className="stat-value">
-                                                                {new Date(journal.created_at).toLocaleDateString('en-US', { month: 'short' })}
-                                                            </div>
-                                                            <div className="stat-label">Month</div>
+                                                            <div className="stat-label">Chars</div>
                                                         </div>
                                                     </div>
                                                     
-                                                    {/* Action Buttons */}
                                                     <div className="entry-actions">
-                                                        <button className="btn-outline">
+                                                        <button 
+                                                            className="btn-outline"
+                                                            onClick={() => handleEditJournal(journal)}
+                                                        >
                                                             <i className="fas fa-edit"></i>
                                                             Edit
                                                         </button>
-                                                        <button className="btn-outline">
+                                                        <button 
+                                                            className="btn-outline"
+                                                            onClick={() => handleDeleteJournal(journal.id)}
+                                                        >
                                                             <i className="fas fa-trash"></i>
                                                             Delete
                                                         </button>
-                                                        <button className="btn-primary">
+                                                        <button 
+                                                            className="btn-primary"
+                                                            onClick={() => handleReadMore(journal)}
+                                                        >
                                                             <i className="fas fa-expand"></i>
                                                             Read More
                                                         </button>

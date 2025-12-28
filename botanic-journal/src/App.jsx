@@ -5,7 +5,8 @@ import Dashboard from './components/Dashboard/Dashboard';
 import MyPlants from './components/Plants/MyPlants';
 import CareTasks from './components/Tasks/CareTasks';
 import PlantJournal from './components/Journal/PlantJournal';
-import PlantEncyclopedia from './components/Encyclopedia/PlantEncylopedia';
+import PlantEncyclopedia from './components/Encyclopedia/PlantEncylopedia'
+import PlantDetail from './components/Plants/PlantDetail'; // Add this import
 import Analytics from './components/Analytics/Analytics';
 import GardenPlanner from './components/Planner/GardenPlanner';
 import SeedLibrary from './components/Library/SeedLibrary';
@@ -28,12 +29,23 @@ function App() {
     const savedUser = localStorage.getItem('currentUser');
     return savedUser ? JSON.parse(savedUser) : null;
   });
+  const [selectedPlantId, setSelectedPlantId] = useState(null); // For plant details
+  const [showPlantDetailModal, setShowPlantDetailModal] = useState(false); // For modal approach
 
   // Handle hash-based navigation
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
-      if (hash && ['dashboard', 'plants', 'tasks', 'journal', 'encyclopedia', 'analytics', 'planner', 'library', 'profile'].includes(hash)) {
+      
+      // Handle plant detail routes like #plant/123
+      if (hash.startsWith('plant/')) {
+        const plantId = hash.split('/')[1];
+        setSelectedPlantId(plantId);
+        setActiveView('plant-detail');
+        return;
+      }
+      
+      if (hash && ['dashboard', 'plants', 'tasks', 'journal', 'encyclopedia', 'analytics', 'planner', 'library', 'profile', 'plant-detail'].includes(hash)) {
         setActiveView(hash);
       }
     };
@@ -52,12 +64,16 @@ function App() {
   // Update URL hash when activeView changes
   useEffect(() => {
     if (isAuthenticated && activeView !== 'dashboard') {
-      window.location.hash = activeView;
+      if (activeView === 'plant-detail' && selectedPlantId) {
+        window.location.hash = `plant/${selectedPlantId}`;
+      } else if (activeView !== 'plant-detail') {
+        window.location.hash = activeView;
+      }
     } else if (isAuthenticated && activeView === 'dashboard') {
       // Remove hash for dashboard (clean URL)
       window.history.replaceState(null, null, ' ');
     }
-  }, [activeView, isAuthenticated]);
+  }, [activeView, isAuthenticated, selectedPlantId]);
 
   // Generate unique IDs for notifications
   const generateUniqueId = () => {
@@ -72,6 +88,21 @@ function App() {
     setTimeout(() => {
       setNotifications(prev => prev.filter(notification => notification.id !== id));
     }, 5000);
+  };
+
+  // Function to show plant details (can be called from any component)
+  const showPlantDetails = (plantId) => {
+    console.log('🌱 Showing plant details for ID:', plantId);
+    setSelectedPlantId(plantId);
+    setActiveView('plant-detail');
+  };
+
+  // Function to hide plant details and go back
+  const hidePlantDetails = () => {
+    console.log('🔙 Going back from plant details');
+    setActiveView('encyclopedia'); // Or go back to previous view
+    setSelectedPlantId(null);
+    window.history.back(); // Or navigate to encyclopedia
   };
 
   const handleLogin = async (loginData) => {
@@ -100,6 +131,7 @@ function App() {
     setIsAuthenticated(false);
     setCurrentUser(null);
     setActiveView('dashboard');
+    setSelectedPlantId(null);
     
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('currentUser');
@@ -136,9 +168,9 @@ function App() {
   const handleSetActiveView = (view) => {
     console.log('Setting active view to:', view);
     setActiveView(view);
-    if (view !== 'dashboard') {
+    if (view !== 'dashboard' && view !== 'plant-detail') {
       window.location.hash = view;
-    } else {
+    } else if (view === 'dashboard') {
       window.history.replaceState(null, null, ' ');
     }
   };
@@ -162,13 +194,30 @@ function App() {
       case 'dashboard':
         return <Dashboard showNotification={showNotification} user={currentUser} />;
       case 'plants':
-        return <MyPlants showNotification={showNotification} user={currentUser} setActiveView={setActiveView} />;
+        return <MyPlants 
+          showNotification={showNotification} 
+          user={currentUser} 
+          setActiveView={setActiveView}
+          onShowPlantDetails={showPlantDetails} // Pass the function
+        />;
       case 'tasks':
         return <CareTasks showNotification={showNotification} user={currentUser} />;
       case 'journal':
         return <PlantJournal showNotification={showNotification} user={currentUser} />;
       case 'encyclopedia':
-        return <PlantEncyclopedia showNotification={showNotification} user={currentUser} />;
+        return <PlantEncyclopedia 
+          showNotification={showNotification} 
+          user={currentUser}
+          onShowPlantDetails={showPlantDetails} // Pass the function
+        />;
+      case 'plant-detail':
+        return <PlantDetail 
+          showNotification={showNotification} 
+          user={currentUser}
+          plantId={selectedPlantId}
+          onClose={hidePlantDetails}
+          onBack={hidePlantDetails}
+        />;
       case 'analytics':
         return <Analytics showNotification={showNotification} user={currentUser} />;
       case 'planner':

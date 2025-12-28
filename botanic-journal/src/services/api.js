@@ -215,6 +215,11 @@ class ApiService {
         return this.request('plants-encyclopedia.php');
     }
 
+    async getPlantDetails(plantId) {
+    const user_id = this.getCurrentUserId();
+    return this.request(`plants.php?id=${plantId}&user_id=${user_id}`);
+}
+
     // Profile
     async getProfile() {
         const user_id = this.getCurrentUserId();
@@ -371,4 +376,4 @@ class ApiService {
     }
 }
 
-export const apiService = new ApiService();
+export const apiService = new ApiService();  
