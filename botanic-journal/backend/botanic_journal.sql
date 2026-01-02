@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 23, 2025 at 12:41 AM
+-- Generation Time: Dec 28, 2025 at 08:55 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -70,10 +70,19 @@ CREATE TABLE `journals` (
   `plant_id` int(11) DEFAULT NULL,
   `title` varchar(255) NOT NULL,
   `content` text NOT NULL,
-  `images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`images`)),
+  `images` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `journals`
+--
+
+INSERT INTO `journals` (`id`, `user_id`, `plant_id`, `title`, `content`, `images`, `created_at`, `updated_at`) VALUES
+(1, 7, 191, 'dfgtfhzgjsdfsdf', 'sdfghgfdcvbnghrfedcvbnjhgfdfghnjzztgrfdfgbgnhjgfvgbhjmgfdghnjmujmngbfvrgthzujhnbvfgthzujijhngbfrthzujikjmhngbfvdcsxdfrgthzujikolujzhtrewqwe34rt5z67ujikjmhngbfvdasdfasdfasfd', NULL, '2025-11-23 17:54:28', '2025-12-01 22:08:45'),
+(11, 7, 190, 'asdadad', 'asdasdasd', NULL, '2025-12-01 21:46:28', '2025-12-01 21:46:28'),
+(12, 7, 191, 'asdasdasdfdgfgh', 'asdasdasdaewsdfsafs', NULL, '2025-12-01 21:50:15', '2025-12-01 22:02:45');
 
 -- --------------------------------------------------------
 
@@ -185,7 +194,9 @@ INSERT INTO `plants` (`id`, `user_id`, `name`, `species`, `description`, `type`,
 (187, 6, 'Aloe Vera', 'Aloe barbadensis', 'Medicinal plant with soothing gel in its leaves.', 'succulent', 'Bright Indirect', NULL, NULL, 'Every 3 weeks', NULL, NULL, NULL, 'https://images.unsplash.com/photo-1525498128493-380d1990a112?w=300', NULL, 'healthy', NULL, NULL, NULL, NULL, 0, '2025-11-22 22:24:47', '2025-11-22 22:24:47', 0, 128),
 (188, 6, 'Basil', 'Ocimum basilicum', 'Aromatic herb perfect for cooking.', 'vegetable', 'Full Sun', NULL, NULL, 'Every 2-3 days', NULL, NULL, NULL, NULL, NULL, 'healthy', NULL, NULL, NULL, NULL, 0, '2025-11-22 22:25:07', '2025-11-22 22:25:07', 0, 162),
 (189, 7, 'Basil', 'Ocimum basilicum', 'Aromatic herb perfect for cooking.', 'vegetable', 'Full Sun', NULL, NULL, 'Every 2-3 days', NULL, NULL, NULL, 'https://images.unsplash.com/photo-1618375569909-3c8616cf0353?w=300', NULL, 'healthy', NULL, NULL, NULL, NULL, 0, '2025-11-22 22:25:45', '2025-11-22 22:25:45', 0, 132),
-(190, 7, 'Orchid', 'Phalaenopsis species', 'Elegant flowering plant with long-lasting blooms.', 'flowering', 'Bright Indirect', NULL, NULL, 'Weekly', NULL, NULL, NULL, 'https://images.unsplash.com/photo-1517233165167-2e3e2e2e2e2e?w=300', NULL, 'healthy', NULL, NULL, NULL, NULL, 1, '2025-11-22 22:25:47', '2025-11-22 22:29:08', 0, 124);
+(190, 7, 'Orchid', 'Phalaenopsis species', 'Elegant flowering plant with long-lasting blooms.', 'flowering', 'Bright Indirect', NULL, NULL, 'Weekly', NULL, NULL, NULL, 'https://images.unsplash.com/photo-1517233165167-2e3e2e2e2e2e?w=300', NULL, 'healthy', NULL, NULL, NULL, NULL, 1, '2025-11-22 22:25:47', '2025-11-22 22:29:08', 0, 124),
+(191, 7, 'Orchid 2', 'Phalaenopsis species', 'Elegant flowering plant with long-lasting blooms.', 'flowering', 'Bright Indirect', NULL, NULL, 'Weekly', NULL, NULL, NULL, 'https://images.unsplash.com/photo-1517233165167-2e3e2e2e2e2e?w=300', NULL, 'healthy', NULL, NULL, NULL, NULL, 0, '2025-11-23 18:24:34', '2025-11-23 18:24:34', 0, 124),
+(192, 7, 'Rose', 'Rosa species', 'Classic flowering shrub with fragrant blooms.', 'flowering', 'Full Sun', NULL, NULL, 'Twice weekly', NULL, NULL, NULL, 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300', NULL, 'healthy', NULL, NULL, NULL, NULL, 0, '2025-11-23 18:24:38', '2025-11-23 18:24:38', 0, 127);
 
 -- --------------------------------------------------------
 
@@ -228,6 +239,16 @@ CREATE TABLE `tasks` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `tasks`
+--
+
+INSERT INTO `tasks` (`id`, `user_id`, `plant_id`, `title`, `description`, `priority`, `due_date`, `completed`, `progress`, `type`, `created_at`, `updated_at`) VALUES
+(13, 7, 189, 'pranje', 'sdsfdsd', 'low', '2025-02-02', 1, 100, 'pruning', '2025-11-23 16:22:46', '2025-11-23 16:39:12'),
+(14, 7, 189, 'dfgddfgd', 'dsfgfhjcvfbghjmhgfdxcvhjgc', 'high', '2025-11-25', 0, 5, 'pest_control', '2025-11-23 16:39:00', '2025-11-23 16:39:00'),
+(15, 7, 190, 'dfgddfgd', 'cfghjhhgfdfgh', 'low', '2025-12-02', 0, 10, 'fertilizing', '2025-11-23 16:40:02', '2025-12-01 21:51:33'),
+(16, 7, 190, 'pranje', 'SDFSFS', 'medium', '2025-12-03', 1, 100, 'repotting', '2025-12-01 22:12:58', '2025-12-01 22:13:01');
 
 -- --------------------------------------------------------
 
@@ -304,9 +325,9 @@ ALTER TABLE `garden_plans`
 --
 ALTER TABLE `journals`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `plant_id` (`plant_id`),
-  ADD KEY `idx_journals_created_at` (`created_at`);
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_plant_id` (`plant_id`),
+  ADD KEY `idx_created_at` (`created_at`);
 
 --
 -- Indexes for table `plants`
@@ -376,13 +397,13 @@ ALTER TABLE `garden_plans`
 -- AUTO_INCREMENT for table `journals`
 --
 ALTER TABLE `journals`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `plants`
 --
 ALTER TABLE `plants`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=191;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=193;
 
 --
 -- AUTO_INCREMENT for table `seeds`
@@ -394,7 +415,7 @@ ALTER TABLE `seeds`
 -- AUTO_INCREMENT for table `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `users`

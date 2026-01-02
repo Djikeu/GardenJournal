@@ -9,6 +9,7 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
     const [relatedPlants, setRelatedPlants] = useState([]);
     const [addingToCollection, setAddingToCollection] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
+    const [isInCollection, setIsInCollection] = useState(false);
 
     useEffect(() => {
         if (plantId) {
@@ -16,12 +17,17 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
         }
     }, [plantId]);
 
+    useEffect(() => {
+        if (plant && user) {
+            checkIfInCollection();
+        }
+    }, [plant, user]);
+
     const loadPlantDetails = async () => {
         try {
             setLoading(true);
             console.log('🌱 Loading plant details for ID:', plantId);
             
-            // First try to get from encyclopedia
             const response = await apiService.getPlantsEncyclopedia();
             if (response.success) {
                 const foundPlant = response.data.find(p => p.id == plantId);
@@ -32,12 +38,12 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                 }
             }
             
-            // If not found in encyclopedia, try user plants
             const userResponse = await apiService.getPlants();
             if (userResponse.success) {
                 const userPlant = userResponse.data.find(p => p.id == plantId);
                 if (userPlant) {
                     setPlant(userPlant);
+                    setIsInCollection(true);
                     loadRelatedPlants(userPlant.type);
                     return;
                 }
@@ -51,6 +57,23 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
             onBack();
         } finally {
             setLoading(false);
+        }
+    };
+
+    const checkIfInCollection = async () => {
+        if (!user || !plant) return;
+        
+        try {
+            const userResponse = await apiService.getPlants();
+            if (userResponse.success) {
+                const found = userResponse.data.some(p => 
+                    p.id == plantId || 
+                    p.encyclopedia_id == plantId
+                );
+                setIsInCollection(found);
+            }
+        } catch (error) {
+            console.error('Error checking collection:', error);
         }
     };
 
@@ -91,14 +114,34 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
             
             if (response.success) {
                 showNotification('Success', `${plant.name} added to your collection!`, 'success');
-                // Update UI to show it's been added
-                setPlant(prev => ({ ...prev, inCollection: true }));
+                setIsInCollection(true);
             }
         } catch (error) {
             console.error('❌ Add to collection error:', error);
             showNotification('Error', `Failed to add plant: ${error.message}`, 'error');
         } finally {
             setAddingToCollection(false);
+        }
+    };
+
+    const removeFromCollection = async () => {
+        if (!plant) return;
+        
+        if (!window.confirm(`Are you sure you want to remove "${plant.name}" from your collection?`)) {
+            return;
+        }
+        
+        try {
+            const response = await apiService.deletePlant(plantId);
+            if (response.success) {
+                showNotification('Success', 'Plant removed from collection!', 'success');
+                setIsInCollection(false);
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            console.error('Remove plant error:', error);
+            showNotification('Error', error.message, 'error');
         }
     };
 
@@ -182,7 +225,6 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
     }
 
     const careInfo = getCareLevel(plant.type);
-    const isInCollection = plant.inCollection || plant.is_added;
 
     return (
         <div className="plant-detail-wrapper">
@@ -298,11 +340,15 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                             <p>{plant.description || 'A beautiful plant that adds life to any space. Perfect for both beginners and experienced plant enthusiasts.'}</p>
                         </div>
 
+                        {/* ACTION BUTTONS - UPDATED */}
                         <div className="plant-action-buttons">
                             {isInCollection ? (
-                                <button className="btn-success" disabled>
-                                    <i className="fas fa-check"></i>
-                                    In Your Collection
+                                <button 
+                                    className="btn-warning"
+                                    onClick={removeFromCollection}
+                                >
+                                    <i className="fas fa-times"></i>
+                                    Remove from My Plants
                                 </button>
                             ) : (
                                 <button 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
+import '../../profile.css'
 
 const Profile = ({ showNotification, user }) => {
   const [profileUser, setProfileUser] = useState(user);

@@ -229,27 +229,6 @@ const Dashboard = ({ showNotification, user }) => {
             </div>
           </div>
         </div>
-
-        {/* My Plants Gallery */}
-        <div style={{ gridColumn: 'span 12' }}>
-          <div className="card">
-            <div className="card-header">
-              <h3 className="card-title">
-                <i className="fas fa-seedling"></i>
-                My Plant Collection
-              </h3>
-              <div className="card-actions">
-                <button className="card-btn" title="Add Plant">
-                  <i className="fas fa-plus"></i>
-                </button>
-                <button className="card-btn" title="Filter">
-                  <i className="fas fa-filter"></i>
-                </button>
-              </div>
-            </div>
-            <PlantGrid showNotification={showNotification} limit={4} userId={user?.id} />
-          </div>
-        </div>
       </div>
     </>
   );

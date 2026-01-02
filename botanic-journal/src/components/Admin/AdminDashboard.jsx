@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
-import './Admin.css';
+import '../../admin.css';
 
 const AdminDashboard = ({ showNotification }) => {
   const [users, setUsers] = useState([]);

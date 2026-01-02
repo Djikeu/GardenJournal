@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
+import '../../encyclopedia.css'
 
 const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
     const [plants, setPlants] = useState([]);
@@ -29,7 +30,6 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
         }
     };
 
-    // In PlantEncyclopedia.jsx - update addPlantToCollection function
     const addPlantToCollection = async (plant) => {
         try {
             setAddingPlant(plant.id);
@@ -55,7 +55,6 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
             if (response.success) {
                 console.log('✅ Plant added successfully:', response.data);
                 showNotification('Success', `${plant.name} added to your collection!`, 'success');
-                // Update the encyclopedia to show it's added
                 setPlants(prevPlants =>
                     prevPlants.map(p =>
                         p.id === plant.id ? { ...p, is_added: true } : p
@@ -69,6 +68,7 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
             setAddingPlant(null);
         }
     };
+
     const getTypeIcon = (type) => {
         const icons = {
             'outdoor': 'fa-sun',
@@ -108,7 +108,6 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
         return levels[type] || { level: 'Moderate', color: '#f59e0b' };
     };
 
-    // Filter plants based on search and type
     const filteredPlants = plants.filter(plant => {
         const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (plant.species && plant.species.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -117,18 +116,6 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
     });
 
     const plantTypes = ['all', 'indoor', 'outdoor', 'succulent', 'tropical', 'vegetable', 'flowering', 'herb'];
-
-    const navigateToPlantDetail = (plantId) => {
-        // Method 1: Using React Router (recommended)
-        navigate(`/plants/${plantId}`);
-
-        // Method 2: Using window.location.hash (if you're using hash routing)
-        // window.location.hash = `#plant/${plantId}`;
-
-        // Method 3: Using state in your app
-        // setSelectedPlantId(plantId);
-        // setShowPlantDetail(true);
-    };
 
     if (loading) {
         return (
@@ -308,7 +295,11 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
                                                         }}
                                                     />
                                                     <div className="plant-image-overlay">
-                                                        <div className="plant-type-tag" style={{ backgroundColor: getTypeColor(plant.type) }}>
+                                                        <div className="plant-type-tag" style={{ 
+                                                            backgroundColor: getTypeColor(plant.type),
+                                                            fontSize: '10px',
+                                                            padding: '3px 8px'
+                                                        }}>
                                                             <i className={`fas ${getTypeIcon(plant.type)}`}></i>
                                                             {plant.type}
                                                         </div>
@@ -334,66 +325,63 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
                                                 </div>
 
                                                 {/* Care Level Badge */}
-                                                <div className="care-level-badge" style={{ backgroundColor: careInfo.color }}>
+                                                <div className="care-level-badge" style={{ 
+                                                    backgroundColor: careInfo.color,
+                                                    fontSize: '11px',
+                                                    padding: '4px 8px'
+                                                }}>
                                                     <i className="fas fa-seedling"></i>
                                                     {careInfo.level} Care
                                                 </div>
 
                                                 {/* Plant Details */}
                                                 <div className="plant-details-grid">
-                                                    <div className="detail-item">
+                                                    <div className="detail-item compact">
                                                         <i className="fas fa-sun" style={{ color: '#f59e0b' }}></i>
                                                         <div>
                                                             <span className="detail-label">Light</span>
                                                             <span className="detail-value">{plant.light_requirements || 'Varies'}</span>
                                                         </div>
                                                     </div>
-                                                    <div className="detail-item">
+                                                    <div className="detail-item compact">
                                                         <i className="fas fa-tint" style={{ color: '#3b82f6' }}></i>
                                                         <div>
                                                             <span className="detail-label">Water</span>
                                                             <span className="detail-value">{plant.watering_schedule || 'Varies'}</span>
                                                         </div>
                                                     </div>
-                                                    {plant.description && (
-                                                        <div className="plant-description">
-                                                            {plant.description.length > 100
-                                                                ? `${plant.description.substring(0, 100)}...`
-                                                                : plant.description
-                                                            }
-                                                        </div>
-                                                    )}
                                                 </div>
 
                                                 {/* Action Buttons */}
-                                                <div className="plant-actions">
+                                                <div className="plant-actions compact">
                                                     <button
-                                                        className="btn-outline"
-                                                        onClick={() => onShowPlantDetails(plant.id)} // Changed this line
+                                                        className="btn-outline btn-sm"
+                                                        onClick={() => onShowPlantDetails(plant.id)}
+                                                        title="View details"
                                                     >
                                                         <i className="fas fa-info-circle"></i>
-                                                        Details
+                                                        <span className="btn-text">Details</span>
                                                     </button>
                                                     {isAdded ? (
-                                                        <button className="btn-success" disabled>
+                                                        <button className="btn-success btn-sm" disabled>
                                                             <i className="fas fa-check"></i>
-                                                            In Collection
+                                                            <span className="btn-text">Added</span>
                                                         </button>
                                                     ) : (
                                                         <button
-                                                            className="btn-primary"
+                                                            className="btn-primary btn-sm"
                                                             onClick={() => addPlantToCollection(plant)}
                                                             disabled={isAdding}
                                                         >
                                                             {isAdding ? (
                                                                 <>
                                                                     <i className="fas fa-spinner fa-spin"></i>
-                                                                    Adding...
+                                                                    <span className="btn-text">Adding</span>
                                                                 </>
                                                             ) : (
                                                                 <>
                                                                     <i className="fas fa-plus"></i>
-                                                                    Add to My Plants
+                                                                    <span className="btn-text">Add</span>
                                                                 </>
                                                             )}
                                                         </button>

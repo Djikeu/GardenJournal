@@ -28,10 +28,10 @@ class ApiService {
 
         try {
             const response = await fetch(url, config);
-            
+
             // First, get the response as text to handle both JSON and HTML
             const responseText = await response.text();
-            
+
             let data;
             try {
                 data = JSON.parse(responseText);
@@ -104,8 +104,8 @@ class ApiService {
         const user_id = this.getCurrentUserId();
         return this.request('tasks.php', {
             method: 'POST',
-            body: { 
-                ...taskData, 
+            body: {
+                ...taskData,
                 user_id: user_id
             }
         });
@@ -116,10 +116,10 @@ class ApiService {
         const user_id = this.getCurrentUserId();
         return this.request('tasks.php', {
             method: 'PATCH', // Changed from PUT to PATCH
-            body: { 
+            body: {
                 id: id,
-                ...taskData, 
-                user_id: user_id 
+                ...taskData,
+                user_id: user_id
             }
         });
     }
@@ -216,9 +216,9 @@ class ApiService {
     }
 
     async getPlantDetails(plantId) {
-    const user_id = this.getCurrentUserId();
-    return this.request(`plants.php?id=${plantId}&user_id=${user_id}`);
-}
+        const user_id = this.getCurrentUserId();
+        return this.request(`plants.php?id=${plantId}&user_id=${user_id}`);
+    }
 
     // Profile
     async getProfile() {

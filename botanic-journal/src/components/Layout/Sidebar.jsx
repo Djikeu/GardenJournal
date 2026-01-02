@@ -4,8 +4,8 @@ const Sidebar = ({ activeView, setActiveView, onLogout }) => {
   const navItems = {
     main: [
       { id: 'dashboard', icon: 'fas fa-home', label: 'Dashboard' },
-      { id: 'plants', icon: 'fas fa-leaf', label: 'My Plants', badge: 24 },
-      { id: 'tasks', icon: 'fas fa-tasks', label: 'Care Tasks', badge: 12 },
+      { id: 'plants', icon: 'fas fa-leaf', label: 'My Plants',},
+      { id: 'tasks', icon: 'fas fa-tasks', label: 'Care Tasks', },
       { id: 'journal', icon: 'fas fa-book', label: 'Plant Journal' },
       { id: 'encyclopedia', icon: 'fas fa-book-open', label: 'Plant Encyclopedia' }
     ],
@@ -58,7 +58,7 @@ const Sidebar = ({ activeView, setActiveView, onLogout }) => {
                   <i className={item.icon}></i>
                   <span>{item.label}</span>
                 </div>
-                {item.badge && <span className="nav-badge">{item.badge}</span>}
+            
               </a>
             </li>
           ))}

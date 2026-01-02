@@ -16,7 +16,8 @@ ini_set('display_errors', 1);
 
 require_once '../config/database.php';
 
-function sendResponse($success, $message = '', $data = null, $code = 200) {
+function sendResponse($success, $message = '', $data = null, $code = 200)
+{
     http_response_code($code);
     echo json_encode([
         'success' => $success,
@@ -55,7 +56,7 @@ if (!$user_id || $user_id <= 0) {
 }
 
 try {
-    switch($method) {
+    switch ($method) {
         case 'GET':
             handleGetTasks($db, $user_id);
             break;
@@ -75,9 +76,10 @@ try {
     sendResponse(false, 'Server error: ' . $e->getMessage(), null, 500);
 }
 
-function handleGetTasks($db, $user_id) {
+function handleGetTasks($db, $user_id)
+{
     $task_id = isset($_GET['id']) ? intval($_GET['id']) : null;
-    
+
     if ($task_id) {
         // Get single task
         $stmt = $db->prepare("
@@ -107,19 +109,20 @@ function handleGetTasks($db, $user_id) {
         ");
         $stmt->bindParam(':user_id', $user_id);
     }
-    
+
     $stmt->execute();
     $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     sendResponse(true, 'Tasks retrieved successfully', $tasks);
 }
 
-function handleCreateTask($db, $user_id, $data) {
+function handleCreateTask($db, $user_id, $data)
+{
     // Validate required fields
     if (!isset($data['title']) || empty(trim($data['title']))) {
         sendResponse(false, 'Task title is required', null, 400);
     }
-    
+
     // Set default values
     $title = trim($data['title']);
     $description = isset($data['description']) ? trim($data['description']) : '';
@@ -129,19 +132,19 @@ function handleCreateTask($db, $user_id, $data) {
     $due_date = isset($data['due_date']) ? $data['due_date'] : null;
     $progress = isset($data['progress']) ? intval($data['progress']) : 0;
     $completed = isset($data['completed']) ? (bool)$data['completed'] : false;
-    
+
     // Validate plant_id belongs to user
     if ($plant_id) {
         $checkStmt = $db->prepare("SELECT id FROM plants WHERE id = :plant_id AND user_id = :user_id");
         $checkStmt->bindParam(':plant_id', $plant_id);
         $checkStmt->bindParam(':user_id', $user_id);
         $checkStmt->execute();
-        
+
         if (!$checkStmt->fetch()) {
             sendResponse(false, 'Plant not found or access denied', null, 404);
         }
     }
-    
+
     // Insert task
     $stmt = $db->prepare("
         INSERT INTO tasks 
@@ -149,7 +152,7 @@ function handleCreateTask($db, $user_id, $data) {
         VALUES 
         (:user_id, :plant_id, :title, :description, :type, :priority, :due_date, :progress, :completed, NOW(), NOW())
     ");
-    
+
     $stmt->bindParam(':user_id', $user_id);
     $stmt->bindParam(':plant_id', $plant_id);
     $stmt->bindParam(':title', $title);
@@ -159,10 +162,10 @@ function handleCreateTask($db, $user_id, $data) {
     $stmt->bindParam(':due_date', $due_date);
     $stmt->bindParam(':progress', $progress, PDO::PARAM_INT);
     $stmt->bindParam(':completed', $completed, PDO::PARAM_BOOL);
-    
+
     if ($stmt->execute()) {
         $task_id = $db->lastInsertId();
-        
+
         // Get the created task with plant info
         $taskStmt = $db->prepare("
             SELECT t.*, p.name as plant_name, p.image_url as plant_image
@@ -173,63 +176,92 @@ function handleCreateTask($db, $user_id, $data) {
         $taskStmt->bindParam(':id', $task_id);
         $taskStmt->execute();
         $task = $taskStmt->fetch(PDO::FETCH_ASSOC);
-        
+
         sendResponse(true, 'Task created successfully', $task, 201);
     } else {
         sendResponse(false, 'Failed to create task: ' . implode(', ', $stmt->errorInfo()), null, 500);
     }
+
+    // Add to handleCreateTask function:
+    if (isset($data['reminder_minutes']) && isset($data['task_date'])) {
+        $reminder_minutes = intval($data['reminder_minutes']);
+        $task_date = $data['task_date'];
+
+        if ($reminder_minutes > 0) {
+            $notify_at = date(
+                "Y-m-d H:i:s",
+                strtotime($task_date . " -{$reminder_minutes} minutes")
+            );
+
+            $notif_stmt = $db->prepare("
+            INSERT INTO notifications (user_id, task_id, notify_at)
+            VALUES (:user_id, :task_id, :notify_at)
+        ");
+            $notify_stmt->bindParam(':user_id', $user_id);
+            $notify_stmt->bindParam(':task_id', $task_id);
+            $notify_stmt->bindParam(':notify_at', $notify_at);
+            $notify_stmt->execute();
+        }
+    }
 }
 
-function handleUpdateTask($db, $user_id, $data) {
+function handleUpdateTask($db, $user_id, $data)
+{
     if (!isset($data['id'])) {
         sendResponse(false, 'Task ID is required', null, 400);
     }
-    
+
     $task_id = intval($data['id']);
-    
+
     // Check if task belongs to user
     $checkStmt = $db->prepare("SELECT id FROM tasks WHERE id = :id AND user_id = :user_id");
     $checkStmt->bindParam(':id', $task_id);
     $checkStmt->bindParam(':user_id', $user_id);
     $checkStmt->execute();
-    
+
     if (!$checkStmt->fetch()) {
         sendResponse(false, 'Task not found or access denied', null, 404);
     }
-    
+
     // Build dynamic update query based on provided fields
     $updates = [];
     $params = [':id' => $task_id];
-    
+
     // List of allowed fields to update
     $allowedFields = [
-        'title', 'description', 'plant_id', 'type', 'priority', 
-        'due_date', 'completed', 'progress'
+        'title',
+        'description',
+        'plant_id',
+        'type',
+        'priority',
+        'due_date',
+        'completed',
+        'progress'
     ];
-    
+
     foreach ($allowedFields as $field) {
         if (isset($data[$field])) {
             $updates[] = "$field = :$field";
             $params[":$field"] = $data[$field];
         }
     }
-    
+
     // Handle progress auto-update when completing task
     if (isset($data['completed'])) {
         $updates[] = "progress = :progress";
         $params[":progress"] = $data['completed'] ? 100 : 0;
     }
-    
+
     if (empty($updates)) {
         sendResponse(false, 'No valid fields to update', null, 400);
     }
-    
+
     // Add updated_at timestamp
     $updates[] = "updated_at = NOW()";
-    
+
     $sql = "UPDATE tasks SET " . implode(', ', $updates) . " WHERE id = :id";
     $stmt = $db->prepare($sql);
-    
+
     if ($stmt->execute($params)) {
         // Get the updated task
         $taskStmt = $db->prepare("
@@ -241,37 +273,37 @@ function handleUpdateTask($db, $user_id, $data) {
         $taskStmt->bindParam(':id', $task_id);
         $taskStmt->execute();
         $task = $taskStmt->fetch(PDO::FETCH_ASSOC);
-        
+
         sendResponse(true, 'Task updated successfully', $task);
     } else {
         sendResponse(false, 'Failed to update task: ' . implode(', ', $stmt->errorInfo()));
     }
 }
 
-function handleDeleteTask($db, $user_id) {
+function handleDeleteTask($db, $user_id)
+{
     $task_id = isset($_GET['id']) ? intval($_GET['id']) : null;
-    
+
     if (!$task_id) {
         sendResponse(false, 'Task ID is required', null, 400);
     }
-    
+
     // Check if task belongs to user
     $checkStmt = $db->prepare("SELECT id FROM tasks WHERE id = :id AND user_id = :user_id");
     $checkStmt->bindParam(':id', $task_id);
     $checkStmt->bindParam(':user_id', $user_id);
     $checkStmt->execute();
-    
+
     if (!$checkStmt->fetch()) {
         sendResponse(false, 'Task not found or access denied', null, 404);
     }
-    
+
     $stmt = $db->prepare("DELETE FROM tasks WHERE id = :id");
     $stmt->bindParam(':id', $task_id);
-    
+
     if ($stmt->execute()) {
         sendResponse(true, 'Task deleted successfully');
     } else {
         sendResponse(false, 'Failed to delete task');
     }
 }
-?>

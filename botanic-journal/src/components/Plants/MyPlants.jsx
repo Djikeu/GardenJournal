@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
+import '../../plants.css';
 
-const MyPlants = ({ showNotification, user }) => {
+const MyPlants = ({ showNotification, user, onShowPlantDetails }) => {  // Add onShowPlantDetails prop
   const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [viewMode, setViewMode] = useState('grid');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
@@ -106,224 +108,338 @@ const MyPlants = ({ showNotification, user }) => {
     filterType: filterType
   });
 
+  // Helper functions for UI
+  const getTypeColor = (type) => {
+    const colors = {
+      'indoor': '#3b82f6',
+      'outdoor': '#f59e0b',
+      'succulent': '#10b981',
+      'tropical': '#059669',
+      'vegetable': '#ea580c',
+      'flowering': '#8b5cf6',
+      'herb': '#16a34a'
+    };
+    return colors[type] || '#7db36e';
+  };
+
+  const getTypeIcon = (type) => {
+    const icons = {
+      'outdoor': 'fa-sun',
+      'indoor': 'fa-home',
+      'succulent': 'fa-leaf',
+      'tropical': 'fa-pagelines',
+      'vegetable': 'fa-carrot',
+      'flowering': 'fa-spa',
+      'herb': 'fa-leaf'
+    };
+    return icons[type] || 'fa-seedling';
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      'healthy': '#10b981',
+      'warning': '#f59e0b',
+      'danger': '#ef4444',
+      'needs-water': '#3b82f6',
+      'needs-light': '#8b5cf6'
+    };
+    return colors[status] || '#10b981';
+  };
+
+  // Handle plant details click
+  const handleShowPlantDetails = (plantId) => {
+    if (onShowPlantDetails) {
+      onShowPlantDetails(plantId);
+    } else {
+      // Fallback: show a notification or use hash routing
+      console.log('Show plant details for:', plantId);
+      showNotification('Info', 'Plant details feature requires onShowPlantDetails prop', 'info');
+      // Alternative: Use hash routing
+      window.location.hash = `#plant-details/${plantId}`;
+    }
+  };
+
   if (loading) {
     return (
-      <div className="plants-container">
-        <div className="loading-spinner">Loading your plants...</div>
+      <div className="my-plants-container">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading your plants...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="plants-container">
-      {/* Enhanced debug info */}
-      <div className="plants-header">
-        <div className="header-content">
-          <h1>My Plant Collection</h1>
-          <p>Plants you've added to your personal collection</p>
+    <div className="my-plants-container">
+      {/* Hero Header */}
+      <div className="hero-section">
+        <div className="hero-content">
+          <h1>
+            <i className="fas fa-seedling"></i>
+            My Plant Collection
+          </h1>
+          <p className="hero-subtitle">
+            All plants you've added to your personal collection. Manage, track, and care for your plants here.
+          </p>
+        </div>
+        <div className="hero-stats">
+          <div className="stat-item">
+            <div className="stat-number">{plants.length}</div>
+            <div className="stat-label">Total Plants</div>
+          </div>
+          <div className="stat-item">
+            <div className="stat-number">{plants.filter(p => p.is_favorite).length}</div>
+            <div className="stat-label">Favorites</div>
+          </div>
+          <div className="stat-item">
+            <div className="stat-number">{plants.filter(p => p.status === 'healthy').length}</div>
+            <div className="stat-label">Healthy</div>
+          </div>
+          <div 
+            className="stat-item clickable" 
+            onClick={() => window.location.hash = '#encyclopedia'}
+          >
+            <div className="stat-number">+</div>
+            <div className="stat-label">Add New</div>
+          </div>
         </div>
       </div>
 
-      {/* Stats Summary - Modern Design */}
-      {plants.length > 0 && (
-        <div className="stats-summary">
-          <div className="stats-grid-my-collection">
-            <div className="stat-card">
-              <div className="stat-icon primary">
-                <i className="fas fa-seedling"></i>
-              </div>
-              <div className="stat-content">
-                <h3>{plants.length}</h3>
-                <p>Total Plants</p>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon accent">
-                <i className="fas fa-heart"></i>
-              </div>
-              <div className="stat-content">
-                <h3>{plants.filter(p => p.is_favorite).length}</h3>
-                <p>Favorites</p>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon success">
-                <i className="fas fa-check-circle"></i>
-              </div>
-              <div className="stat-content">
-                <h3>{plants.filter(p => p.status === 'healthy').length}</h3>
-                <p>Healthy</p>
-              </div>
-            </div>
-
-            <div className="stat-card clickable" onClick={() => window.location.hash = '#encyclopedia'}>
-    <div className="stat-icon action" style={{background: 'linear-gradient(135deg, #10b981, #059669)'}}>
-        <i className="fas fa-plus"></i>
-    </div>
-    <div className="stat-content">
-        <h3>Add</h3>
-        <p>New Plant</p>
-    </div>
-</div>
-          </div>
-        </div>
-      )}
-
-      {/* User's Plants Section */}
-      {plants.length === 0 ? (
-        <div className="empty-state comprehensive">
-          <div className="empty-state-icon">
-            <i className="fas fa-seedling"></i>
-          </div>
-          <h2>Your plant collection is empty</h2>
-          <p>Start building your collection by adding plants from the encyclopedia</p>
-          <div className="empty-state-actions">
-            <button
-              className="btn btn-primary btn-large"
-              onClick={() => window.location.hash = '#encyclopedia'}
-            >
-              <i className="fas fa-book"></i>
-              Browse Plant Encyclopedia
-            </button>
-            <button
-              className="btn btn-secondary btn-large"
-              onClick={forceRefresh}
-              style={{ marginLeft: '10px' }}
-            >
-              <i className="fas fa-sync"></i>
-              Refresh
-            </button>
-          </div>
-          <div className="empty-state-features">
-            <div className="feature">
-              <i className="fas fa-book"></i>
-              <span>Browse 100+ plant species</span>
-            </div>
-            <div className="feature">
-              <i className="fas fa-tint"></i>
-              <span>Get care instructions</span>
-            </div>
-            <div className="feature">
-              <i className="fas fa-bell"></i>
-              <span>Track watering schedules</span>
-            </div>
-            <div className="feature">
-              <i className="fas fa-heart"></i>
-              <span>Mark favorites</span>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* Search and Filter Section */}
-          <div className="plants-controls">
+      {/* Controls Section */}
+      <div className="controls-section">
+        <div className="controls-row">
+          <div className="search-container">
             <div className="search-box">
               <i className="fas fa-search"></i>
               <input
                 type="text"
-                placeholder="Search your plants..."
+                placeholder="Search your plants by name, species, or type..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
               />
-            </div>
-
-            <div className="filter-buttons">
-              {plantTypes.map(type => (
+              {searchTerm && (
                 <button
-                  key={type}
-                  className={`filter-btn ${filterType === type ? 'active' : ''}`}
-                  onClick={() => setFilterType(type)}
+                  className="clear-search-btn"
+                  onClick={() => setSearchTerm('')}
                 >
-                  {type === 'all' ? 'All Plants' : type.charAt(0).toUpperCase() + type.slice(1)}
+                  <i className="fas fa-times"></i>
                 </button>
-              ))}
+              )}
             </div>
           </div>
 
-          {/* Plants Grid */}
-          {filteredPlants.length === 0 ? (
-            <div className="empty-state">
-              <i className="fas fa-search"></i>
-              <h3>No plants found</h3>
-              <p>Try adjusting your search or filter criteria</p>
+          <div className="view-toggle">
+            <button
+              className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+              title="Grid View"
+            >
+              <i className="fas fa-th"></i>
+            </button>
+            <button
+              className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+              title="List View"
+            >
+              <i className="fas fa-list"></i>
+            </button>
+          </div>
+        </div>
+
+        {/* Filter Section */}
+        <div className="filter-section">
+          <div className="filter-header">
+            <h4>Filter by Category</h4>
+            {filterType !== 'all' && (
               <button
-                className="btn btn-primary"
-                onClick={() => {
-                  setSearchTerm('');
-                  setFilterType('all');
-                }}
+                className="clear-filters-btn"
+                onClick={() => setFilterType('all')}
               >
-                Clear Search
+                Clear Filters
+              </button>
+            )}
+          </div>
+          <div className="filter-chips">
+            {plantTypes.map(type => (
+              <button
+                key={type}
+                className={`filter-chip ${filterType === type ? 'active' : ''}`}
+                onClick={() => setFilterType(type)}
+                style={filterType === type ? {
+                  backgroundColor: getTypeColor(type),
+                  borderColor: getTypeColor(type),
+                  color: 'white'
+                } : {}}
+              >
+                <i className={`fas ${getTypeIcon(type)}`}></i>
+                {type === 'all' ? 'All Plants' : type.charAt(0).toUpperCase() + type.slice(1)}
+                {type !== 'all' && (
+                  <span className="chip-count">
+                    {plants.filter(p => p.type === type).length}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Results Section */}
+      <div className="results-section">
+        {plants.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <i className="fas fa-seedling"></i>
+            </div>
+            <h2>Your plant collection is empty</h2>
+            <p>Start building your collection by adding plants from the encyclopedia</p>
+            <div className="empty-state-actions">
+              <button
+                className="btn btn-primary btn-large"
+                onClick={() => window.location.hash = '#encyclopedia'}
+              >
+                <i className="fas fa-book"></i>
+                Browse Plant Encyclopedia
+              </button>
+              <button
+                className="btn btn-secondary btn-large"
+                onClick={forceRefresh}
+              >
+                <i className="fas fa-sync"></i>
+                Refresh
               </button>
             </div>
-          ) : (
-            <div className="plants-grid">
+          </div>
+        ) : filteredPlants.length === 0 ? (
+          <div className="no-results">
+            <div className="no-results-icon">
+              <i className="fas fa-search"></i>
+            </div>
+            <h3>No plants found</h3>
+            <p>Try adjusting your search or filter criteria</p>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                setSearchTerm('');
+                setFilterType('all');
+              }}
+            >
+              Clear Search & Filters
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Results Header */}
+            <div className="results-header">
+              <div className="results-info">
+                <h3>Showing {filteredPlants.length} {filteredPlants.length === 1 ? 'plant' : 'plants'}</h3>
+                <p>Manage your plant collection below</p>
+              </div>
+              <div className="sort-control">
+                <select className="sort-select">
+                  <option>Name (A-Z)</option>
+                  <option>Recently Added</option>
+                  <option>Favorites First</option>
+                  <option>Type</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Plants Grid/List */}
+            <div className={`plants-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
               {filteredPlants.map(plant => (
                 <div key={plant.id} className="plant-card">
-                  <div className="plant-image">
+                  {/* Plant Image */}
+                  <div className="plant-card-image">
                     <img
                       src={plant.image_url || plant.image || '/default-plant.png'}
                       alt={plant.name}
+                      onError={(e) => {
+                        e.target.src = '/default-plant.png';
+                      }}
                     />
-                    <button
-                      className={`favorite-btn ${plant.is_favorite ? 'active' : ''}`}
-                      onClick={() => toggleFavorite(plant.id, plant.is_favorite)}
-                    >
-                      <i className="fas fa-heart"></i>
-                    </button>
-                    <div className="plant-status">
-                      <span className={`status-badge ${plant.status}`}>
-                        {plant.status}
+                    <div className="plant-card-badges">
+                      <span 
+                        className="type-badge"
+                        style={{ backgroundColor: getTypeColor(plant.type) }}
+                      >
+                        <i className={`fas ${getTypeIcon(plant.type)}`}></i>
+                        {plant.type || 'plant'}
                       </span>
+                      <button
+                        className={`favorite-btn ${plant.is_favorite ? 'active' : ''}`}
+                        onClick={() => toggleFavorite(plant.id, plant.is_favorite)}
+                        title={plant.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+                      >
+                        <i className="fas fa-heart"></i>
+                      </button>
+                    </div>
+                    <div 
+                      className="status-badge"
+                      style={{ backgroundColor: getStatusColor(plant.status) }}
+                    >
+                      {plant.status || 'Healthy'}
                     </div>
                   </div>
 
-                  <div className="plant-info">
-                    <h3>{plant.name}</h3>
-                    <p className="plant-species">{plant.species}</p>
+                  {/* Plant Info */}
+                  <div className="plant-card-content">
+                    <div className="plant-card-header">
+                      <h3>{plant.name}</h3>
+                      {plant.species && (
+                        <p className="plant-species">{plant.species}</p>
+                      )}
+                    </div>
+
                     <div className="plant-details">
-                      <div className="detail-item">
-                        <i className="fas fa-sun"></i>
-                        <span>{plant.type}</span>
-                      </div>
+                      {plant.light_requirements && (
+                        <div className="plant-detail">
+                          <i className="fas fa-sun"></i>
+                          <span>{plant.light_requirements}</span>
+                        </div>
+                      )}
                       {plant.watering_schedule && (
-                        <div className="detail-item">
+                        <div className="plant-detail">
                           <i className="fas fa-tint"></i>
                           <span>{plant.watering_schedule}</span>
                         </div>
                       )}
-                      {plant.light_requirements && (
-                        <div className="detail-item">
-                          <i className="fas fa-lightbulb"></i>
-                          <span>{plant.light_requirements}</span>
-                        </div>
+                      {plant.description && (
+                        <p className="plant-description">
+                          {plant.description.length > 100
+                            ? `${plant.description.substring(0, 100)}...`
+                            : plant.description
+                          }
+                        </p>
                       )}
                     </div>
 
-                    {plant.description && (
-                      <p className="plant-description">{plant.description}</p>
-                    )}
-                  </div>
-
-                  <div className="plant-actions">
-                    <button
-                      className="btn btn-sm btn-warning"
-                      onClick={() => removePlant(plant.id)}
-                      title="Remove from collection"
-                    >
-                      <i className="fas fa-times"></i>
-                      Remove
-                    </button>
+                    {/* Action Buttons - Updated Details button */}
+                    <div className="plant-card-actions">
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => handleShowPlantDetails(plant.id)}
+                      >
+                        <i className="fas fa-info-circle"></i>
+                        Details
+                      </button>
+                      <button
+                        className="btn btn-warning btn-sm"
+                        onClick={() => removePlant(plant.id)}
+                      >
+                        <i className="fas fa-times"></i>
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-          )}
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
