@@ -6,6 +6,15 @@ class ApiService {
         this.baseURL = API_BASE_URL;
     }
 
+    // Helper method to check if user is authenticated for community
+    checkCommunityAuth() {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.id) {
+            throw new Error('You must be logged in to access community features');
+        }
+        return user;
+    }
+
     // Add this helper method to get current user ID
     getCurrentUserId() {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -374,6 +383,300 @@ class ApiService {
             throw error;
         }
     }
+
+    // Get community categories
+    async getCommunityCategories() {
+        return this.request('community/categories.php');
+    }
+
+    // Get discussions with optional filters
+    async getDiscussions(params = {}) {
+        const user_id = this.getCurrentUserId();
+        const queryParams = new URLSearchParams({
+            user_id: user_id,
+            ...params
+        });
+        return this.request(`community/discussions.php?${queryParams}`);
+    }
+
+    // Get single discussion by ID
+    async getDiscussion(id) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/discussions.php?id=${id}&user_id=${user_id}`);
+    }
+
+    // Create new discussion
+    async createDiscussion(discussionData) {
+        const user_id = this.getCurrentUserId();
+        return this.request('community/discussions.php', {
+            method: 'POST',
+            body: { ...discussionData, user_id }
+        });
+    }
+
+    // Get replies for a discussion
+    async getReplies(discussionId, page = 1, limit = 20) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/replies.php?discussion_id=${discussionId}&page=${page}&limit=${limit}&user_id=${user_id}`);
+    }
+
+    // Create reply to a discussion
+    async createReply(replyData) {
+        const user_id = this.getCurrentUserId();
+        return this.request('community/replies.php', {
+            method: 'POST',
+            body: { ...replyData, user_id }
+        });
+    }
+
+    // Get community statistics
+    async getCommunityStats() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/stats.php?user_id=${user_id}`);
+    }
+
+    // Add these methods to your ApiService class in apiService.js
+
+    // Like/unlike discussion
+    async likeDiscussion(discussionId) {
+        const user_id = this.getCurrentUserId();
+        return this.request('community/likes.php', {
+            method: 'POST',
+            body: { discussion_id: discussionId, user_id }
+        });
+    }
+
+    async unlikeDiscussion(discussionId) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/likes.php?discussion_id=${discussionId}&user_id=${user_id}`, {
+            method: 'DELETE'
+        });
+    }
+
+    // Like/unlike reply
+    async likeReply(replyId) {
+        const user_id = this.getCurrentUserId();
+        return this.request('community/likes.php', {
+            method: 'POST',
+            body: { reply_id: replyId, user_id }
+        });
+    }
+
+    async unlikeReply(replyId) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/likes.php?reply_id=${replyId}&user_id=${user_id}`, {
+            method: 'DELETE'
+        });
+    }
+
+    // Bookmark a discussion
+    async addBookmark(discussionId) {
+        const user_id = this.getCurrentUserId();
+        return this.request('community/bookmarks.php', {
+            method: 'POST',
+            body: { discussion_id: discussionId, user_id }
+        });
+    }
+
+    // Remove bookmark from a discussion
+    async removeBookmark(discussionId) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/bookmarks.php?discussion_id=${discussionId}&user_id=${user_id}`, {
+            method: 'DELETE'
+        });
+    }
+
+    // Get user's bookmarked discussions
+    async getBookmarks() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/bookmarks.php?user_id=${user_id}`);
+    }
+
+    // Search discussions
+    async searchDiscussions(query, category = null) {
+        const user_id = this.getCurrentUserId();
+        const params = new URLSearchParams({ q: query, user_id });
+        if (category) params.append('category', category);
+
+        return this.request(`community/search.php?${params}`);
+    }
+
+    // Get user's discussions
+    async getUserDiscussions() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/user-discussions.php?user_id=${user_id}`);
+    }
+
+    // Update discussion (edit)
+    async updateDiscussion(id, discussionData) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/discussions.php?id=${id}`, {
+            method: 'PUT',
+            body: { ...discussionData, user_id }
+        });
+    }
+
+    // Delete discussion
+    async deleteDiscussion(id) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/discussions.php?id=${id}&user_id=${user_id}`, {
+            method: 'DELETE'
+        });
+    }
+
+    // Update reply (edit)
+    async updateReply(id, replyData) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/replies.php?id=${id}`, {
+            method: 'PUT',
+            body: { ...replyData, user_id }
+        });
+    }
+
+    // Delete reply
+    async deleteReply(id) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/replies.php?id=${id}&user_id=${user_id}`, {
+            method: 'DELETE'
+        });
+    }
+
+    // Get trending discussions
+    async getTrendingDiscussions() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/trending.php?user_id=${user_id}`);
+    }
+
+    // Get latest activity
+    async getLatestActivity() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/activity.php?user_id=${user_id}`);
+    }
+
+    // Mark all notifications as read
+    async markNotificationsAsRead() {
+        const user_id = this.getCurrentUserId();
+        return this.request('community/notifications.php', {
+            method: 'PATCH',
+            body: { user_id, action: 'mark_all_read' }
+        });
+    }
+
+    // Get user notifications
+    async getNotifications() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/notifications.php?user_id=${user_id}`);
+    }
+
+    // Follow a user
+    async followUser(userIdToFollow) {
+        const user_id = this.getCurrentUserId();
+        return this.request('community/follow.php', {
+            method: 'POST',
+            body: { user_id, follow_user_id: userIdToFollow }
+        });
+    }
+
+    // Unfollow a user
+    async unfollowUser(userIdToUnfollow) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/follow.php?follow_user_id=${userIdToUnfollow}&user_id=${user_id}`, {
+            method: 'DELETE'
+        });
+    }
+
+    // Get user's followed users and followers
+    async getFollowData() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/follow.php?user_id=${user_id}`);
+    }
+
+    // Report content
+    async reportContent(contentType, contentId, reason) {
+        const user_id = this.getCurrentUserId();
+        return this.request('community/reports.php', {
+            method: 'POST',
+            body: {
+                user_id,
+                content_type: contentType, // 'discussion' or 'reply'
+                content_id: contentId,
+                reason: reason
+            }
+        });
+    }
+
+    // Get user badges/achievements
+    async getUserBadges() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/badges.php?user_id=${user_id}`);
+    }
+
+    // Get discussion tags
+    async getDiscussionTags() {
+        return this.request('community/tags.php');
+    }
+
+    // Get discussions by tag
+    async getDiscussionsByTag(tagName) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/tags.php?tag=${encodeURIComponent(tagName)}&user_id=${user_id}`);
+    }
+
+    // Get user statistics for community
+    async getUserCommunityStats() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`community/user-stats.php?user_id=${user_id}`);
+    }
+
+    // Pin/Unpin discussion (admin/moderator)
+    async togglePinDiscussion(discussionId, pinStatus) {
+        const user_id = this.getCurrentUserId();
+        return this.request('community/moderate.php', {
+            method: 'POST',
+            body: {
+                user_id,
+                discussion_id: discussionId,
+                action: pinStatus ? 'pin' : 'unpin'
+            }
+        });
+    }
+
+    // Lock/Unlock discussion (admin/moderator)
+    async toggleLockDiscussion(discussionId, lockStatus) {
+        const user_id = this.getCurrentUserId();
+        return this.request('community/moderate.php', {
+            method: 'POST',
+            body: {
+                user_id,
+                discussion_id: discussionId,
+                action: lockStatus ? 'lock' : 'unlock'
+            }
+        });
+    }
+
+    // Upload image for discussion or reply
+    async uploadCommunityImage(formData) {
+        const url = `${this.baseURL}/community/upload.php`;
+        const config = {
+            method: 'POST',
+            body: formData,
+        };
+
+        try {
+            const response = await fetch(url, config);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Image upload failed');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Community Image Upload Error:', error);
+            throw error;
+        }
+    }
+
 }
 
 export const apiService = new ApiService();  

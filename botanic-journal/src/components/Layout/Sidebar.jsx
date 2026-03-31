@@ -4,7 +4,7 @@ const Sidebar = ({ activeView, setActiveView, onLogout }) => {
   const navItems = {
     main: [
       { id: 'dashboard', icon: 'fas fa-home', label: 'Dashboard' },
-      { id: 'plants', icon: 'fas fa-leaf', label: 'My Plants',},
+      { id: 'plants', icon: 'fas fa-leaf', label: 'My Plants', },
       { id: 'tasks', icon: 'fas fa-tasks', label: 'Care Tasks', },
       { id: 'journal', icon: 'fas fa-book', label: 'Plant Journal' },
       { id: 'encyclopedia', icon: 'fas fa-book-open', label: 'Plant Encyclopedia' }
@@ -12,10 +12,10 @@ const Sidebar = ({ activeView, setActiveView, onLogout }) => {
     analytics: [
       { id: 'analytics', icon: 'fas fa-chart-line', label: 'Analytics' },
       { id: 'planner', icon: 'fas fa-calendar-alt', label: 'Garden Planner' },
-      { id: 'library', icon: 'fas fa-seedling', label: 'Seed Library' }
+      { id: 'forecast', icon: 'fas fa-cloud-sun-rain', label: 'Weather Forecast' }
     ],
     community: [
-      { id: 'community', icon: 'fas fa-users', label: 'Community' },
+      { id: 'community', icon: 'fas fa-users', label: 'Community Forum' },
       { id: 'help', icon: 'fas fa-question-circle', label: 'Help Center' },
       { id: 'settings', icon: 'fas fa-cog', label: 'Settings' }
     ]
@@ -46,8 +46,8 @@ const Sidebar = ({ activeView, setActiveView, onLogout }) => {
         <ul className="nav-links">
           {navItems.main.map(item => (
             <li key={item.id}>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className={activeView === item.id ? 'active' : ''}
                 onClick={(e) => {
                   e.preventDefault();
@@ -58,7 +58,7 @@ const Sidebar = ({ activeView, setActiveView, onLogout }) => {
                   <i className={item.icon}></i>
                   <span>{item.label}</span>
                 </div>
-            
+
               </a>
             </li>
           ))}
@@ -70,8 +70,8 @@ const Sidebar = ({ activeView, setActiveView, onLogout }) => {
         <ul className="nav-links">
           {navItems.analytics.map(item => (
             <li key={item.id}>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className={activeView === item.id ? 'active' : ''}
                 onClick={(e) => {
                   e.preventDefault();
@@ -93,8 +93,8 @@ const Sidebar = ({ activeView, setActiveView, onLogout }) => {
         <ul className="nav-links">
           {navItems.community.map(item => (
             <li key={item.id}>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className={activeView === item.id ? 'active' : ''}
                 onClick={(e) => {
                   e.preventDefault();
@@ -116,8 +116,8 @@ const Sidebar = ({ activeView, setActiveView, onLogout }) => {
         <div className="nav-section">
           <ul className="nav-links">
             <li>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="logout-btn"
                 onClick={(e) => {
                   e.preventDefault();

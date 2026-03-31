@@ -68,6 +68,10 @@ if ($method == 'POST') {
                     $user_stmt->execute();
                     $user = $user_stmt->fetch(PDO::FETCH_ASSOC);
                     
+                    // Map 'name' to 'username' for frontend compatibility
+                    $user['username'] = $user['name'];
+                    unset($user['name']); // Remove the 'name' field to avoid confusion
+                    
                     http_response_code(201);
                     echo json_encode([
                         'success' => true,
@@ -110,6 +114,10 @@ if ($method == 'POST') {
                 
                 // Remove password from response
                 unset($user['password']);
+                
+                // Map 'name' to 'username' for frontend compatibility
+                $user['username'] = $user['name'];
+                unset($user['name']); // Remove the 'name' field to avoid confusion
                 
                 http_response_code(200);
                 echo json_encode([

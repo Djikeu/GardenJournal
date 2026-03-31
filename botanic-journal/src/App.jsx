@@ -9,11 +9,13 @@ import PlantEncyclopedia from './components/Encyclopedia/PlantEncylopedia'
 import PlantDetail from './components/Plants/PlantDetail'; // Add this import
 import Analytics from './components/Analytics/Analytics';
 import GardenPlanner from './components/Planner/GardenPlanner';
-import SeedLibrary from './components/Library/SeedLibrary';
+import WeatherForecast from './components/Weather/WeatherForecast'
 import Notification from './components/UI/Notification';
 import Profile from './components/Profile/profile';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
+import CommunityForum from './components/Community/CommunityForum';
+import DiscussionDetail from './components/Community/DiscussionDetail';
 import { apiService } from './services/api';
 import './index.css';
 import './App.css';
@@ -31,12 +33,13 @@ function App() {
   });
   const [selectedPlantId, setSelectedPlantId] = useState(null); // For plant details
   const [showPlantDetailModal, setShowPlantDetailModal] = useState(false); // For modal approach
+  const [selectedDiscussionId, setSelectedDiscussionId] = useState(null); // ADD THIS LINE
 
   // Handle hash-based navigation
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
-      
+
       // Handle plant detail routes like #plant/123
       if (hash.startsWith('plant/')) {
         const plantId = hash.split('/')[1];
@@ -45,14 +48,15 @@ function App() {
         return;
       }
       
-      if (hash && ['dashboard', 'plants', 'tasks', 'journal', 'encyclopedia', 'analytics', 'planner', 'library', 'profile', 'plant-detail'].includes(hash)) {
+
+      if (hash && ['dashboard', 'plants', 'tasks', 'journal', 'encyclopedia', 'analytics', 'planner', 'profile', 'plant-detail','community', 'my-discussions', 'discussion-detail'].includes(hash)) {
         setActiveView(hash);
       }
     };
 
     // Listen for hash changes
     window.addEventListener('hashchange', handleHashChange);
-    
+
     // Check initial hash
     handleHashChange();
 
@@ -108,15 +112,15 @@ function App() {
   const handleLogin = async (loginData) => {
     try {
       const response = await apiService.login(loginData);
-      
+
       if (response.success) {
         setIsAuthenticated(true);
         setCurrentUser(response.user);
-        
+
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('currentUser', JSON.stringify(response.user));
         localStorage.setItem('user_id', response.user.id);
-        
+
         showNotification('Welcome back!', 'Successfully signed in', 'success');
       } else {
         throw new Error(response.message || 'Login failed');
@@ -132,14 +136,14 @@ function App() {
     setCurrentUser(null);
     setActiveView('dashboard');
     setSelectedPlantId(null);
-    
+
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('currentUser');
     localStorage.removeItem('user_id');
-    
+
     // Clear hash on logout
     window.history.replaceState(null, null, ' ');
-    
+
     showNotification('Goodbye!', 'You have been logged out', 'info');
   };
 
@@ -190,13 +194,25 @@ function App() {
       );
     }
 
+    // Add after your showPlantDetails function
+    const showDiscussionDetail = (discussionId) => {
+      setSelectedDiscussionId(discussionId);
+      setActiveView('discussion-detail');
+    };
+
+    const hideDiscussionDetail = () => {
+      setActiveView('community');
+      setSelectedDiscussionId(null);
+      window.history.back();
+    };
+
     switch (activeView) {
       case 'dashboard':
         return <Dashboard showNotification={showNotification} user={currentUser} />;
       case 'plants':
-        return <MyPlants 
-          showNotification={showNotification} 
-          user={currentUser} 
+        return <MyPlants
+          showNotification={showNotification}
+          user={currentUser}
           setActiveView={setActiveView}
           onShowPlantDetails={showPlantDetails} // Pass the function
         />;
@@ -205,14 +221,14 @@ function App() {
       case 'journal':
         return <PlantJournal showNotification={showNotification} user={currentUser} />;
       case 'encyclopedia':
-        return <PlantEncyclopedia 
-          showNotification={showNotification} 
+        return <PlantEncyclopedia
+          showNotification={showNotification}
           user={currentUser}
           onShowPlantDetails={showPlantDetails} // Pass the function
         />;
       case 'plant-detail':
-        return <PlantDetail 
-          showNotification={showNotification} 
+        return <PlantDetail
+          showNotification={showNotification}
           user={currentUser}
           plantId={selectedPlantId}
           onClose={hidePlantDetails}
@@ -222,11 +238,24 @@ function App() {
         return <Analytics showNotification={showNotification} user={currentUser} />;
       case 'planner':
         return <GardenPlanner showNotification={showNotification} user={currentUser} />;
-      case 'library':
-        return <SeedLibrary showNotification={showNotification} user={currentUser} />;
+      case 'forecast':
+        return <WeatherForecast showNotification={showNotification} user={currentUser} />;
       case 'profile':
         return <Profile showNotification={showNotification} user={currentUser} />;
-      default:
+      case 'community':
+    return <CommunityForum 
+      showNotification={showNotification} 
+      user={currentUser}
+      onShowDiscussionDetail={showDiscussionDetail}
+    />;
+  case 'discussion-detail':
+    return <DiscussionDetail 
+      showNotification={showNotification} 
+      user={currentUser}
+      discussionId={selectedDiscussionId}
+      onBack={hideDiscussionDetail}
+    />;
+  default:
         return <Dashboard showNotification={showNotification} user={currentUser} />;
     }
   };
