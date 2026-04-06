@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Sidebar = ({ activeView, setActiveView, onLogout }) => {
+const Sidebar = ({ activeView, setActiveView, onLogout, user }) => {
   const navItems = {
     main: [
       { id: 'dashboard', icon: 'fas fa-home', label: 'Dashboard' },
@@ -58,7 +58,6 @@ const Sidebar = ({ activeView, setActiveView, onLogout }) => {
                   <i className={item.icon}></i>
                   <span>{item.label}</span>
                 </div>
-
               </a>
             </li>
           ))}
@@ -110,6 +109,30 @@ const Sidebar = ({ activeView, setActiveView, onLogout }) => {
           ))}
         </ul>
       </nav>
+
+      {/* Admin Panel Section - Only visible to admin users */}
+      {user?.role === 'admin' && (
+        <nav className="nav-section">
+          <div className="nav-title">Administration</div>
+          <ul className="nav-links">
+            <li>
+              <a
+                href="#"
+                className={activeView === 'admin' ? 'active' : ''}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveView('admin');
+                }}
+              >
+                <div className="nav-link-content">
+                  <i className="fas fa-shield-alt"></i>
+                  <span>Admin Panel</span>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      )}
 
       {/* Logout Section */}
       <div className="sidebar-footer">

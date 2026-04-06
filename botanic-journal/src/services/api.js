@@ -309,27 +309,67 @@ class ApiService {
     }
 
     // Admin methods
-    async getAdminUsers() {
-        return this.request('admin/users.php');
+    async getAdminUsers(page = 1, limit = 20) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`admin/users.php?user_id=${user_id}&page=${page}&limit=${limit}`);
     }
 
     async getAdminStats() {
-        return this.request('admin/stats.php');
+        const user_id = this.getCurrentUserId();
+        return this.request(`admin/stats.php?user_id=${user_id}`);
+    }
+
+
+    // Add to your ApiService class in apiService.js
+
+    async getAdminPlants(page = 1, limit = 50, search = '') {
+        const user_id = this.getCurrentUserId();
+        let url = `admin/plants.php?user_id=${user_id}&page=${page}&limit=${limit}`;
+        if (search) {
+            url += `&search=${encodeURIComponent(search)}`;
+        }
+        return this.request(url);
+    }
+
+    async createAdminPlant(plantData) {
+        const user_id = this.getCurrentUserId();
+        return this.request('admin/plants.php', {
+            method: 'POST',
+            body: { ...plantData, user_id }
+        });
+    }
+
+    async updateAdminPlant(plantId, plantData) {
+        const user_id = this.getCurrentUserId();
+        return this.request('admin/plants.php', {
+            method: 'PUT',
+            body: { id: plantId, ...plantData, user_id }
+        });
+    }
+
+    async deleteAdminPlant(plantId) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`admin/plants.php?id=${plantId}&user_id=${user_id}`, {
+            method: 'DELETE'
+        });
     }
 
     async toggleUserStatus(userId, isActive) {
+        const user_id = this.getCurrentUserId();
         return this.request('admin/users.php', {
             method: 'PATCH',
-            body: { id: userId, is_active: isActive }
+            body: { id: userId, is_active: isActive, user_id: user_id }
         });
     }
 
     async updateUserRole(userId, role) {
+        const user_id = this.getCurrentUserId();
         return this.request('admin/users.php', {
             method: 'PATCH',
-            body: { id: userId, role: role }
+            body: { id: userId, role: role, user_id: user_id }
         });
     }
+
 
     // NEW METHOD: Get sample tasks for demonstration
     async getSampleTasks() {

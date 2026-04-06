@@ -187,22 +187,46 @@
     font-size: 13px;
 }
 
-/* Quick Stats */
 .plant-quick-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin: 20px 0;
+    gap: 10px;
+    margin: 15px 0;
 }
 
 .quick-stat {
     background: #f8fafc;
-    border-radius: 12px;
-    padding: 15px;
+    border-radius: 10px;
+    padding: 10px 12px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    transition: transform 0.2s ease;
+    gap: 8px;
+}
+
+.stat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.quick-stat .stat-label {
+    font-size: 11px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.quick-stat .stat-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.3;
 }
 
 .quick-stat:hover {
@@ -547,14 +571,26 @@
     border-color: #34d399;
 }
 
-/* Environment Stats */
 .environment-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
+.env-stat .stat-label {
+    font-size: 11px;
+    margin-bottom: 4px;
+}
+
+.env-stat .stat-value {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.stat-value.safe {
+    font-size: 14px;
+}
 .env-stat {
     text-align: center;
 }

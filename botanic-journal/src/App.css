@@ -62,7 +62,129 @@
   padding: 0;
   box-sizing: border-box;
 }
+.container {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  height: 100vh;        /* ADD THIS */
+  overflow: hidden;     /* ADD THIS */
+}
 
+.main-content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;     /* This stays — makes only the content scroll */
+  width: 100%;
+  min-width: 0;
+  position: relative;
+}
+
+.sidebar {
+  width: 320px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 30px 0;
+  height: 100vh;        /* Keep this */
+  overflow-y: auto;     /* Keep this */
+  position: sticky;     /* Keep this, now it'll work */
+  top: 0;
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+/* Remove or adjust the ::before pseudo-element that's causing width issues */
+.main-content::before {
+    display: none !important;
+    content: none !important;
+}
+
+/* OR if you want to keep it but not affect layout: */
+.main-content::before {
+    content: '';
+    position: absolute; /* Changed from fixed to absolute */
+    top: 0;
+    right: 0;
+    width: 30%; /* Reduced from 50% */
+    height: 100%;
+    background: radial-gradient(circle at top right, 
+        rgba(125, 179, 110, 0.1) 0%, 
+        transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Ensure the community forum takes full width */
+.community-forum,
+.discussion-detail {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 1.5rem 2rem;
+    background: var(--gray-50);
+    min-height: calc(100vh - 120px);
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+}
+
+
+
+/* If there's any wrapper div restricting width */
+#root,
+.app-container,
+.page-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+
+/* Make stats grid and other elements full width */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+/* For the discussion list */
+.discussions-list {
+    background: white;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    width: 100%;
+}
+
+/* For the filters section */
+.filters-section {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    width: 100%;
+}
+
+/* For the categories section */
+.categories-section {
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+    width: 100%;
+} 
 body {
   font-family: var(--font-primary);
   background: var(--gradient-1);
@@ -77,22 +199,6 @@ body {
   min-height: 100vh;
   position: relative;
   width: 100%;
-}
-
-/* Advanced Sidebar with Glassmorphism */
-.sidebar {
-  width: 320px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 30px 0;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 100;
-  flex-shrink: 0;
 }
 
 .sidebar::before {
@@ -1611,6 +1717,27 @@ body {
 .search-input-enhanced {
     font-size: 1.1rem;
     padding: 18px 20px 18px 50px;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-box i {
+  position: absolute;
+  left: 14px;
+  color: #9ca3af;
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-box input,
+.search-input {
+  padding-left: 40px;  /* key fix — pushes text right of the icon */
+  width: 100%;
 }
 
 /* Health Overview - Wider */

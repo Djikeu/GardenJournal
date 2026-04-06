@@ -134,7 +134,7 @@ const Profile = ({ showNotification, user }) => {
         </h1>
         {!editing && (
           <button 
-            className="btn btn-primary"
+            className="btn btn-primary-profile"
             onClick={() => setEditing(true)}
           >
             <i className="fas fa-edit"></i>

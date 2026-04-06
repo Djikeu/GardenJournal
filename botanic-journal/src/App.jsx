@@ -16,6 +16,7 @@ import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import CommunityForum from './components/Community/CommunityForum';
 import DiscussionDetail from './components/Community/DiscussionDetail';
+import AdminDashboard from './components/Admin/AdminDashboard';
 import { apiService } from './services/api';
 import './index.css';
 import './App.css';
@@ -216,6 +217,14 @@ function App() {
           setActiveView={setActiveView}
           onShowPlantDetails={showPlantDetails} // Pass the function
         />;
+        case 'admin':
+      // Only show admin dashboard if user is admin
+      if (currentUser?.role === 'admin') {
+        return <AdminDashboard showNotification={showNotification} user={currentUser} />;
+      } else {
+        showNotification('Access Denied', 'Admin access required', 'error');
+        return <Dashboard showNotification={showNotification} user={currentUser} />;
+      }
       case 'tasks':
         return <CareTasks showNotification={showNotification} user={currentUser} />;
       case 'journal':

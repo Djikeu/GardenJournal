@@ -150,7 +150,7 @@ const CommunityForum = ({ showNotification, user }) => {
           <p>Connect with fellow gardeners, share tips, and grow together!</p>
         </div>
         <button 
-          className="btn btn-primary"
+          className="btn btn-primary-discussion"
           onClick={() => setShowNewDiscussion(true)}
         >
           <i className="fas fa-plus"></i> New Discussion
