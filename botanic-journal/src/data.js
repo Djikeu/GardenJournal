@@ -23,7 +23,7 @@ export const plantsData = [
     humidity: "40%",
     isFavorite: false
   },
-  // Add more plants...
+
 ];
 
 export const tasksData = [
