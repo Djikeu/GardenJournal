@@ -1,234 +1,302 @@
 import React, { useState, useEffect } from 'react';
-import StatsGrid from './StatsGrid';
-import WeatherWidget from './WeatherWidget';
-import AnalyticsChart from './AnalyticsChart';
-import QuickActions from './QuickActions';
-import PlantGrid from '../Plants/PlantGrid';
-import { apiService } from '../../services/api';
+import '../../dashboard.css'; // We'll create separate CSS or you can keep in same file
 
 const Dashboard = ({ showNotification, user }) => {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [userStats, setUserStats] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [userStats, setUserStats] = useState({
+    totalPlants: 24,
+    wateringCount: 162,
+    growthRate: '+18%',
+    communityMembers: 342
+  });
 
-  useEffect(() => {
-    loadDashboardData();
-  }, [user]);
-
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true);
-      const [tasksResponse, statsResponse] = await Promise.all([
-        apiService.getTasks(),
-        apiService.getStats()
-      ]);
-      
-      // Get only urgent tasks (high priority, not completed)
-      const urgentTasks = tasksResponse.data.filter(task => 
-        task.priority === 'high' && !task.completed
-      ).slice(0, 3);
-      
-      setTasks(urgentTasks);
-      
-      if (statsResponse.success) {
-        setUserStats(statsResponse.data);
-      }
-    } catch (error) {
-      showNotification('Error', 'Failed to load dashboard data', 'error');
-    } finally {
-      setLoading(false);
+  // Upcoming tasks data (dashboard specific)
+  const [upcomingTasks, setUpcomingTasks] = useState([
+    {
+      id: 1,
+      plantName: 'Ficus elastica (Rubber Plant)',
+      action: 'Morning watering',
+      dueDate: '2026-05-02',
+      priority: 'medium',
+      icon: 'fas fa-tint'
+    },
+    {
+      id: 2,
+      plantName: 'Basil & Mint duo',
+      action: 'Prune old leaves',
+      dueDate: '2026-05-03',
+      priority: 'high',
+      icon: 'fas fa-cut'
+    },
+    {
+      id: 3,
+      plantName: 'Snake plant (Sansevieria)',
+      action: 'Fertilize (weak solution)',
+      dueDate: '2026-05-04',
+      priority: 'low',
+      icon: 'fas fa-seedling'
+    },
+    {
+      id: 4,
+      plantName: 'Pothos Golden',
+      action: 'Mist & check trailing vines',
+      dueDate: '2026-05-02',
+      priority: 'medium',
+      icon: 'fas fa-spray-can-sparkles'
     }
-  };
+  ]);
 
-  const completeTask = async (taskId) => {
-    try {
-      await apiService.completeTask(taskId);
-      setTasks(tasks.map(task => 
-        task.id === taskId ? { ...task, completed: true, progress: 100 } : task
-      ));
-      showNotification('Task Completed!', 'Great job! Your plant will thank you.', 'success');
-    } catch (error) {
-      showNotification('Error', 'Failed to complete task', 'error');
-    }
-  };
+  const [healthMetrics, setHealthMetrics] = useState({
+    soilMoisture: 68,
+    lightExposure: 82,
+    temperature: 71,
+    vitality: 89
+  });
 
-  const getTaskTypeIcon = (type) => {
-    switch (type) {
-      case 'watering': return 'fas fa-tint';
-      case 'fertilizing': return 'fas fa-flask';
-      case 'pruning': return 'fas fa-cut';
-      case 'repotting': return 'fas fa-seedling';
-      case 'pest_control': return 'fas fa-bug';
-      default: return 'fas fa-tasks';
+  const [communityPosts, setCommunityPosts] = useState([
+    {
+      id: 1,
+      username: 'PlantMom_Jasmine',
+      avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+      content: 'My orchid rebloomed after 6 months! 🌸',
+      timeAgo: '5 min ago'
+    },
+    {
+      id: 2,
+      username: 'GreenThumbTom',
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      content: 'Best organic fertilizer for leafy greens?',
+      timeAgo: '12 min ago'
     }
-  };
+  ]);
 
   const getLevelTitle = (level) => {
     if (level >= 10) return 'Expert Gardener';
-    if (level >= 5) return 'Intermediate Gardener';
-    return 'Beginner Gardener';
+    if (level >= 5) return 'Green Guardian';
+    return 'Budding Grower';
+  };
+
+  const getPriorityColor = (priority) => {
+    switch(priority) {
+      case 'high': return { bg: '#ffe4e2', color: '#b91c1c' };
+      case 'medium': return { bg: '#fff1e0', color: '#c2410c' };
+      default: return { bg: '#e6f4ea', color: '#2e7d32' };
+    }
+  };
+
+  const handleTaskClick = (task) => {
+    showNotification('Task Reminder', `${task.plantName}: ${task.action}`, 'info');
+  };
+
+  const handleJoinDiscussion = () => {
+    showNotification('Community', 'Redirecting to discussions...', 'info');
+  };
+
+  const handleSpotlightTip = () => {
+    showNotification('Plant Care Tip', 'Monstera care: keep away from drafts, water when top 2" dry.', 'success');
   };
 
   return (
     <>
-      {/* Welcome Section */}
-      <div className="welcome-section">
-        <div className="welcome-content">
-          <h1>Welcome back, {user?.name}!
-            <span className="user-level">
-              <i className="fas fa-seedling"></i>
-              {getLevelTitle(user?.level || 1)} • Level {user?.level || 1}
-            </span>
-          </h1>
-          <p className="welcome-subtitle">
-            {new Date().toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
-          </p>
-        </div>
-        {user?.avatar && (
-          <div className="welcome-avatar">
-            <img src={user.avatar} alt={user.name} />
+      {/* Stats Insight Cards - Brand new dashboard metrics */}
+      <div className="insight-grid">
+        <div className="insight-card">
+          <div className="insight-icon plants">
+            <i className="fas fa-sprout"></i>
           </div>
-        )}
+          <div className="insight-stats">
+            <h3>{userStats.totalPlants}</h3>
+            <p>Plants thriving</p>
+          </div>
+        </div>
+        <div className="insight-card">
+          <div className="insight-icon water">
+            <i className="fas fa-water"></i>
+          </div>
+          <div className="insight-stats">
+            <h3>{userStats.wateringCount}</h3>
+            <p>Total waterings this month</p>
+          </div>
+        </div>
+        <div className="insight-card">
+          <div className="insight-icon growth">
+            <i className="fas fa-chart-line"></i>
+          </div>
+          <div className="insight-stats">
+            <h3>{userStats.growthRate}</h3>
+            <p>Growth rate vs last month</p>
+          </div>
+        </div>
+        <div className="insight-card">
+          <div className="insight-icon community">
+            <i className="fas fa-users"></i>
+          </div>
+          <div className="insight-stats">
+            <h3>{userStats.communityMembers}</h3>
+            <p>Community helpers</p>
+          </div>
+        </div>
       </div>
 
-      <StatsGrid showNotification={showNotification} userStats={userStats} />
-      
-      <div className="dashboard-grid">
-        <WeatherWidget showNotification={showNotification} />
-        
-        {/* Tasks Card for Dashboard */}
-        <div className="card" style={{ gridColumn: 'span 6' }}>
-          <div className="card-header">
-            <h3 className="card-title">
-              <i className="fas fa-exclamation-circle"></i>
-              Urgent Care Needed
-            </h3>
-            <div className="card-actions">
-              <button className="card-btn" title="View All">
-                <i className="fas fa-eye"></i>
-              </button>
+      {/* Two-Column Dashboard Layout */}
+      <div className="dashboard-two-columns">
+        {/* LEFT COLUMN */}
+        <div className="dashboard-left">
+          {/* Seasonal Spotlight - New Feature */}
+          <div className="spotlight-card">
+            <div className="spotlight-badge">
+              <i className="fas fa-star"></i> Seasonal Spotlight
             </div>
+            <h3 className="spotlight-plant">🌿 Monstera Deliciosa</h3>
+            <p className="spotlight-description">
+              Also known as "Swiss Cheese Plant" — now entering peak growing season. 
+              Increase humidity and wipe leaves for glossy shine.
+            </p>
+            <button className="spotlight-tip" onClick={handleSpotlightTip}>
+              <i className="fas fa-lightbulb"></i> Tip: rotate pot every week for even growth.
+            </button>
           </div>
-          <div className="task-list">
-            {loading ? (
-              <div className="loading-message">Loading urgent tasks...</div>
-            ) : tasks.length === 0 ? (
-              <div className="empty-state">
-                <i className="fas fa-check-circle"></i>
-                <h4>No urgent tasks</h4>
-                <p>All caught up with urgent care!</p>
-              </div>
-            ) : (
-              tasks.map(task => (
-                <div key={task.id} className="task-item">
-                  <input 
-                    type="checkbox" 
-                    className="task-checkbox" 
-                    checked={task.completed}
-                    onChange={() => completeTask(task.id)}
-                  />
-                  <div className="task-content">
-                    <div className="task-title">
-                      <span className="task-priority priority-high"></span>
-                      <i className={getTaskTypeIcon(task.type)}></i>
-                      {task.title}
-                      {task.plant_name && (
-                        <span className="task-plant">for {task.plant_name}</span>
-                      )}
+
+          {/* Upcoming Care Tasks - Redesigned */}
+          <div className="tasks-card">
+            <div className="card-header">
+              <h3><i className="fas fa-tasks"></i> Upcoming Plant Care</h3>
+              <span className="date-range">next 3 days</span>
+            </div>
+            <div className="tasks-list">
+              {upcomingTasks.map(task => {
+                const priorityStyle = getPriorityColor(task.priority);
+                return (
+                  <div key={task.id} className="task-item" onClick={() => handleTaskClick(task)}>
+                    <div className="task-icon">
+                      <i className={task.icon}></i>
                     </div>
-                    
-                    <div className="task-meta">
-                      <span className="task-meta-item">
-                        <i className="far fa-calendar"></i>
-                        {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Due soon'}
-                      </span>
-                      
-                      {task.description && (
-                        <span className="task-meta-item">
-                          <i className="fas fa-info-circle"></i>
-                          {task.description}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="task-progress">
-                      <div className="progress-bar">
-                        <div 
-                          className="progress-fill" 
-                          style={{ width: `${task.progress}%` }}
-                        ></div>
+                    <div className="task-details">
+                      <div className="task-name">{task.plantName}</div>
+                      <div className="task-action">{task.action}</div>
+                      <div className="task-date">
+                        <i className="far fa-calendar"></i> 
+                        Due {new Date(task.dueDate).toLocaleDateString()}
                       </div>
                     </div>
+                    <div className="task-priority" style={{ background: priorityStyle.bg, color: priorityStyle.color }}>
+                      {task.priority}
+                    </div>
                   </div>
-                  
-                  <div className="task-actions">
-                    <button 
-                      className="task-btn btn-primary" 
-                      onClick={() => completeTask(task.id)}
-                    >
-                      <i className="fas fa-check"></i>
-                      Done
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Growth Summary - Text-based insight instead of chart */}
+          <div className="growth-summary-card">
+            <div className="summary-icon">
+              <i className="fas fa-leaf"></i>
+            </div>
+            <div className="summary-content">
+              <h4>Growth Summary for April</h4>
+              <p>Average leaf production +22% compared to March. Your Monstera put out 3 new leaves! 🌱 Keep up the light management.</p>
+              <div className="top-performer">
+                <i className="fas fa-chart-simple"></i> 
+                <strong>Top performer:</strong> Spider Plant — 12 new pups ready for propagation.
+              </div>
+            </div>
           </div>
         </div>
 
-        <AnalyticsChart showNotification={showNotification} userStats={userStats} />
-        <QuickActions showNotification={showNotification} />
-        
-        {/* Companion Planting Tips */}
-        <div style={{ gridColumn: 'span 6' }}>
-          <div className="card">
+        {/* RIGHT COLUMN */}
+        <div className="dashboard-right">
+          {/* Plant Health Monitor - Visual bars */}
+          <div className="health-monitor-card">
             <div className="card-header">
-              <h3 className="card-title">
-                <i className="fas fa-handshake"></i>
-                Companion Planting
-              </h3>
-              <div className="card-actions">
-                <button className="card-btn" title="Learn More">
-                  <i className="fas fa-graduation-cap"></i>
-                </button>
+              <h3><i className="fas fa-heartbeat"></i> Plant Health Monitor</h3>
+            </div>
+            <div className="health-metrics">
+              <div className="metric-item">
+                <div className="metric-label">
+                  <i className="fas fa-tint"></i> Soil Moisture (avg)
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: `${healthMetrics.soilMoisture}%` }}></div>
+                </div>
+                <span className="metric-value">{healthMetrics.soilMoisture}%</span>
+              </div>
+              <div className="metric-item">
+                <div className="metric-label">
+                  <i className="fas fa-sun"></i> Light Exposure
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-fill light-fill" style={{ width: `${healthMetrics.lightExposure}%` }}></div>
+                </div>
+                <span className="metric-value">good</span>
+              </div>
+              <div className="metric-item">
+                <div className="metric-label">
+                  <i className="fas fa-temperature-low"></i> Temperature
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-fill temp-fill" style={{ width: `${healthMetrics.temperature - 32}%` }}></div>
+                </div>
+                <span className="metric-value">{healthMetrics.temperature}°F</span>
+              </div>
+              <div className="metric-item">
+                <div className="metric-label">
+                  <i className="fas fa-seedling"></i> Overall Vitality
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-fill vitality-fill" style={{ width: `${healthMetrics.vitality}%` }}></div>
+                </div>
+                <span className="metric-value">Excellent</span>
               </div>
             </div>
-            <div className="task-list">
-              <div className="task-item" style={{ border: 'none', background: 'none', padding: '16px 0' }}>
-                <div className="task-content">
-                  <div className="task-title">
-                    <i className="fas fa-check-circle" style={{ color: 'var(--forest-600)', marginRight: '8px' }}></i>
-                    Tomatoes love basil
-                  </div>
-                  <div className="task-meta">Plant together to improve flavor and repel pests</div>
-                </div>
-              </div>
-              <div className="task-item" style={{ border: 'none', background: 'none', padding: '16px 0' }}>
-                <div className="task-content">
-                  <div className="task-title">
-                    <i className="fas fa-times-circle" style={{ color: '#ff6b6b', marginRight: '8px' }}></i>
-                    Avoid beans near onions
-                  </div>
-                  <div className="task-meta">Onions can inhibit bean growth</div>
-                </div>
-              </div>
-              <div className="task-item" style={{ border: 'none', background: 'none', padding: '16px 0' }}>
-                <div className="task-content">
-                  <div className="task-title">
-                    <i className="fas fa-check-circle" style={{ color: 'var(--forest-600)', marginRight: '8px' }}></i>
-                    Marigolds protect vegetables
-                  </div>
-                  <div className="task-meta">Plant throughout garden to deter pests</div>
-                </div>
-              </div>
+            <p className="health-note">
+              <i className="fas fa-info-circle"></i> 4 plants need attention: check Calathea for curling leaves.
+            </p>
+          </div>
+
+          {/* Gardening Wisdom Quote */}
+          <div className="wisdom-card">
+            <i className="fas fa-quote-left quote-icon"></i>
+            <p className="quote-text">"The love of gardening is a seed once sown that never dies."</p>
+            <p className="quote-author">— Gertrude Jekyll</p>
+            <hr className="divider" />
+            <div className="daily-tip">
+              <i className="fas fa-pencil-alt"></i>
+              <strong>Today's Gardening Tip:</strong> Use crushed eggshells as natural calcium boost for tomatoes and peppers.
             </div>
           </div>
+
+          {/* Community Pulse Widget */}
+          <div className="community-pulse">
+            <div className="card-header">
+              <h3><i className="fas fa-comments"></i> Community Buzz</h3>
+              <span className="active-badge">active now</span>
+            </div>
+            <div className="community-posts">
+              {communityPosts.map(post => (
+                <div key={post.id} className="post-item">
+                  <img src={post.avatar} alt={post.username} className="post-avatar" />
+                  <div className="post-content">
+                    <div className="post-user">{post.username}</div>
+                    <div className="post-message">{post.content}</div>
+                    <div className="post-time">{post.timeAgo}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button className="join-btn" onClick={handleJoinDiscussion}>
+              <i className="fas fa-tree"></i> Join Discussion
+            </button>
+          </div>
         </div>
+      </div>
+
+      {/* Eco Footer */}
+      <div className="dashboard-footer">
+        <i className="fas fa-feather-alt"></i>
+        <span>Every leaf speaks bliss to me — let's grow together. <strong>Your garden, your story.</strong></span>
+        <i className="fas fa-recycle"></i>
+        <span>Eco-friendly tips saved 3.2kg of waste this month.</span>
       </div>
     </>
   );

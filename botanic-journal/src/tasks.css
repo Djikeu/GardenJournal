@@ -8,6 +8,150 @@
   min-height: 100vh;
 }
 
+
+/* Compact Stats Grid - REPLACES the old stats-grid-enhanced */
+.stats-grid-compact {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card-compact {
+    background: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card-compact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card-compact.primary {
+    border-left: 3px solid #667eea;
+}
+
+.stat-card-compact.warning {
+    border-left: 3px solid #f59e0b;
+}
+
+.stat-card-compact.success {
+    border-left: 3px solid #10b981;
+}
+
+.stat-card-compact.info {
+    border-left: 3px solid #3b82f6;
+}
+
+.stat-icon-compact {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+.stat-card-compact.primary .stat-icon-compact {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.stat-card-compact.warning .stat-icon-compact {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    color: white;
+}
+
+.stat-card-compact.success .stat-icon-compact {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.stat-card-compact.info .stat-icon-compact {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+}
+
+.stat-content-compact {
+    flex: 1;
+}
+
+.stat-value-compact {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.2;
+    margin-bottom: 2px;
+}
+
+.stat-label-compact {
+    color: #6b7280;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.stat-trend-compact {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    color: #9ca3af;
+}
+
+/* Responsive for compact stats */
+@media (max-width: 768px) {
+    .stats-grid-compact {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .stat-card-compact {
+        padding: 12px 16px;
+    }
+    
+    .stat-icon-compact {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+    
+    .stat-value-compact {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid-compact {
+        gap: 10px;
+    }
+    
+    .stat-card-compact {
+        padding: 10px 12px;
+    }
+    
+    .stat-icon-compact {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    
+    .stat-value-compact {
+        font-size: 1.2rem;
+    }
+    
+    .stat-label-compact {
+        font-size: 0.7rem;
+    }
+} 
 /* Loading State */
 .tasks-loading {
   display: flex;
@@ -715,67 +859,60 @@
   color: #d97706;
 }
 
-/* MODAL STYLES - FIXED FOR BETTER VISIBILITY */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  padding: 20px;
+  animation: modalFadeIn 0.2s ease-out;
 }
-
 .modal-content {
   background: white;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 600px;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 550px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: modalSlideIn 0.3s ease;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  animation: modalSlideIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
 
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 .modal-header {
+  padding: 24px 32px;
+  border-bottom: 1px solid #f1f5f9;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid #e5e7eb;
+  /* If you want the green look from your image but cleaner: */
+  background: linear-gradient(to right, #10b981, #059669);
+  color: white;
 }
 
 .modal-header h3 {
   margin: 0;
-  color: #1f2937;
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white; /* Changed to white to match the green header */
 }
-
 .modal-close {
-  background: none;
-  border: none;
-  color: #6b7280;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  transition: all 0.2s;
-  font-size: 1.2rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-close:hover {
@@ -783,43 +920,58 @@
   color: #374151;
 }
 
-/* FORM STYLES - FIXED FOR VISIBILITY */
-.task-form {
-  padding: 24px;
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* FORM STYLES - FIXED FOR VISIBILITY */
+.task-form {
+  padding: 32px;
+}
 .form-group {
   margin-bottom: 20px;
 }
 
 .form-group label {
-  display: block;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: #64748b;
   margin-bottom: 8px;
-  color: #374151;
-  font-weight: 600;
-  font-size: 0.95rem;
 }
 
-.form-group input,
-.form-group textarea,
-.form-group select {
-  width: 100%;
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+  background-color: #f8fafc; /* Subtle off-white background */
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   padding: 12px 16px;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 1rem;
-  background: white;
-  color: #1f2937;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .form-group input:focus,
 .form-group textarea:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-  background: white;
+.form-group input:focus {
+  background-color: white;
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
 
 .form-group input::placeholder,

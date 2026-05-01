@@ -1,5 +1,17 @@
 
 
+.sidebar {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+      rgba(125, 179, 110, 0.1) 0%, 
+      rgba(90, 140, 90, 0.05) 100%);
+  z-index: -1;
+}
 /* User Info Section */
 .user-info-section {
   padding: 20px;

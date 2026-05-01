@@ -285,25 +285,7 @@ function App() {
   if (!isAuthenticated) {
     return (
       <div className="app">
-        <button
-          onClick={skipAuth}
-          style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            zIndex: 1000,
-            padding: '10px 20px',
-            background: '#10b981',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          Skip Auth (Dev)
-        </button>
-
+        
         {renderContent()}
 
         <div className="notification-container">

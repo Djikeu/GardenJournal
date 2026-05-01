@@ -117,8 +117,13 @@ const Profile = ({ showNotification, user }) => {
 
   if (!profileUser) {
     return (
-      <div className="profile-container">
-        <div className="loading-spinner">Loading profile...</div>
+      <div className="profile-container-modern">
+        <div className="loading-modern">
+          <div className="loading-spinner-modern">
+            <i className="fas fa-leaf"></i>
+          </div>
+          <p>Loading profile...</p>
+        </div>
       </div>
     );
   }
@@ -126,15 +131,19 @@ const Profile = ({ showNotification, user }) => {
   const levelBadge = getLevelBadge(profileUser.level);
 
   return (
-    <div className="profile-container">
-      <div className="profile-header">
-        <h1 className="profile-title">
-          <i className="fas fa-user"></i>
-          My Profile
-        </h1>
+    <div className="profile-container-modern">
+      {/* Hero Section */}
+      <div className="profile-hero">
+        <div className="hero-content-modern">
+          <h1>
+            <i className="fas fa-user-circle"></i>
+            My Profile
+          </h1>
+          <p>Manage your account settings and track your gardening journey</p>
+        </div>
         {!editing && (
           <button 
-            className="btn btn-primary-profile"
+            className="btn-edit-profile"
             onClick={() => setEditing(true)}
           >
             <i className="fas fa-edit"></i>
@@ -143,33 +152,33 @@ const Profile = ({ showNotification, user }) => {
         )}
       </div>
 
-      <div className="profile-content">
-        {/* Profile Card */}
-        <div className="profile-card">
-          <div className="profile-avatar-section">
-            <div className="avatar-container">
+      <div className="profile-content-modern">
+        {/* Main Profile Card */}
+        <div className="profile-card-modern">
+          <div className="profile-avatar-modern">
+            <div className="avatar-wrapper-modern">
               {editing ? (
                 <>
-                  <div className="avatar-upload">
+                  <div className="avatar-upload-modern">
                     <img 
                       src={formData.avatar || '/default-avatar.png'} 
                       alt="Avatar" 
-                      className="avatar-image editable"
+                      className="avatar-image-modern editable"
                     />
-                    <div className="avatar-overlay">
+                    <div className="avatar-overlay-modern">
                       <i className="fas fa-camera"></i>
                       <span>Change Photo</span>
                     </div>
                     <input 
                       type="file" 
-                      className="avatar-input"
+                      className="avatar-input-modern"
                       accept="image/*"
                       onChange={handleAvatarUpload}
                       disabled={uploading}
                     />
                   </div>
                   {uploading && (
-                    <div className="upload-progress">
+                    <div className="upload-status-modern">
                       <i className="fas fa-spinner fa-spin"></i>
                       Uploading...
                     </div>
@@ -179,68 +188,74 @@ const Profile = ({ showNotification, user }) => {
                 <img 
                   src={profileUser.avatar || '/default-avatar.png'} 
                   alt="Avatar" 
-                  className="avatar-image"
+                  className="avatar-image-modern"
                 />
               )}
             </div>
             
-            <div className="level-badge" style={{ backgroundColor: levelBadge.color }}>
-              Level {profileUser.level} • {levelBadge.text}
-            </div>
-
-            {profileUser.role === 'admin' && (
-              <div className="admin-badge">
-                <i className="fas fa-shield-alt"></i>
-                Administrator
+            <div className="profile-info-modern">
+              <h2>{profileUser.name}</h2>
+              <div className="user-meta-modern">
+                {profileUser.role === 'admin' && (
+                  <span className="admin-badge-modern">
+                    <i className="fas fa-shield-alt"></i>
+                    Administrator
+                  </span>
+                )}
               </div>
-            )}
+              <div className="user-join-info">
+                <i className="fas fa-calendar-alt"></i>
+                Member since {new Date(profileUser.created_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long'
+                })}
+              </div>
+            </div>
           </div>
 
-          <div className="profile-details">
+          <div className="profile-details-modern">
             {editing ? (
-              <div className="edit-form">
-                <div className="form-group">
-                  <label htmlFor="name" className="form-label">
+              <div className="edit-form-modern">
+                <div className="form-group-modern">
+                  <label>
                     <i className="fas fa-user"></i>
                     Full Name
                   </label>
                   <input
                     type="text"
-                    id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="form-input"
                     placeholder="Enter your full name"
+                    className="form-input-modern"
                   />
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="email" className="form-label">
+                <div className="form-group-modern">
+                  <label>
                     <i className="fas fa-envelope"></i>
                     Email Address
                   </label>
                   <input
                     type="email"
-                    id="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="form-input"
                     placeholder="Enter your email"
+                    className="form-input-modern"
                   />
                 </div>
 
-                <div className="form-actions">
+                <div className="form-actions-modern">
                   <button 
-                    className="btn btn-secondary"
+                    className="btn-cancel-modern"
                     onClick={handleCancelEdit}
                     disabled={loading}
                   >
                     Cancel
                   </button>
                   <button 
-                    className="btn btn-primary"
+                    className="btn-save-modern"
                     onClick={handleSaveProfile}
                     disabled={loading}
                   >
@@ -259,62 +274,46 @@ const Profile = ({ showNotification, user }) => {
                 </div>
               </div>
             ) : (
-              <div className="view-mode">
-                <div className="profile-field">
-                  <label className="field-label">
-                    <i className="fas fa-user"></i>
-                    Full Name
-                  </label>
-                  <div className="field-value">{profileUser.name}</div>
-                </div>
-
-                <div className="profile-field">
-                  <label className="field-label">
+              <div className="info-grid-modern">
+                <div className="info-item-modern">
+                  <div className="info-icon">
                     <i className="fas fa-envelope"></i>
-                    Email Address
-                  </label>
-                  <div className="field-value">{profileUser.email}</div>
+                  </div>
+                  <div className="info-content">
+                    <span className="info-label">Email Address</span>
+                    <span className="info-value">{profileUser.email}</span>
+                  </div>
                 </div>
 
-                <div className="profile-field">
-                  <label className="field-label">
+                <div className="info-item-modern">
+                  <div className="info-icon">
                     <i className="fas fa-user-tag"></i>
-                    Role
-                  </label>
-                  <div className="field-value">
-                    <span className={`role-badge ${profileUser.role}`}>
-                      {profileUser.role === 'admin' ? 'Administrator' : 'User'}
+                  </div>
+                  <div className="info-content">
+                    <span className="info-label">Role</span>
+                    <span className="info-value">
+                      <span className={`role-badge-modern ${profileUser.role}`}>
+                        {profileUser.role === 'admin' ? 'Administrator' : 'User'}
+                      </span>
                     </span>
                   </div>
                 </div>
 
-                <div className="profile-field">
-                  <label className="field-label">
-                    <i className="fas fa-calendar"></i>
-                    Member Since
-                  </label>
-                  <div className="field-value">
-                    {new Date(profileUser.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </div>
-                </div>
-
-                <div className="profile-field">
-                  <label className="field-label">
+                <div className="info-item-modern">
+                  <div className="info-icon">
                     <i className="fas fa-clock"></i>
-                    Last Login
-                  </label>
-                  <div className="field-value">
-                    {profileUser.last_login ? new Date(profileUser.last_login).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    }) : 'Never'}
+                  </div>
+                  <div className="info-content">
+                    <span className="info-label">Last Login</span>
+                    <span className="info-value">
+                      {profileUser.last_login ? new Date(profileUser.last_login).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }) : 'Never'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -322,72 +321,106 @@ const Profile = ({ showNotification, user }) => {
           </div>
         </div>
 
-        {/* Stats Card with Real Data */}
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-icon">
-              <i className="fas fa-seedling"></i>
+        {/* Stats Grid - Dashboard Style */}
+        <div className="stats-grid-modern">
+          <div className="stat-card-modern">
+            <div className="stat-header-modern">
+              <div className="stat-icon-modern plants">
+                <i className="fas fa-seedling"></i>
+              </div>
+              <div className="stat-number-modern">{userStats?.totalPlants || 0}</div>
             </div>
-            <div className="stat-content">
-              <div className="stat-number">{userStats?.totalPlants || 0}</div>
-              <div className="stat-label">Total Plants</div>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon">
-              <i className="fas fa-tasks"></i>
-            </div>
-            <div className="stat-content">
-              <div className="stat-number">{userStats?.pendingTasks || 0}</div>
-              <div className="stat-label">Pending Tasks</div>
+            <div className="stat-footer-modern">
+              <span className="stat-label-modern">Total Plants</span>
+              <span className="stat-trend-modern">
+                <i className="fas fa-leaf"></i> Growing
+              </span>
             </div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon">
-              <i className="fas fa-trophy"></i>
+          <div className="stat-card-modern">
+            <div className="stat-header-modern">
+              <div className="stat-icon-modern tasks">
+                <i className="fas fa-tasks"></i>
+              </div>
+              <div className="stat-number-modern">{userStats?.pendingTasks || 0}</div>
             </div>
-            <div className="stat-content">
-              <div className="stat-number">{profileUser.level}</div>
-              <div className="stat-label">Gardener Level</div>
+            <div className="stat-footer-modern">
+              <span className="stat-label-modern">Pending Tasks</span>
+              <span className="stat-trend-modern">
+                <i className="fas fa-clock"></i> Need attention
+              </span>
             </div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon">
-              <i className="fas fa-calendar-check"></i>
+          <div className="stat-card-modern">
+            <div className="stat-header-modern">
+              <div className="stat-icon-modern level">
+                <i className="fas fa-trophy"></i>
+              </div>
+              <div className="stat-number-modern">{profileUser.level}</div>
             </div>
-            <div className="stat-content">
-              <div className="stat-number">{userStats?.completionRate || '0%'}</div>
-              <div className="stat-label">Task Completion</div>
+            <div className="stat-footer-modern">
+              <span className="stat-label-modern">Gardener Level</span>
+              <span className="stat-trend-modern">
+                <i className="fas fa-chart-line"></i> {levelBadge.text}
+              </span>
+            </div>
+          </div>
+
+          <div className="stat-card-modern">
+            <div className="stat-header-modern">
+              <div className="stat-icon-modern completion">
+                <i className="fas fa-calendar-check"></i>
+              </div>
+              <div className="stat-number-modern">{userStats?.completionRate || '0%'}</div>
+            </div>
+            <div className="stat-footer-modern">
+              <span className="stat-label-modern">Task Completion</span>
+              <span className="stat-trend-modern">
+                <i className="fas fa-trend-up"></i> This month
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="activity-card">
-          <h3 className="card-title">
-            <i className="fas fa-history"></i>
-            Recent Activity
-          </h3>
-          <div className="activity-list">
+        {/* Recent Activity Section */}
+        <div className="activity-card-modern">
+          <div className="activity-header-modern">
+            <h3>
+              <i className="fas fa-history"></i>
+              Recent Activity
+            </h3>
+            {userStats?.recentActivity?.length > 0 && (
+              <span className="activity-count">{userStats.recentActivity.length} activities</span>
+            )}
+          </div>
+          <div className="activity-list-modern">
             {userStats?.recentActivity?.length > 0 ? (
               userStats.recentActivity.map((activity, index) => (
-                <div key={index} className="activity-item">
-                  <div className={`activity-icon ${activity.type}`}>
+                <div key={index} className="activity-item-modern">
+                  <div className={`activity-icon-modern ${activity.type}`}>
                     <i className={activity.icon}></i>
                   </div>
-                  <div className="activity-content">
-                    <div className="activity-title">{activity.title}</div>
-                    <div className="activity-time">{activity.time}</div>
+                  <div className="activity-details-modern">
+                    <div className="activity-title-modern">{activity.title}</div>
+                    <div className="activity-time-modern">
+                      <i className="fas fa-clock"></i>
+                      {activity.time}
+                    </div>
+                  </div>
+                  <div className="activity-status-modern">
+                    <i className="fas fa-check-circle"></i>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="empty-activity">
-                <i className="fas fa-inbox"></i>
-                <p>No recent activity</p>
+              <div className="empty-activity-modern">
+                <div className="empty-icon">
+                  <i className="fas fa-inbox"></i>
+                </div>
+                <h4>No Recent Activity</h4>
+                <p>Start taking care of your plants to see activity here</p>
               </div>
             )}
           </div>

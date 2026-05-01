@@ -47,6 +47,11 @@
     font-size: 1rem;
 }
 
+.clear-search-btn i {
+    line-height: 1;
+    display: block;
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -135,26 +140,28 @@
 
 .search-container {
     flex: 1;
-    max-width: 600px;
+    max-width: 100%;
+    width: 100%;
 }
 
 .search-box {
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
+    overflow: hidden; /* ADD */
 }
-
 .search-input {
     width: 100%;
-    padding: 12px 40px 12px 40px;
+    padding: 12px 44px 12px 40px;
     border: 2px solid #e5e7eb;
     border-radius: 12px;
     font-size: 1rem;
     transition: all 0.2s;
     background: white;
     color: #374151;
+    box-sizing: border-box; /* ADD */
 }
-
 .search-input:focus {
     outline: none;
     border-color: #059669;
@@ -165,27 +172,39 @@
     color: #9ca3af;
 }
 
+
 .search-box .fa-search {
     position: absolute;
     left: 12px;
     color: #6b7280;
+    font-size: 1rem;
+    pointer-events: none; /* Allows clicking through to input */
 }
 
 .clear-search-btn {
     position: absolute;
-    right: 8px;
-    background: none;
-    border: none;
-    color: #6b7280;
+    right: 12px;        /* increase this */
+    background: none !important;
+    border: none !important;
+    color: #374151;
     cursor: pointer;
-    padding: 8px;
-    border-radius: 4px;
+    padding: 0;
+    border-radius: 50%;
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    min-width: unset !important;
+    flex: none !important;
+    font-size: 0.8rem;
 }
 
 .clear-search-btn:hover {
-    background: #f3f4f6;
+    background: #f3f4f6 !important;
     color: #374151;
+    transform: scale(1.1);
 }
 
 .view-toggle {
@@ -292,12 +311,13 @@
     font-size: 0.9rem;
 }
 
-/* Journal Content Grid */
+/* Journal Content Grid - FIXED: Better grid with fixed form width */
 .journal-content {
     display: grid;
-    grid-template-columns: 350px 1fr;
+    grid-template-columns: 380px 1fr;
     gap: 30px;
     margin-bottom: 40px;
+    align-items: start;
 }
 
 @media (max-width: 1200px) {
@@ -306,13 +326,18 @@
     }
 }
 
-/* Form Card */
+/* Form Card - FIXED: Limited size with sticky positioning */
 .journal-form-card {
     background: white;
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     border: 1px solid #e8f5e8;
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
 }
 
 .journal-form-card .card-header {
@@ -320,6 +345,7 @@
     color: white;
     padding: 20px;
     border-bottom: 1px solid #e5e7eb;
+    flex-shrink: 0;
 }
 
 .journal-form-card .card-header h3 {
@@ -337,6 +363,8 @@
 
 .journal-form-card .card-body {
     padding: 24px;
+    overflow-y: auto;
+    flex: 1;
 }
 
 /* Form Styles */
@@ -376,7 +404,8 @@
 }
 
 .form-textarea {
-    min-height: 150px;
+    min-height: 120px;
+    max-height: 200px;
     resize: vertical;
     line-height: 1.5;
 }
@@ -415,13 +444,16 @@
     border-top: 1px solid #e5e7eb;
 }
 
-/* Entries Card */
+/* Entries Card - FIXED: Scrollable entries */
 .journal-entries-card {
     background: white;
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     border: 1px solid #e8f5e8;
+    display: flex;
+    flex-direction: column;
+    min-height: 500px;
 }
 
 .journal-entries-card .card-header {
@@ -430,6 +462,7 @@
     align-items: center;
     padding: 20px;
     border-bottom: 1px solid #e5e7eb;
+    flex-shrink: 0;
 }
 
 .journal-entries-card .card-header h3 {
@@ -464,7 +497,28 @@
 
 .journal-entries-card .card-body {
     padding: 20px;
-    min-height: 300px;
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+}
+
+/* Custom scrollbar for entries */
+.journal-entries-card .card-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.journal-entries-card .card-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.journal-entries-card .card-body::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.journal-entries-card .card-body::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }
 
 /* Empty State */
@@ -518,7 +572,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     border: 1px solid #e5e7eb;
     transition: all 0.3s ease;
-    height: 280px; /* Slightly increased for more padding */
+    height: 280px;
     display: flex;
     flex-direction: column;
 }
@@ -534,7 +588,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding-bottom: 20px; /* ADDED: More bottom padding */
+    padding-bottom: 20px;
 }
 
 /* Header */
@@ -610,12 +664,7 @@
     flex-shrink: 0;
 }
 
-.plant-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 120px;
-}
+
 
 /* Content Preview */
 .journal-content-preview {
@@ -657,7 +706,7 @@
 .journal-stats {
     display: flex;
     gap: 16px;
-    margin: 8px 0 12px 0; /* Added bottom margin */
+    margin: 8px 0 12px 0;
     padding: 10px 0;
     border-top: 1px solid #f3f4f6;
     border-bottom: 1px solid #f3f4f6;
@@ -684,9 +733,9 @@
     display: flex;
     gap: 8px;
     margin-top: auto;
-    margin-bottom: 8px; /* ADDED: More bottom padding */
+    margin-bottom: 8px;
     flex-shrink: 0;
-    padding-top: 8px; /* ADDED: Space above buttons */
+    padding-top: 8px;
 }
 
 .journal-actions .btn {
@@ -700,7 +749,7 @@
 
 /* List View Adjustments */
 .entries-grid.list-view .journal-card {
-    height: 160px; /* Slightly taller for list view */
+    height: 160px;
 }
 
 .entries-grid.list-view .journal-card-inner {
@@ -1010,7 +1059,7 @@
     gap: 12px;
     padding-top: 20px;
     border-top: 1px solid #e5e7eb;
-    padding-bottom: 10px; /* ADDED: More bottom padding */
+    padding-bottom: 10px;
 }
 
 .detail-actions .btn {
@@ -1066,6 +1115,17 @@
     .journal-content {
         grid-template-columns: 1fr;
         gap: 24px;
+    }
+
+    /* Remove sticky on mobile for form */
+    .journal-form-card {
+        position: relative;
+        top: 0;
+        max-height: none;
+    }
+
+    .journal-entries-card .card-body {
+        max-height: 500px;
     }
 
     .entries-grid:not(.list-view) {
@@ -1152,7 +1212,7 @@
     background: transparent !important;
 }
 
-/* Fix for very long words */
+/* Fix for very long words */ 
 .journal-content-preview {
     word-wrap: break-word;
     overflow-wrap: break-word;

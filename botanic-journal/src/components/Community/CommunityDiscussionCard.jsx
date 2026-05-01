@@ -12,7 +12,7 @@ const CommunityDiscussionCard = ({ discussion, user, onUpdate }) => {
     e.stopPropagation(); // Prevent card click when clicking like button
     if (liking) return;
     setLiking(true);
-    
+
     try {
       if (isLiked) {
         // UNLIKE - remove the like
@@ -73,35 +73,35 @@ const CommunityDiscussionCard = ({ discussion, user, onUpdate }) => {
   };
 
   return (
-    <div 
+    <div
       className={`discussion-card ${discussion.is_pinned ? 'pinned' : ''}`}
       onClick={handleViewDiscussion}
       style={{ cursor: 'pointer' }}
     >
-      {discussion.is_pinned && (
+      {!!discussion.is_pinned && (
         <div className="pinned-badge">
           <i className="fas fa-thumbtack"></i> Pinned
         </div>
       )}
-      
+
       <div className="discussion-content">
         <div className="category-tag">
           <i className={getCategoryIcon(discussion.category)}></i>
           <span>{discussion.category}</span>
         </div>
-        
+
         <h3 className="discussion-title">
           {discussion.title}
         </h3>
-        
+
         <p className="discussion-excerpt">
           {discussion.content.substring(0, 150)}...
         </p>
-        
+
         <div className="discussion-meta">
           <div className="author-info">
-            <img 
-              src={discussion.author_avatar || `https://i.pravatar.cc/150?u=${discussion.user_id}`} 
+            <img
+              src={discussion.author_avatar || `https://i.pravatar.cc/150?u=${discussion.user_id}`}
               alt={discussion.author_name}
               className="author-avatar"
             />
@@ -112,7 +112,7 @@ const CommunityDiscussionCard = ({ discussion, user, onUpdate }) => {
               </span>
             </div>
           </div>
-          
+
           <div className="discussion-stats">
             <span className="stat-item">
               <i className="fas fa-eye"></i>
@@ -122,7 +122,7 @@ const CommunityDiscussionCard = ({ discussion, user, onUpdate }) => {
               <i className="fas fa-comment"></i>
               {discussion.reply_count || 0}
             </span>
-            <button 
+            <button
               className={`stat-item like-btn ${isLiked ? 'liked' : ''}`}
               onClick={handleLike}
               disabled={liking}

@@ -196,13 +196,6 @@ const MyPlants = ({ showNotification, user, onShowPlantDetails }) => {  // Add o
             <div className="stat-number">{plants.filter(p => p.status === 'healthy').length}</div>
             <div className="stat-label">Healthy</div>
           </div>
-          <div 
-            className="stat-item clickable" 
-            onClick={() => window.location.hash = '#encyclopedia'}
-          >
-            <div className="stat-number">+</div>
-            <div className="stat-label">Add New</div>
-          </div>
         </div>
       </div>
 

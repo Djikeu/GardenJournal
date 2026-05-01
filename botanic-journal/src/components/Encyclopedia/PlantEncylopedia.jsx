@@ -182,23 +182,6 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
                             )}
                         </div>
                     </div>
-
-                    <div className="view-controls">
-                        <button
-                            className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                            onClick={() => setViewMode('grid')}
-                            title="Grid View"
-                        >
-                            <i className="fas fa-th"></i>
-                        </button>
-                        <button
-                            className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
-                            onClick={() => setViewMode('list')}
-                            title="List View"
-                        >
-                            <i className="fas fa-list"></i>
-                        </button>
-                    </div>
                 </div>
 
                 {/* Filter Chips */}

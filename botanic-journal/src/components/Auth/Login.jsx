@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-
-
+import '../../auth.css'
 const Login = ({ onSwitchToRegister, onLogin }) => {
   const [formData, setFormData] = useState({
     email: '',

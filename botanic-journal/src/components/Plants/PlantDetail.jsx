@@ -27,7 +27,7 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
         try {
             setLoading(true);
             console.log('🌱 Loading plant details for ID:', plantId);
-            
+
             const response = await apiService.getPlantsEncyclopedia();
             if (response.success) {
                 const foundPlant = response.data.find(p => p.id == plantId);
@@ -37,7 +37,7 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                     return;
                 }
             }
-            
+
             const userResponse = await apiService.getPlants();
             if (userResponse.success) {
                 const userPlant = userResponse.data.find(p => p.id == plantId);
@@ -48,9 +48,9 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                     return;
                 }
             }
-            
+
             throw new Error('Plant not found');
-            
+
         } catch (error) {
             console.error('❌ Load plant details error:', error);
             showNotification('Error', 'Failed to load plant details', 'error');
@@ -62,12 +62,12 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
 
     const checkIfInCollection = async () => {
         if (!user || !plant) return;
-        
+
         try {
             const userResponse = await apiService.getPlants();
             if (userResponse.success) {
-                const found = userResponse.data.some(p => 
-                    p.id == plantId || 
+                const found = userResponse.data.some(p =>
+                    p.id == plantId ||
                     p.encyclopedia_id == plantId
                 );
                 setIsInCollection(found);
@@ -93,10 +93,10 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
 
     const addToCollection = async () => {
         if (!plant) return;
-        
+
         try {
             setAddingToCollection(true);
-            
+
             const plantData = {
                 name: plant.name,
                 species: plant.species || '',
@@ -104,6 +104,11 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                 description: plant.description || '',
                 light_requirements: plant.light_requirements || 'medium',
                 watering_schedule: plant.watering_schedule || 'weekly',
+                temperature_range: plant.temperature_range || '',
+                humidity_requirements: plant.humidity_requirements || '',
+                growth_rate: plant.growth_rate || '',
+                difficulty: plant.difficulty || '',
+                care_instructions: plant.care_instructions || '',
                 image_url: plant.image_url || plant.image || '',
                 status: 'healthy',
                 is_favorite: false,
@@ -111,7 +116,7 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
             };
 
             const response = await apiService.createPlant(plantData);
-            
+
             if (response.success) {
                 showNotification('Success', `${plant.name} added to your collection!`, 'success');
                 setIsInCollection(true);
@@ -126,11 +131,11 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
 
     const removeFromCollection = async () => {
         if (!plant) return;
-        
+
         if (!window.confirm(`Are you sure you want to remove "${plant.name}" from your collection?`)) {
             return;
         }
-        
+
         try {
             const response = await apiService.deletePlant(plantId);
             if (response.success) {
@@ -171,7 +176,19 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
         return colors[type] || '#7db36e';
     };
 
-    const getCareLevel = (type) => {
+    // UPDATED: Use database difficulty if available
+    const getCareLevel = (plant) => {
+        // Use database difficulty first
+        if (plant.difficulty) {
+            const levelMap = {
+                'Easy': { level: 'Easy', color: '#10b981', bgColor: '#d1fae5' },
+                'Moderate': { level: 'Moderate', color: '#f59e0b', bgColor: '#fef3c7' },
+                'Advanced': { level: 'Advanced', color: '#ef4444', bgColor: '#fee2e2' }
+            };
+            return levelMap[plant.difficulty] || { level: plant.difficulty, color: '#7db36e', bgColor: '#f3f4f6' };
+        }
+
+        // Fallback to type-based logic
         const levels = {
             'succulent': { level: 'Easy', color: '#10b981', bgColor: '#d1fae5' },
             'indoor': { level: 'Moderate', color: '#f59e0b', bgColor: '#fef3c7' },
@@ -181,7 +198,7 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
             'flowering': { level: 'Advanced', color: '#ef4444', bgColor: '#fee2e2' },
             'tropical': { level: 'Advanced', color: '#ef4444', bgColor: '#fee2e2' }
         };
-        return levels[type] || { level: 'Moderate', color: '#f59e0b', bgColor: '#fef3c7' };
+        return levels[plant.type] || { level: 'Moderate', color: '#f59e0b', bgColor: '#fef3c7' };
     };
 
     const getWateringFrequency = (schedule) => {
@@ -190,9 +207,48 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
             'weekly': 'Once a week',
             'bi-weekly': 'Every 2 weeks',
             'monthly': 'Once a month',
-            'rarely': 'Very rarely'
+            'rarely': 'Very rarely',
+            'Every 2-3 weeks': 'Every 2-3 weeks',
+            'Every 3-4 weeks': 'Every 3-4 weeks',
+            'Twice weekly': 'Twice weekly',
+            'Every 2-3 days': 'Every 2-3 days',
+            'Weekly (soak & drain)': 'Weekly (soak & drain)',
+            'Weekly (allow to dry)': 'Weekly (allow to dry)'
         };
-        return frequencies[schedule?.toLowerCase()] || schedule || 'Once a week';
+        return frequencies[schedule] || schedule || 'Once a week';
+    };
+
+    // Helper to get light meter percentage
+    const getLightPercentage = (lightReq) => {
+        if (!lightReq) return 70;
+        const light = lightReq.toLowerCase();
+        if (light.includes('low')) return 33;
+        if (light.includes('medium') || light.includes('indirect')) return 66;
+        if (light.includes('high') || light.includes('full') || light.includes('bright')) return 100;
+        return 70;
+    };
+
+    // Helper to get soil type recommendation
+    const getSoilType = (plant) => {
+        if (plant.type === 'succulent') return 'Cactus/Succulent mix';
+        if (plant.type === 'tropical') return 'Rich, organic potting mix';
+        if (plant.care_instructions) {
+            if (plant.care_instructions.toLowerCase().includes('well-draining')) return 'Well-draining potting mix';
+        }
+        return 'Standard potting mix';
+    };
+
+    // Helper to get toxicity info
+    const getToxicity = (plant) => {
+        // Check care instructions for toxicity info
+        if (plant.care_instructions && plant.care_instructions.toLowerCase().includes('toxic')) {
+            return { safe: false, text: 'Toxic to pets', icon: 'fa-exclamation-triangle', color: '#ef4444' };
+        }
+        // Most succulents and common houseplants are pet-safe
+        if (plant.type === 'succulent' || plant.name === 'Spider Plant' || plant.name === 'Jade Plant') {
+            return { safe: true, text: 'Pet Safe', icon: 'fa-paw', color: '#10b981' };
+        }
+        return { safe: true, text: 'Pet Safe', icon: 'fa-paw', color: '#10b981' };
     };
 
     if (loading) {
@@ -224,7 +280,8 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
         );
     }
 
-    const careInfo = getCareLevel(plant.type);
+    const careInfo = getCareLevel(plant);
+    const toxicity = getToxicity(plant);
 
     return (
         <div className="plant-detail-wrapper">
@@ -258,9 +315,9 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                         />
                         <div className="image-overlay">
                             <div className="plant-tags">
-                                <span 
-                                    className="plant-tag type-tag" 
-                                    style={{ 
+                                <span
+                                    className="plant-tag type-tag"
+                                    style={{
                                         backgroundColor: getTypeColor(plant.type),
                                         color: 'white'
                                     }}
@@ -268,9 +325,9 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                                     <i className={`fas ${getTypeIcon(plant.type)}`}></i>
                                     {plant.type.charAt(0).toUpperCase() + plant.type.slice(1)}
                                 </span>
-                                <span 
+                                <span
                                     className="plant-tag care-tag"
-                                    style={{ 
+                                    style={{
                                         backgroundColor: careInfo.bgColor,
                                         color: careInfo.color,
                                         border: `1px solid ${careInfo.color}20`
@@ -279,6 +336,12 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                                     <i className="fas fa-seedling"></i>
                                     {careInfo.level} Care
                                 </span>
+                                {plant.growth_rate && (
+                                    <span className="plant-tag growth-tag" style={{ backgroundColor: '#6b7280', color: 'white' }}>
+                                        <i className="fas fa-chart-line"></i>
+                                        {plant.growth_rate} Growth
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -330,7 +393,7 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                                 <div className="stat-content">
                                     <span className="stat-label">Temp</span>
                                     <span className="stat-value">
-                                        {plant.temperature_range || (plant.type === 'tropical' ? '18-27°C' : '15-24°C')}
+                                        {plant.temperature_range || '18-26°C'}
                                     </span>
                                 </div>
                             </div>
@@ -340,10 +403,10 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                             <p>{plant.description || 'A beautiful plant that adds life to any space. Perfect for both beginners and experienced plant enthusiasts.'}</p>
                         </div>
 
-                        {/* ACTION BUTTONS - UPDATED */}
+                        {/* ACTION BUTTONS */}
                         <div className="plant-action-buttons">
                             {isInCollection ? (
-                                <button 
+                                <button
                                     className="btn-warning"
                                     onClick={removeFromCollection}
                                 >
@@ -351,7 +414,7 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                                     Remove from My Plants
                                 </button>
                             ) : (
-                                <button 
+                                <button
                                     className="btn-primary"
                                     onClick={addToCollection}
                                     disabled={addingToCollection}
@@ -383,28 +446,28 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
 
                 {/* Tabs Navigation */}
                 <div className="plant-tabs">
-                    <button 
+                    <button
                         className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
                         onClick={() => setActiveTab('overview')}
                     >
                         <i className="fas fa-info-circle"></i>
                         Overview
                     </button>
-                    <button 
+                    <button
                         className={`tab-btn ${activeTab === 'care' ? 'active' : ''}`}
                         onClick={() => setActiveTab('care')}
                     >
                         <i className="fas fa-hand-holding-water"></i>
                         Care Guide
                     </button>
-                    <button 
+                    <button
                         className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`}
                         onClick={() => setActiveTab('gallery')}
                     >
                         <i className="fas fa-images"></i>
                         Gallery
                     </button>
-                    <button 
+                    <button
                         className={`tab-btn ${activeTab === 'tips' ? 'active' : ''}`}
                         onClick={() => setActiveTab('tips')}
                     >
@@ -428,14 +491,16 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                                     <div className="card-body">
                                         <p className="requirement-level">{plant.light_requirements || 'Medium'} Light</p>
                                         <p className="requirement-desc">
-                                            {plant.type === 'indoor' 
-                                                ? 'Thrives in bright, indirect light. Avoid direct sunlight which can scorch leaves.'
-                                                : 'Prefers full sun to partial shade depending on the season.'
+                                            {plant.care_instructions
+                                                ? plant.care_instructions.split('.')[0] + '.'
+                                                : (plant.type === 'indoor'
+                                                    ? 'Thrives in bright, indirect light. Avoid direct sunlight which can scorch leaves.'
+                                                    : 'Prefers full sun to partial shade depending on the season.')
                                             }
                                         </p>
                                         <div className="light-meter">
                                             <div className="meter-bar">
-                                                <div className="meter-fill" style={{ width: '70%' }}></div>
+                                                <div className="meter-fill" style={{ width: `${getLightPercentage(plant.light_requirements)}%` }}></div>
                                             </div>
                                             <div className="meter-labels">
                                                 <span>Low</span>
@@ -456,10 +521,11 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                                     <div className="card-body">
                                         <p className="requirement-level">{getWateringFrequency(plant.watering_schedule)}</p>
                                         <p className="requirement-desc">
-                                            Water thoroughly when the top inch of soil feels dry. 
-                                            {plant.type === 'succulent' 
-                                                ? ' Allow soil to completely dry between waterings.'
-                                                : ' Maintain consistent moisture.'
+                                            {plant.care_instructions
+                                                ? plant.care_instructions.split('.')[1] || plant.care_instructions.split('.')[0]
+                                                : (plant.type === 'succulent'
+                                                    ? 'Water thoroughly when soil is completely dry. Allow soil to completely dry between waterings.'
+                                                    : 'Water when top inch of soil feels dry. Maintain consistent moisture.')
                                             }
                                         </p>
                                         <div className="watering-tips">
@@ -487,17 +553,15 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                                         <h3>Soil & Fertilizer</h3>
                                     </div>
                                     <div className="card-body">
-                                        <p className="requirement-level">
-                                            {plant.type === 'succulent' ? 'Well-draining mix' : 
-                                             plant.type === 'tropical' ? 'Rich, moist soil' : 
-                                             'Standard potting mix'}
-                                        </p>
+                                        <p className="requirement-level">{getSoilType(plant)}</p>
                                         <p className="requirement-desc">
-                                            Use {plant.type === 'succulent' ? 'cactus/succulent mix' : 'quality potting soil'} with good drainage.
-                                            Fertilize monthly during growing season with balanced fertilizer.
+                                            Use {getSoilType(plant).toLowerCase()} with good drainage.
+                                            {plant.type === 'vegetable'
+                                                ? ' Fertilize every 2 weeks during fruiting season.'
+                                                : ' Fertilize monthly during growing season with balanced fertilizer.'}
                                         </p>
                                         <div className="fertilizer-schedule">
-                                            <div className="schedule-item active">
+                                            <div className={`schedule-item ${['Spring', 'Summer'].includes(activeTab) ? 'active' : 'active'}`}>
                                                 <span>Spring</span>
                                                 <i className="fas fa-check"></i>
                                             </div>
@@ -529,26 +593,32 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                                             <div className="env-stat">
                                                 <span className="stat-label">Temperature</span>
                                                 <span className="stat-value">
-                                                    {plant.temperature_range || (plant.type === 'tropical' ? '18-27°C' : '15-24°C')}
+                                                    {plant.temperature_range || '18-26°C'}
                                                 </span>
                                             </div>
                                             <div className="env-stat">
                                                 <span className="stat-label">Humidity</span>
                                                 <span className="stat-value">
-                                                    {plant.humidity_requirements || (plant.type === 'tropical' ? '60-80%' : '40-60%')}
+                                                    {plant.humidity_requirements || '40-60%'}
+                                                </span>
+                                            </div>
+                                            <div className="env-stat">
+                                                <span className="stat-label">Growth Rate</span>
+                                                <span className="stat-value">
+                                                    {plant.growth_rate || 'Moderate'}
                                                 </span>
                                             </div>
                                             <div className="env-stat">
                                                 <span className="stat-label">Toxicity</span>
-                                                <span className="stat-value safe">
-                                                    <i className="fas fa-paw"></i>
-                                                    Pet Safe
+                                                <span className={`stat-value ${toxicity.safe ? 'safe' : 'toxic'}`} style={{ color: toxicity.color }}>
+                                                    <i className={`fas ${toxicity.icon}`}></i>
+                                                    {toxicity.text}
                                                 </span>
                                             </div>
                                         </div>
                                         <p className="environment-tip">
-                                            Keep away from drafts and heating vents. 
-                                            {plant.type === 'tropical' && ' Mist leaves regularly to maintain humidity.'}
+                                            Keep away from drafts and heating vents.
+                                            {plant.humidity_requirements && plant.humidity_requirements.includes('High') && ' Mist leaves regularly to maintain humidity.'}
                                         </p>
                                     </div>
                                 </div>
@@ -563,19 +633,19 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                                         <div className="description-features">
                                             <div className="feature">
                                                 <i className="fas fa-star"></i>
-                                                <span>Purifies air quality</span>
+                                                <span>{plant.difficulty === 'Easy' ? 'Beginner friendly' : 'Requires attention'}</span>
                                             </div>
                                             <div className="feature">
                                                 <i className="fas fa-star"></i>
-                                                <span>Low maintenance</span>
+                                                <span>{plant.type === 'succulent' ? 'Drought tolerant' : 'Regular watering needed'}</span>
                                             </div>
                                             <div className="feature">
                                                 <i className="fas fa-star"></i>
-                                                <span>Non-toxic to pets</span>
+                                                <span>{toxicity.safe ? 'Safe for pets' : 'Keep away from pets'}</span>
                                             </div>
                                             <div className="feature">
                                                 <i className="fas fa-star"></i>
-                                                <span>Great for beginners</span>
+                                                <span>Great for {plant.type === 'indoor' ? 'indoor spaces' : 'outdoor gardens'}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -586,6 +656,26 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
 
                     {activeTab === 'care' && (
                         <div className="care-guide-content">
+                            {/* Display full care instructions from database */}
+                            {plant.care_instructions && (
+                                <div className="care-quick-tips">
+                                    <h3><i className="fas fa-star"></i> Quick Tips</h3>
+                                    <div className="care-tips-grid">
+                                        {plant.care_instructions.split('. ')
+                                            .filter(s => s.trim())
+                                            .map((tip, idx) => (
+                                                <div key={idx} className="care-tip-chip">
+                                                    <div className="tip-chip-icon">
+                                                        <i className="fas fa-check"></i>
+                                                    </div>
+                                                    <span>{tip.trim().replace(/\.$/, '')}</span>
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="care-timeline">
                                 <div className="timeline-item">
                                     <div className="timeline-marker">
@@ -593,12 +683,30 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                                     </div>
                                     <div className="timeline-content">
                                         <h4>Watering Schedule</h4>
-                                        <p>Check soil moisture weekly. Water when top 1-2 inches are dry.</p>
-                                        <div className="timeline-tip">
-                                            <strong>Tip:</strong> Use your finger to test soil moisture.
-                                        </div>
+                                        <p>{getWateringFrequency(plant.watering_schedule)}</p>
+                                        {plant.watering_schedule && (
+                                            <div className="timeline-tip">
+                                                <strong>Schedule:</strong> {plant.watering_schedule}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
+
+                                {plant.growth_rate && (
+                                    <div className="timeline-item">
+                                        <div className="timeline-marker">
+                                            <i className="fas fa-chart-line"></i>
+                                        </div>
+                                        <div className="timeline-content">
+                                            <h4>Growth Rate</h4>
+                                            <p>{plant.growth_rate} growing plant</p>
+                                            <div className="timeline-tip">
+                                                <strong>Tip:</strong> {plant.growth_rate === 'Fast' ? 'May need repotting annually' : plant.growth_rate === 'Slow' ? 'Be patient with growth' : 'Regular pruning encourages bushiness'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="timeline-item">
                                     <div className="timeline-marker">
                                         <i className="fas fa-cut"></i>
@@ -606,17 +714,42 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                                     <div className="timeline-content">
                                         <h4>Pruning & Maintenance</h4>
                                         <p>Remove dead or yellow leaves regularly to promote new growth.</p>
+                                        {plant.type === 'flowering' && <p>Deadhead spent blooms to encourage more flowers.</p>}
+                                        {plant.type === 'vegetable' && <p>Harvest regularly to promote continued production.</p>}
                                     </div>
                                 </div>
+
                                 <div className="timeline-item">
                                     <div className="timeline-marker">
                                         <i className="fas fa-bug"></i>
                                     </div>
                                     <div className="timeline-content">
                                         <h4>Pest Control</h4>
-                                        <p>Check for pests weekly. Treat with neem oil if needed.</p>
+                                        <p>Check for pests weekly. Common issues include aphids, spider mites, and mealybugs.</p>
+                                        <div className="timeline-tip">
+                                            <strong>Treatment:</strong> Use neem oil or insecticidal soap for organic pest control.
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'tips' && plant.care_instructions && (
+                        <div className="tips-content">
+                            <h3><i className="fas fa-lightbulb"></i> Expert Tips & Tricks</h3>
+                            <div className="care-tips-grid">
+                                {plant.care_instructions.split('. ')
+                                    .filter(s => s.trim())
+                                    .map((tip, idx) => (
+                                        <div key={idx} className="care-tip-chip tips-variant">
+                                            <div className="tip-chip-icon tips-icon">
+                                                <i className="fas fa-lightbulb"></i>
+                                            </div>
+                                            <span>{tip.trim().replace(/\.$/, '')}</span>
+                                        </div>
+                                    ))
+                                }
                             </div>
                         </div>
                     )}
@@ -654,6 +787,12 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                                                 <i className="fas fa-tint"></i>
                                                 {getWateringFrequency(relatedPlant.watering_schedule)}
                                             </span>
+                                            {relatedPlant.difficulty && (
+                                                <span className="meta-item">
+                                                    <i className="fas fa-seedling"></i>
+                                                    {relatedPlant.difficulty}
+                                                </span>
+                                            )}
                                         </div>
                                         <button className="btn-view">
                                             View Details

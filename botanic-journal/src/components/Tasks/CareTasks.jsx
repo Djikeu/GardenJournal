@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
-import '../../tasks.css' 
+import '../../tasks.css'
+
 const CareTasks = ({ showNotification }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +65,7 @@ const CareTasks = ({ showNotification }) => {
     try {
       const response = await apiService.completeTask(taskId);
       if (response.success) {
-        setTasks(tasks.map(task => 
+        setTasks(tasks.map(task =>
           task.id === taskId ? { ...task, completed: true, progress: 100 } : task
         ));
         showNotification('Task Completed!', 'Great job! Your plant will thank you.', 'success');
@@ -77,34 +78,49 @@ const CareTasks = ({ showNotification }) => {
     }
   };
 
- const snoozeTask = async (taskId) => {
+  const snoozeTask = async (taskId) => {
     try {
+      // Find the current task
+      const currentTask = tasks.find(task => task.id === taskId);
+      if (!currentTask) {
+        throw new Error('Task not found');
+      }
+
+      // Calculate new due date (1 day after current due date OR tomorrow if no due date)
+      let newDueDate;
+      if (currentTask.due_date) {
+        const currentDate = new Date(currentTask.due_date);
+        currentDate.setDate(currentDate.getDate() + 1);
+        newDueDate = currentDate.toISOString().split('T')[0];
+      } else {
+        // If no due date, set to tomorrow
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
-        const tomorrowString = tomorrow.toISOString().split('T')[0];
-        
-        console.log('Snoozing task:', taskId, 'New due date:', tomorrowString);
-        
-        // Use PATCH method to update only the due_date field
-        const response = await apiService.updateTask(taskId, { 
-            due_date: tomorrowString 
-        });
-        
-        console.log('Snooze response:', response);
-        
-        if (response.success) {
-            setTasks(tasks.map(task => 
-                task.id === taskId ? { ...task, due_date: tomorrowString } : task
-            ));
-            showNotification('Task Snoozed', 'This task has been postponed until tomorrow.', 'info');
-        } else {
-            throw new Error(response.message);
-        }
+        newDueDate = tomorrow.toISOString().split('T')[0];
+      }
+
+      console.log('Snoozing task:', taskId, 'Original due date:', currentTask.due_date, 'New due date:', newDueDate);
+
+      // Use PATCH method to update only the due_date field
+      const response = await apiService.updateTask(taskId, {
+        due_date: newDueDate
+      });
+
+      console.log('Snooze response:', response);
+
+      if (response.success) {
+        setTasks(tasks.map(task =>
+          task.id === taskId ? { ...task, due_date: newDueDate } : task
+        ));
+        showNotification('Task Snoozed', `This task has been postponed until ${new Date(newDueDate).toLocaleDateString()}.`, 'info');
+      } else {
+        throw new Error(response.message);
+      }
     } catch (error) {
-        console.error('Failed to snooze task:', error);
-        showNotification('Error', 'Failed to snooze task. Please try again.', 'error');
+      console.error('Failed to snooze task:', error);
+      showNotification('Error', 'Failed to snooze task. Please try again.', 'error');
     }
-};
+  };
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
@@ -127,7 +143,7 @@ const CareTasks = ({ showNotification }) => {
 
       console.log('Creating task:', taskData);
       const response = await apiService.createTask(taskData);
-      
+
       if (response.success) {
         setTasks(prevTasks => [response.data, ...prevTasks]);
         setShowCreateModal(false);
@@ -226,12 +242,12 @@ const CareTasks = ({ showNotification }) => {
       (task.plant_name && task.plant_name.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesFilter = filter === 'all' ? true :
       filter === 'pending' ? !task.completed :
-      filter === 'completed' ? task.completed : true;
+        filter === 'completed' ? task.completed : true;
     return matchesSearch && matchesFilter;
   });
 
   const pendingTasks = tasks.filter(task => !task.completed);
-  const urgentTasks = pendingTasks.filter(task => 
+  const urgentTasks = pendingTasks.filter(task =>
     getUrgencyLevel(task) === 'urgent' || getUrgencyLevel(task) === 'overdue'
   );
 
@@ -338,17 +354,16 @@ const CareTasks = ({ showNotification }) => {
                 className={`filter-chip ${filter === filterType ? 'active' : ''}`}
                 onClick={() => setFilter(filterType)}
               >
-                <i className={`fas ${
-                  filterType === 'all' ? 'fa-tasks' :
-                  filterType === 'pending' ? 'fa-clock' :
-                  'fa-check-circle'
-                }`}></i>
+                <i className={`fas ${filterType === 'all' ? 'fa-tasks' :
+                    filterType === 'pending' ? 'fa-clock' :
+                      'fa-check-circle'
+                  }`}></i>
                 {filterType === 'all' ? 'All Tasks' :
-                 filterType === 'pending' ? 'Pending' : 'Completed'}
+                  filterType === 'pending' ? 'Pending' : 'Completed'}
                 <span className="chip-count">
                   {filterType === 'all' ? tasks.length :
-                   filterType === 'pending' ? pendingTasks.length :
-                   tasks.filter(t => t.completed).length}
+                    filterType === 'pending' ? pendingTasks.length :
+                      tasks.filter(t => t.completed).length}
                 </span>
               </button>
             ))}
@@ -356,64 +371,55 @@ const CareTasks = ({ showNotification }) => {
         </div>
       </div>
 
-      {/* Task Statistics */}
-      <div className="stats-grid-enhanced">
-        <div className="stat-card-enhanced primary">
-          <div className="stat-icon">
+      {/* Task Statistics - REDUCED SIZE */}
+      <div className="stats-grid-compact">
+        <div className="stat-card-compact primary">
+          <div className="stat-icon-compact">
             <i className="fas fa-tasks"></i>
           </div>
-          <div className="stat-content">
-            <div className="stat-value">{pendingTasks.length}</div>
-            <div className="stat-label">Pending Tasks</div>
-            <div className="stat-trend">
-              <i className="fas fa-exclamation-circle"></i>
-              <span>{urgentTasks.length} urgent</span>
-            </div>
+          <div className="stat-content-compact">
+            <div className="stat-value-compact">{pendingTasks.length}</div>
+            <div className="stat-label-compact">Pending</div>
+            <div className="stat-trend-compact">{urgentTasks.length} urgent</div>
           </div>
         </div>
-        <div className="stat-card-enhanced warning">
-          <div className="stat-icon">
+
+        <div className="stat-card-compact warning">
+          <div className="stat-icon-compact">
             <i className="fas fa-tint"></i>
           </div>
-          <div className="stat-content">
-            <div className="stat-value">
+          <div className="stat-content-compact">
+            <div className="stat-value-compact">
               {tasks.filter(task => task.type === 'watering' && !task.completed).length}
             </div>
-            <div className="stat-label">Watering Tasks</div>
-            <div className="stat-trend">
-              <i className="fas fa-clock"></i>
-              <span>Due soon</span>
-            </div>
+            <div className="stat-label-compact">Watering</div>
+            <div className="stat-trend-compact">Due soon</div>
           </div>
         </div>
-        <div className="stat-card-enhanced success">
-          <div className="stat-icon">
+
+        <div className="stat-card-compact success">
+          <div className="stat-icon-compact">
             <i className="fas fa-leaf"></i>
           </div>
-          <div className="stat-content">
-            <div className="stat-value">
+          <div className="stat-content-compact">
+            <div className="stat-value-compact">
               {[...new Set(tasks.filter(task => !task.completed && task.plant_id).map(task => task.plant_id))].length}
             </div>
-            <div className="stat-label">Plants Needing Care</div>
-            <div className="stat-trend">
-              <i className="fas fa-seedling"></i>
-              <span>Active plants</span>
-            </div>
+            <div className="stat-label-compact">Plants</div>
+            <div className="stat-trend-compact">Need care</div>
           </div>
         </div>
-        <div className="stat-card-enhanced info">
-          <div className="stat-icon">
+
+        <div className="stat-card-compact info">
+          <div className="stat-icon-compact">
             <i className="fas fa-chart-line"></i>
           </div>
-          <div className="stat-content">
-            <div className="stat-value">
+          <div className="stat-content-compact">
+            <div className="stat-value-compact">
               {tasks.length > 0 ? Math.round((tasks.filter(t => t.completed).length / tasks.length) * 100) : 0}%
             </div>
-            <div className="stat-label">Completion Rate</div>
-            <div className="stat-trend">
-              <i className="fas fa-trend-up"></i>
-              <span>This week</span>
-            </div>
+            <div className="stat-label-compact">Completed</div>
+            <div className="stat-trend-compact">Completion rate</div>
           </div>
         </div>
       </div>
@@ -427,9 +433,9 @@ const CareTasks = ({ showNotification }) => {
               Care Tasks ({filteredTasks.length})
             </h3>
             <div className="card-actions">
-              <button 
-                className="card-btn" 
-                title="Refresh" 
+              <button
+                className="card-btn"
+                title="Refresh"
                 onClick={loadTasks}
                 style={{ marginRight: '8px' }}
               >
@@ -485,7 +491,7 @@ const CareTasks = ({ showNotification }) => {
                   const urgencyLevel = getUrgencyLevel(task);
                   const priorityColor = getPriorityColor(task.priority);
                   const typeColor = getTaskTypeColor(task.type);
-                  
+
                   return (
                     <div
                       key={task.id}
@@ -630,10 +636,10 @@ const CareTasks = ({ showNotification }) => {
         </div>
       </div>
 
-      {/* Create Task Modal */}
+      {/* Create Task Modal - FIXED WITH ANIMATION */}
       {showCreateModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Create New Task</h3>
               <button
@@ -645,6 +651,7 @@ const CareTasks = ({ showNotification }) => {
             </div>
 
             <form onSubmit={handleCreateTask} className="task-form">
+              {/* Form fields remain the same */}
               <div className="form-group">
                 <label htmlFor="task-title">Task Title *</label>
                 <input

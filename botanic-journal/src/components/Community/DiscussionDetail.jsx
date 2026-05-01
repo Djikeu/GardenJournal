@@ -51,13 +51,13 @@ const DiscussionDetail = ({ showNotification, user, discussionId, onBack }) => {
     }
 
     setSubmittingReply(true);
-    
+
     try {
       const response = await apiService.createReply({
         discussion_id: parseInt(discussionId),
         content: replyContent.trim()
       });
-      
+
       if (response.success) {
         setReplies([...replies, response.reply]);
         setReplyContent('');
@@ -75,7 +75,7 @@ const DiscussionDetail = ({ showNotification, user, discussionId, onBack }) => {
   const handleLikeDiscussion = async () => {
     if (likingDiscussion) return;
     setLikingDiscussion(true);
-    
+
     try {
       if (discussion.user_has_liked) {
         await apiService.unlikeDiscussion(discussionId);
@@ -102,21 +102,21 @@ const DiscussionDetail = ({ showNotification, user, discussionId, onBack }) => {
 
   const handleLikeReply = async (replyId, currentLikes, userHasLiked) => {
     if (likingReplies[replyId]) return;
-    
+
     setLikingReplies(prev => ({ ...prev, [replyId]: true }));
-    
+
     try {
       if (userHasLiked) {
         await apiService.unlikeReply(replyId);
-        setReplies(replies.map(reply => 
-          reply.id === replyId 
+        setReplies(replies.map(reply =>
+          reply.id === replyId
             ? { ...reply, likes: (reply.likes || 0) - 1, user_has_liked: false }
             : reply
         ));
       } else {
         await apiService.likeReply(replyId);
-        setReplies(replies.map(reply => 
-          reply.id === replyId 
+        setReplies(replies.map(reply =>
+          reply.id === replyId
             ? { ...reply, likes: (reply.likes || 0) + 1, user_has_liked: true }
             : reply
         ));
@@ -160,24 +160,18 @@ const DiscussionDetail = ({ showNotification, user, discussionId, onBack }) => {
       </div>
 
       <div className="discussion-main">
-        <div className="discussion-header">
-          <div className="category-badge">
-            <i className="fas fa-tag"></i>
-            {discussion.category}
+        {!!discussion.is_pinned && (
+          <div className="pinned-badge">
+            <i className="fas fa-thumbtack"></i> Pinned
           </div>
-          {discussion.is_pinned && (
-            <div className="pinned-badge">
-              <i className="fas fa-thumbtack"></i> Pinned
-            </div>
-          )}
-        </div>
+        )}
 
         <h1 className="discussion-title">{discussion.title}</h1>
 
         <div className="discussion-meta">
           <div className="author-info">
-            <img 
-              src={discussion.author_avatar || `https://i.pravatar.cc/150?u=${discussion.user_id}`} 
+            <img
+              src={discussion.author_avatar || `https://i.pravatar.cc/150?u=${discussion.user_id}`}
               alt={discussion.author_name}
               className="author-avatar-large"
             />
@@ -196,7 +190,7 @@ const DiscussionDetail = ({ showNotification, user, discussionId, onBack }) => {
             <span className="stat">
               <i className="fas fa-comment"></i> {discussion.reply_count || 0} replies
             </span>
-            <button 
+            <button
               className={`stat like-btn ${discussion.user_has_liked ? 'liked' : ''}`}
               onClick={handleLikeDiscussion}
               disabled={likingDiscussion}
@@ -217,7 +211,7 @@ const DiscussionDetail = ({ showNotification, user, discussionId, onBack }) => {
 
       <div className="replies-section">
         <h2 className="replies-title">
-          <i className="fas fa-comments"></i> 
+          <i className="fas fa-comments"></i>
           Replies ({replies.length})
         </h2>
 
@@ -232,7 +226,7 @@ const DiscussionDetail = ({ showNotification, user, discussionId, onBack }) => {
             {replies.map((reply) => (
               <div key={reply.id} className="reply-item">
                 <div className="reply-author">
-                  <img 
+                  <img
                     src={reply.author_avatar || `https://i.pravatar.cc/150?u=${reply.user_id}`}
                     alt={reply.author_name}
                     className="reply-avatar"
@@ -244,13 +238,13 @@ const DiscussionDetail = ({ showNotification, user, discussionId, onBack }) => {
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="reply-content">
                   <p>{reply.content}</p>
                 </div>
-                
+
                 <div className="reply-actions">
-                  <button 
+                  <button
                     onClick={() => handleLikeReply(reply.id, reply.likes, reply.user_has_liked)}
                     className={`like-btn ${reply.user_has_liked ? 'liked' : ''}`}
                     disabled={likingReplies[reply.id]}

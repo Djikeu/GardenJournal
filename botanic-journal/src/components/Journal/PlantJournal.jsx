@@ -237,16 +237,9 @@ const PlantJournal = ({ showNotification, user }) => {
                         <div className="stat-number">{stats.averageWords}</div>
                         <div className="stat-label">Avg Words</div>
                     </div>
-                    <div 
-                        className="stat-item clickable" 
-                        onClick={() => document.querySelector('.journal-form-card')?.scrollIntoView({ behavior: 'smooth' })}
-                    >
-                        <div className="stat-number">+</div>
-                        <div className="stat-label">New Entry</div>
-                    </div>
                 </div>
             </div>
-
+ 
             {/* Controls Section */}
             <div className="journal-controls">
                 <div className="controls-row">
@@ -700,7 +693,7 @@ const PlantJournal = ({ showNotification, user }) => {
                                     </div>
                                 )
                             )}
-                        </div>
+                        </div> 
                     </div>
                 </div>
             )}

@@ -201,18 +201,7 @@ body {
   width: 100%;
 }
 
-.sidebar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, 
-      rgba(125, 179, 110, 0.1) 0%, 
-      rgba(90, 140, 90, 0.05) 100%);
-  z-index: -1;
-}
+
 
 
 .logo-container {
@@ -1240,10 +1229,6 @@ body {
     gap: 30px;
 }
 
-.stat-item {
-    text-align: center;
-}
-
 .stat-number {
     font-size: 2.5rem;
     font-weight: bold;
@@ -1673,6 +1658,7 @@ body {
 .stat-item {
     text-align: center;
     min-width: 120px;
+    color: #f1f3f1;
 }
 
 .stat-number {
