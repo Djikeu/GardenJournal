@@ -1656,9 +1656,13 @@ body {
 }
 
 .stat-item {
-    text-align: center;
-    min-width: 120px;
-    color: #f1f3f1;
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  text-align: center;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  color: black;
 }
 
 .stat-number {

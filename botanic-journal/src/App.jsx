@@ -6,7 +6,7 @@ import MyPlants from './components/Plants/MyPlants';
 import CareTasks from './components/Tasks/CareTasks';
 import PlantJournal from './components/Journal/PlantJournal';
 import PlantEncyclopedia from './components/Encyclopedia/PlantEncylopedia'
-import PlantDetail from './components/Plants/PlantDetail'; // Add this import
+import PlantDetail from './components/Plants/PlantDetail';
 import Analytics from './components/Analytics/Analytics';
 import GardenPlanner from './components/Planner/GardenPlanner';
 import WeatherForecast from './components/Weather/WeatherForecast'
@@ -17,6 +17,9 @@ import Register from './components/Auth/Register';
 import CommunityForum from './components/Community/CommunityForum';
 import DiscussionDetail from './components/Community/DiscussionDetail';
 import AdminDashboard from './components/Admin/AdminDashboard';
+import PlantRequestForm from './components/PlantRequest/PlantRequestForm';
+import MyPlantRequests from './components/PlantRequest/MyPlantRequests';
+import PlantRequestManager from './components/Admin/PlantRequestManager';
 import { apiService } from './services/api';
 import './index.css';
 import './App.css';
@@ -32,9 +35,9 @@ function App() {
     const savedUser = localStorage.getItem('currentUser');
     return savedUser ? JSON.parse(savedUser) : null;
   });
-  const [selectedPlantId, setSelectedPlantId] = useState(null); // For plant details
-  const [showPlantDetailModal, setShowPlantDetailModal] = useState(false); // For modal approach
-  const [selectedDiscussionId, setSelectedDiscussionId] = useState(null); // ADD THIS LINE
+  const [selectedPlantId, setSelectedPlantId] = useState(null);
+  const [showPlantDetailModal, setShowPlantDetailModal] = useState(false);
+  const [selectedDiscussionId, setSelectedDiscussionId] = useState(null);
 
   // Handle hash-based navigation
   useEffect(() => {
@@ -48,17 +51,27 @@ function App() {
         setActiveView('plant-detail');
         return;
       }
-      
 
-      if (hash && ['dashboard', 'plants', 'tasks', 'journal', 'encyclopedia', 'analytics', 'planner', 'profile', 'plant-detail','community', 'my-discussions', 'discussion-detail'].includes(hash)) {
+      // Handle discussion detail routes
+      if (hash.startsWith('discussion/')) {
+        const discussionId = hash.split('/')[1];
+        setSelectedDiscussionId(discussionId);
+        setActiveView('discussion-detail');
+        return;
+      }
+
+      const validViews = [
+        'dashboard', 'plants', 'tasks', 'journal', 'encyclopedia',
+        'analytics', 'planner', 'profile', 'plant-detail', 'community',
+        'discussion-detail', 'suggest-plant', 'my-requests', 'plant-requests', 'admin'
+      ];
+
+      if (hash && validViews.includes(hash)) {
         setActiveView(hash);
       }
     };
 
-    // Listen for hash changes
     window.addEventListener('hashchange', handleHashChange);
-
-    // Check initial hash
     handleHashChange();
 
     return () => {
@@ -71,16 +84,16 @@ function App() {
     if (isAuthenticated && activeView !== 'dashboard') {
       if (activeView === 'plant-detail' && selectedPlantId) {
         window.location.hash = `plant/${selectedPlantId}`;
-      } else if (activeView !== 'plant-detail') {
+      } else if (activeView === 'discussion-detail' && selectedDiscussionId) {
+        window.location.hash = `discussion/${selectedDiscussionId}`;
+      } else if (activeView !== 'plant-detail' && activeView !== 'discussion-detail') {
         window.location.hash = activeView;
       }
     } else if (isAuthenticated && activeView === 'dashboard') {
-      // Remove hash for dashboard (clean URL)
       window.history.replaceState(null, null, ' ');
     }
-  }, [activeView, isAuthenticated, selectedPlantId]);
+  }, [activeView, isAuthenticated, selectedPlantId, selectedDiscussionId]);
 
-  // Generate unique IDs for notifications
   const generateUniqueId = () => {
     return `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   };
@@ -95,19 +108,17 @@ function App() {
     }, 5000);
   };
 
-  // Function to show plant details (can be called from any component)
   const showPlantDetails = (plantId) => {
     console.log('🌱 Showing plant details for ID:', plantId);
     setSelectedPlantId(plantId);
     setActiveView('plant-detail');
   };
 
-  // Function to hide plant details and go back
   const hidePlantDetails = () => {
     console.log('🔙 Going back from plant details');
-    setActiveView('encyclopedia'); // Or go back to previous view
+    setActiveView('encyclopedia');
     setSelectedPlantId(null);
-    window.history.back(); // Or navigate to encyclopedia
+    window.history.back();
   };
 
   const handleLogin = async (loginData) => {
@@ -137,12 +148,12 @@ function App() {
     setCurrentUser(null);
     setActiveView('dashboard');
     setSelectedPlantId(null);
+    setSelectedDiscussionId(null);
 
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('currentUser');
     localStorage.removeItem('user_id');
 
-    // Clear hash on logout
     window.history.replaceState(null, null, ' ');
 
     showNotification('Goodbye!', 'You have been logged out', 'info');
@@ -169,15 +180,25 @@ function App() {
     setActiveView('profile');
   };
 
-  // Enhanced setActiveView that also updates URL
   const handleSetActiveView = (view) => {
     console.log('Setting active view to:', view);
     setActiveView(view);
-    if (view !== 'dashboard' && view !== 'plant-detail') {
+    if (view !== 'dashboard' && view !== 'plant-detail' && view !== 'discussion-detail') {
       window.location.hash = view;
     } else if (view === 'dashboard') {
       window.history.replaceState(null, null, ' ');
     }
+  };
+
+  const showDiscussionDetail = (discussionId) => {
+    setSelectedDiscussionId(discussionId);
+    setActiveView('discussion-detail');
+  };
+
+  const hideDiscussionDetail = () => {
+    setActiveView('community');
+    setSelectedDiscussionId(null);
+    window.history.back();
   };
 
   const renderContent = () => {
@@ -195,18 +216,6 @@ function App() {
       );
     }
 
-    // Add after your showPlantDetails function
-    const showDiscussionDetail = (discussionId) => {
-      setSelectedDiscussionId(discussionId);
-      setActiveView('discussion-detail');
-    };
-
-    const hideDiscussionDetail = () => {
-      setActiveView('community');
-      setSelectedDiscussionId(null);
-      window.history.back();
-    };
-
     switch (activeView) {
       case 'dashboard':
         return <Dashboard showNotification={showNotification} user={currentUser} />;
@@ -215,16 +224,15 @@ function App() {
           showNotification={showNotification}
           user={currentUser}
           setActiveView={setActiveView}
-          onShowPlantDetails={showPlantDetails} // Pass the function
+          onShowPlantDetails={showPlantDetails}
         />;
-        case 'admin':
-      // Only show admin dashboard if user is admin
-      if (currentUser?.role === 'admin') {
-        return <AdminDashboard showNotification={showNotification} user={currentUser} />;
-      } else {
-        showNotification('Access Denied', 'Admin access required', 'error');
-        return <Dashboard showNotification={showNotification} user={currentUser} />;
-      }
+      case 'admin':
+        if (currentUser?.role === 'admin') {
+          return <AdminDashboard showNotification={showNotification} user={currentUser} />;
+        } else {
+          showNotification('Access Denied', 'Admin access required', 'error');
+          return <Dashboard showNotification={showNotification} user={currentUser} />;
+        }
       case 'tasks':
         return <CareTasks showNotification={showNotification} user={currentUser} />;
       case 'journal':
@@ -233,7 +241,7 @@ function App() {
         return <PlantEncyclopedia
           showNotification={showNotification}
           user={currentUser}
-          onShowPlantDetails={showPlantDetails} // Pass the function
+          onShowPlantDetails={showPlantDetails}
         />;
       case 'plant-detail':
         return <PlantDetail
@@ -252,42 +260,51 @@ function App() {
       case 'profile':
         return <Profile showNotification={showNotification} user={currentUser} />;
       case 'community':
-    return <CommunityForum 
-      showNotification={showNotification} 
-      user={currentUser}
-      onShowDiscussionDetail={showDiscussionDetail}
-    />;
-  case 'discussion-detail':
-    return <DiscussionDetail 
-      showNotification={showNotification} 
-      user={currentUser}
-      discussionId={selectedDiscussionId}
-      onBack={hideDiscussionDetail}
-    />;
-  default:
+        return <CommunityForum
+          showNotification={showNotification}
+          user={currentUser}
+          onShowDiscussionDetail={showDiscussionDetail}
+        />;
+      case 'discussion-detail':
+        return <DiscussionDetail
+          showNotification={showNotification}
+          user={currentUser}
+          discussionId={selectedDiscussionId}
+          onBack={hideDiscussionDetail}
+        />;
+      case 'suggest-plant':
+        return <PlantRequestForm
+          showNotification={showNotification}
+          user={currentUser}
+          onSuccess={() => {
+            setActiveView('my-requests');
+            showNotification('Success', 'Plant suggestion submitted!', 'success');
+          }}
+        />;
+      case 'my-requests':
+        return <MyPlantRequests
+          showNotification={showNotification}
+          user={currentUser}
+        />;
+      case 'plant-requests':
+        if (currentUser?.role === 'admin') {
+          return <PlantRequestManager
+            showNotification={showNotification}
+            user={currentUser}
+          />;
+        } else {
+          showNotification('Access Denied', 'Admin access required', 'error');
+          return <Dashboard showNotification={showNotification} user={currentUser} />;
+        }
+      default:
         return <Dashboard showNotification={showNotification} user={currentUser} />;
     }
-  };
-
-  // For development - skip auth temporarily
-  const skipAuth = () => {
-    setIsAuthenticated(true);
-    setCurrentUser({
-      id: 1,
-      name: "Demo User",
-      email: "demo@example.com",
-      level: 5,
-      avatar: "https://i.pravatar.cc/150?img=12"
-    });
-    showNotification('Welcome!', 'Development mode activated', 'success');
   };
 
   if (!isAuthenticated) {
     return (
       <div className="app">
-        
         {renderContent()}
-
         <div className="notification-container">
           {notifications.map(notification => (
             <Notification

@@ -4,8 +4,8 @@ const Sidebar = ({ activeView, setActiveView, onLogout, user }) => {
   const navItems = {
     main: [
       { id: 'dashboard', icon: 'fas fa-home', label: 'Dashboard' },
-      { id: 'plants', icon: 'fas fa-leaf', label: 'My Plants', },
-      { id: 'tasks', icon: 'fas fa-tasks', label: 'Care Tasks', },
+      { id: 'plants', icon: 'fas fa-leaf', label: 'My Plants' },
+      { id: 'tasks', icon: 'fas fa-tasks', label: 'Care Tasks' },
       { id: 'journal', icon: 'fas fa-book', label: 'Plant Journal' },
       { id: 'encyclopedia', icon: 'fas fa-book-open', label: 'Plant Encyclopedia' }
     ],
@@ -15,9 +15,11 @@ const Sidebar = ({ activeView, setActiveView, onLogout, user }) => {
       { id: 'forecast', icon: 'fas fa-cloud-sun-rain', label: 'Weather Forecast' }
     ],
     community: [
-      { id: 'community', icon: 'fas fa-users', label: 'Community Forum' },
-      { id: 'help', icon: 'fas fa-question-circle', label: 'Help Center' },
-      { id: 'settings', icon: 'fas fa-cog', label: 'Settings' }
+      { id: 'community', icon: 'fas fa-users', label: 'Community Forum' }
+    ],
+    suggestions: [
+      { id: 'suggest-plant', icon: 'fas fa-plus-circle', label: 'Suggest New Plant' },
+      { id: 'my-requests', icon: 'fas fa-clipboard-list', label: 'My Requests' }
     ]
   };
 
@@ -110,6 +112,29 @@ const Sidebar = ({ activeView, setActiveView, onLogout, user }) => {
         </ul>
       </nav>
 
+      <nav className="nav-section">
+        <div className="nav-title">Plant Suggestions</div>
+        <ul className="nav-links">
+          {navItems.suggestions.map(item => (
+            <li key={item.id}>
+              <a
+                href="#"
+                className={activeView === item.id ? 'active' : ''}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveView(item.id);
+                }}
+              >
+                <div className="nav-link-content">
+                  <i className={item.icon}></i>
+                  <span>{item.label}</span>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
       {/* Admin Panel Section - Only visible to admin users */}
       {user?.role === 'admin' && (
         <nav className="nav-section">
@@ -127,6 +152,21 @@ const Sidebar = ({ activeView, setActiveView, onLogout, user }) => {
                 <div className="nav-link-content">
                   <i className="fas fa-shield-alt"></i>
                   <span>Admin Panel</span>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                className={activeView === 'plant-requests' ? 'active' : ''}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveView('plant-requests');
+                }}
+              >
+                <div className="nav-link-content">
+                  <i className="fas fa-clipboard-list"></i>
+                  <span>Plant Requests</span>
                 </div>
               </a>
             </li>

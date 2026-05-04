@@ -235,14 +235,8 @@ class ApiService {
         return this.request(`profile.php?user_id=${user_id}`);
     }
 
-    async updateProfile(profileData) {
-        const user_id = this.getCurrentUserId();
-        return this.request('profile.php', {
-            method: 'PUT',
-            body: { ...profileData, user_id }
-        });
-    }
 
+    // Upload avatar
     async uploadAvatar(formData) {
         const url = `${this.baseURL}/upload-avatar.php`;
         const config = {
@@ -254,13 +248,68 @@ class ApiService {
             const response = await fetch(url, config);
             const data = await response.json();
 
-            if (!response.ok) {
+            if (!response.ok || !data.success) {
                 throw new Error(data.message || 'Avatar upload failed');
             }
 
             return data;
         } catch (error) {
             console.error('Avatar Upload Error:', error);
+            throw error;
+        }
+    }
+
+    // Update profile - with user ID
+    async updateProfile(userId, userData) {
+        const url = `${this.baseURL}/user-dashboard.php?user_id=${userId}`;
+        const config = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: userData.name,  // Map 'name' to 'username' for backend
+                email: userData.email,
+                avatar: userData.avatar
+            })
+        };
+
+        try {
+            const response = await fetch(url, config);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Profile update failed');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Profile Update Error:', error);
+            throw error;
+        }
+    }
+
+    // Get user statistics
+    async getUserStats() {
+        const url = `${this.baseURL}/stats.php`;
+        const config = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        };
+
+        try {
+            const response = await fetch(url, config);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Failed to fetch stats');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Get User Stats Error:', error);
             throw error;
         }
     }
@@ -303,10 +352,7 @@ class ApiService {
         return this.request(`activity.php?user_id=${user_id}`);
     }
 
-    async getUserStats() {
-        const user_id = this.getCurrentUserId();
-        return this.request(`user-stats.php?user_id=${user_id}`);
-    }
+
 
     // Admin methods
     async getAdminUsers(page = 1, limit = 20) {
@@ -370,6 +416,146 @@ class ApiService {
         });
     }
 
+    // ============================================
+    // PLANT REQUESTS METHODS (NEW)
+    // ============================================
+
+    // Submit a new plant request
+    async submitPlantRequest(formData) {
+        const user_id = this.getCurrentUserId();
+        const url = `${this.baseURL}/plant-requests.php?user_id=${user_id}`; // add user_id here
+        const config = {
+            method: 'POST',
+            body: formData,
+        };
+        try {
+            const response = await fetch(url, config);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Plant request submission failed');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Submit Plant Request Error:', error);
+            throw error;
+        }
+    }
+
+    // Get user's own plant requests
+    async getMyPlantRequests(filter = 'all') {
+        const user_id = this.getCurrentUserId();
+        const url = `${this.baseURL}/plant-requests.php?user_id=${user_id}&filter=${filter}&my_requests=true`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to load your requests');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Get My Plant Requests Error:', error);
+            throw error;
+        }
+    }
+
+    // Get all plant requests (admin only)
+    async getPlantRequests(filter = 'pending') {
+        const user_id = this.getCurrentUserId();
+        const url = `${this.baseURL}/plant-requests.php?user_id=${user_id}&filter=${filter}&admin=true`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to load plant requests');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Get Plant Requests Error:', error);
+            throw error;
+        }
+    }
+
+    // Approve a plant request (admin only)
+    async approvePlantRequest(requestId, data) {
+        const user_id = this.getCurrentUserId();
+        const url = `${this.baseURL}/plant-requests.php?id=${requestId}&user_id=${user_id}`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'approve',
+                    status: data.status,
+                    admin_notes: data.admin_notes
+                })
+            });
+            const responseData = await response.json();
+
+            if (!response.ok || !responseData.success) {
+                throw new Error(responseData.message || 'Approval failed');
+            }
+
+            return responseData;
+        } catch (error) {
+            console.error('Approve Plant Request Error:', error);
+            throw error;
+        }
+    }
+
+    // Reject a plant request (admin only)
+    async rejectPlantRequest(requestId, data) {
+        const user_id = this.getCurrentUserId();
+        const url = `${this.baseURL}/plant-requests.php?id=${requestId}&user_id=${user_id}`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'reject',
+                    status: data.status,
+                    admin_notes: data.admin_notes
+                })
+            });
+            const responseData = await response.json();
+
+            if (!response.ok || !responseData.success) {
+                throw new Error(responseData.message || 'Rejection failed');
+            }
+
+            return responseData;
+        } catch (error) {
+            console.error('Reject Plant Request Error:', error);
+            throw error;
+        }
+    }
+
+    // ============================================
+    // END OF PLANT REQUESTS METHODS
+    // ============================================
 
     // NEW METHOD: Get sample tasks for demonstration
     async getSampleTasks() {
@@ -716,7 +902,6 @@ class ApiService {
             throw error;
         }
     }
-
 }
 
-export const apiService = new ApiService();  
+export const apiService = new ApiService();

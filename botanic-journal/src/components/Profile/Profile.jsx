@@ -9,7 +9,8 @@ const Profile = ({ showNotification, user }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    avatar: ''
+    avatar: '',
+    user_id: ''
   });
   const [uploading, setUploading] = useState(false);
   const [userStats, setUserStats] = useState(null);
@@ -18,9 +19,10 @@ const Profile = ({ showNotification, user }) => {
     if (user) {
       setProfileUser(user);
       setFormData({
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar || ''
+        name: user.name || user.username || '',
+        email: user.email || '',
+        avatar: user.avatar || '',
+        user_id: user.id || user.user_id || ''
       });
       loadUserStats();
     }
@@ -64,15 +66,25 @@ const Profile = ({ showNotification, user }) => {
 
     try {
       setUploading(true);
-      // For now, we'll create a local URL - in production, upload to server
-      const imageUrl = URL.createObjectURL(file);
-      setFormData(prev => ({
-        ...prev,
-        avatar: imageUrl
-      }));
-      showNotification('Success', 'Avatar uploaded successfully', 'success');
+      
+      // Upload to server
+      const uploadFormData = new FormData();
+      uploadFormData.append('avatar', file);
+      
+      const response = await apiService.uploadAvatar(uploadFormData);
+      
+      if (response.success) {
+        const imageUrl = response.avatarUrl || response.data?.avatar_url;
+        setFormData(prev => ({
+          ...prev,
+          avatar: imageUrl
+        }));
+        showNotification('Success', 'Avatar uploaded successfully', 'success');
+      } else {
+        throw new Error(response.message || 'Upload failed');
+      }
     } catch (error) {
-      showNotification('Error', 'Failed to upload avatar', 'error');
+      showNotification('Error', error.message || 'Failed to upload avatar', 'error');
     } finally {
       setUploading(false);
     }
@@ -81,12 +93,23 @@ const Profile = ({ showNotification, user }) => {
   const handleSaveProfile = async () => {
     try {
       setLoading(true);
-      const response = await apiService.updateProfile(formData);
+      
+      // Prepare data for update
+      const updateData = {
+        name: formData.name,
+        email: formData.email,
+        avatar: formData.avatar,
+        user_id: formData.user_id
+      };
+      
+      const response = await apiService.updateProfile(formData.user_id, updateData);
       
       if (response.success) {
         setProfileUser(prev => ({
           ...prev,
-          ...formData
+          name: formData.name,
+          email: formData.email,
+          avatar: formData.avatar
         }));
         setEditing(false);
         showNotification('Success', 'Profile updated successfully', 'success');
@@ -102,18 +125,14 @@ const Profile = ({ showNotification, user }) => {
 
   const handleCancelEdit = () => {
     setFormData({
-      name: profileUser.name,
-      email: profileUser.email,
-      avatar: profileUser.avatar || ''
+      name: profileUser.name || profileUser.username || '',
+      email: profileUser.email || '',
+      avatar: profileUser.avatar || '',
+      user_id: profileUser.id || profileUser.user_id || ''
     });
     setEditing(false);
   };
 
-  const getLevelBadge = (level) => {
-    if (level >= 10) return { text: 'Expert Gardener', color: '#e74c3c' };
-    if (level >= 5) return { text: 'Intermediate Gardener', color: '#3498db' };
-    return { text: 'Beginner Gardener', color: '#2ecc71' };
-  };
 
   if (!profileUser) {
     return (
@@ -128,7 +147,9 @@ const Profile = ({ showNotification, user }) => {
     );
   }
 
-  const levelBadge = getLevelBadge(profileUser.level);
+
+  // Prikazivanje imena - uzima name ili username
+  const displayName = profileUser.name || profileUser.username || 'User';
 
   return (
     <div className="profile-container-modern">
@@ -194,7 +215,7 @@ const Profile = ({ showNotification, user }) => {
             </div>
             
             <div className="profile-info-modern">
-              <h2>{profileUser.name}</h2>
+              <h2>{displayName}</h2>
               <div className="user-meta-modern">
                 {profileUser.role === 'admin' && (
                   <span className="admin-badge-modern">
@@ -205,10 +226,10 @@ const Profile = ({ showNotification, user }) => {
               </div>
               <div className="user-join-info">
                 <i className="fas fa-calendar-alt"></i>
-                Member since {new Date(profileUser.created_at).toLocaleDateString('en-US', {
+                Member since {profileUser.created_at ? new Date(profileUser.created_at).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long'
-                })}
+                }) : 'Recently'}
               </div>
             </div>
           </div>
@@ -353,20 +374,6 @@ const Profile = ({ showNotification, user }) => {
             </div>
           </div>
 
-          <div className="stat-card-modern">
-            <div className="stat-header-modern">
-              <div className="stat-icon-modern level">
-                <i className="fas fa-trophy"></i>
-              </div>
-              <div className="stat-number-modern">{profileUser.level}</div>
-            </div>
-            <div className="stat-footer-modern">
-              <span className="stat-label-modern">Gardener Level</span>
-              <span className="stat-trend-modern">
-                <i className="fas fa-chart-line"></i> {levelBadge.text}
-              </span>
-            </div>
-          </div>
 
           <div className="stat-card-modern">
             <div className="stat-header-modern">
