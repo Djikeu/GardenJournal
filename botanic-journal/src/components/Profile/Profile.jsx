@@ -47,6 +47,12 @@ const Profile = ({ showNotification, user }) => {
     }));
   };
 
+  const getAvatarUrl = (avatarPath) => {
+    if (!avatarPath) return '/default-avatar.png';
+    if (avatarPath.startsWith('http')) return avatarPath;
+    return `http://localhost${avatarPath}`;
+  };
+
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -66,19 +72,17 @@ const Profile = ({ showNotification, user }) => {
 
     try {
       setUploading(true);
-      
-      // Upload to server
+
       const uploadFormData = new FormData();
       uploadFormData.append('avatar', file);
-      
+      uploadFormData.append('user_id', user?.id || user?.user_id || formData.user_id);
+
       const response = await apiService.uploadAvatar(uploadFormData);
-      
+
       if (response.success) {
         const imageUrl = response.avatarUrl || response.data?.avatar_url;
-        setFormData(prev => ({
-          ...prev,
-          avatar: imageUrl
-        }));
+        setFormData(prev => ({ ...prev, avatar: imageUrl }));
+        setProfileUser(prev => ({ ...prev, avatar: imageUrl }));
         showNotification('Success', 'Avatar uploaded successfully', 'success');
       } else {
         throw new Error(response.message || 'Upload failed');
@@ -93,17 +97,16 @@ const Profile = ({ showNotification, user }) => {
   const handleSaveProfile = async () => {
     try {
       setLoading(true);
-      
-      // Prepare data for update
+
       const updateData = {
         name: formData.name,
         email: formData.email,
         avatar: formData.avatar,
         user_id: formData.user_id
       };
-      
+
       const response = await apiService.updateProfile(formData.user_id, updateData);
-      
+
       if (response.success) {
         setProfileUser(prev => ({
           ...prev,
@@ -111,6 +114,15 @@ const Profile = ({ showNotification, user }) => {
           email: formData.email,
           avatar: formData.avatar
         }));
+
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        localStorage.setItem('user', JSON.stringify({
+          ...storedUser,
+          name: formData.name,
+          email: formData.email,
+          avatar: formData.avatar
+        }));
+
         setEditing(false);
         showNotification('Success', 'Profile updated successfully', 'success');
       } else {
@@ -133,7 +145,6 @@ const Profile = ({ showNotification, user }) => {
     setEditing(false);
   };
 
-
   if (!profileUser) {
     return (
       <div className="profile-container-modern">
@@ -147,8 +158,6 @@ const Profile = ({ showNotification, user }) => {
     );
   }
 
-
-  // Prikazivanje imena - uzima name ili username
   const displayName = profileUser.name || profileUser.username || 'User';
 
   return (
@@ -163,7 +172,7 @@ const Profile = ({ showNotification, user }) => {
           <p>Manage your account settings and track your gardening journey</p>
         </div>
         {!editing && (
-          <button 
+          <button
             className="btn-edit-profile"
             onClick={() => setEditing(true)}
           >
@@ -181,17 +190,17 @@ const Profile = ({ showNotification, user }) => {
               {editing ? (
                 <>
                   <div className="avatar-upload-modern">
-                    <img 
-                      src={formData.avatar || '/default-avatar.png'} 
-                      alt="Avatar" 
+                    <img
+                      src={getAvatarUrl(formData.avatar)}
+                      alt="Avatar"
                       className="avatar-image-modern editable"
                     />
                     <div className="avatar-overlay-modern">
                       <i className="fas fa-camera"></i>
                       <span>Change Photo</span>
                     </div>
-                    <input 
-                      type="file" 
+                    <input
+                      type="file"
                       className="avatar-input-modern"
                       accept="image/*"
                       onChange={handleAvatarUpload}
@@ -206,14 +215,14 @@ const Profile = ({ showNotification, user }) => {
                   )}
                 </>
               ) : (
-                <img 
-                  src={profileUser.avatar || '/default-avatar.png'} 
-                  alt="Avatar" 
+                <img
+                  src={getAvatarUrl(profileUser.avatar)}
+                  alt="Avatar"
                   className="avatar-image-modern"
                 />
               )}
             </div>
-            
+
             <div className="profile-info-modern">
               <h2>{displayName}</h2>
               <div className="user-meta-modern">
@@ -268,14 +277,14 @@ const Profile = ({ showNotification, user }) => {
                 </div>
 
                 <div className="form-actions-modern">
-                  <button 
+                  <button
                     className="btn-cancel-modern"
                     onClick={handleCancelEdit}
                     disabled={loading}
                   >
                     Cancel
                   </button>
-                  <button 
+                  <button
                     className="btn-save-modern"
                     onClick={handleSaveProfile}
                     disabled={loading}
@@ -342,7 +351,7 @@ const Profile = ({ showNotification, user }) => {
           </div>
         </div>
 
-        {/* Stats Grid - Dashboard Style */}
+        {/* Stats Grid */}
         <div className="stats-grid-modern">
           <div className="stat-card-modern">
             <div className="stat-header-modern">
@@ -373,7 +382,6 @@ const Profile = ({ showNotification, user }) => {
               </span>
             </div>
           </div>
-
 
           <div className="stat-card-modern">
             <div className="stat-header-modern">

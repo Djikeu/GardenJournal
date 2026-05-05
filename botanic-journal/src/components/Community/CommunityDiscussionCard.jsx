@@ -44,6 +44,12 @@ const CommunityDiscussionCard = ({ discussion, user, onUpdate }) => {
     }
   };
 
+  const getAvatarUrl = (avatarPath, userId) => {
+    if (!avatarPath) return `https://i.pravatar.cc/150?u=${userId}`;
+    if (avatarPath.startsWith('http')) return avatarPath;
+    return `http://localhost${avatarPath}`;
+  };
+
   const getCategoryIcon = (category) => {
     const icons = {
       'General': 'fas fa-leaf',
@@ -101,7 +107,7 @@ const CommunityDiscussionCard = ({ discussion, user, onUpdate }) => {
         <div className="discussion-meta">
           <div className="author-info">
             <img
-              src={discussion.author_avatar || `https://i.pravatar.cc/150?u=${discussion.user_id}`}
+              src={getAvatarUrl(discussion.author_avatar, discussion.user_id)}
               alt={discussion.author_name}
               className="author-avatar"
             />

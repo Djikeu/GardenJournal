@@ -236,28 +236,30 @@ class ApiService {
     }
 
 
-    // Upload avatar
     async uploadAvatar(formData) {
-        const url = `${this.baseURL}/upload-avatar.php`;
-        const config = {
-            method: 'POST',
-            body: formData,
-        };
+    const user_id = this.getCurrentUserId();
+    // Change "upload-avatar.php" → "update-avatar.php"
+    const url = `${this.baseURL}/update-avatar.php?user_id=${user_id}`;
 
-        try {
-            const response = await fetch(url, config);
-            const data = await response.json();
+    const config = {
+        method: 'POST',
+        body: formData,
+    };
 
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'Avatar upload failed');
-            }
+    try {
+        const response = await fetch(url, config);
+        const data = await response.json();
 
-            return data;
-        } catch (error) {
-            console.error('Avatar Upload Error:', error);
-            throw error;
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Avatar upload failed');
         }
+
+        return data;
+    } catch (error) {
+        console.error('Avatar Upload Error:', error);
+        throw error;
     }
+}
 
     // Update profile - with user ID
     async updateProfile(userId, userData) {
@@ -366,7 +368,7 @@ class ApiService {
     }
 
 
-    // Add to your ApiService class in apiService.js
+    // In your apiService.js, replace these admin methods:
 
     async getAdminPlants(page = 1, limit = 50, search = '') {
         const user_id = this.getCurrentUserId();
@@ -377,20 +379,57 @@ class ApiService {
         return this.request(url);
     }
 
-    async createAdminPlant(plantData) {
+    async createAdminPlant(formData) {
+        // This method should accept FormData, not JSON
         const user_id = this.getCurrentUserId();
-        return this.request('admin/plants.php', {
+        const url = `${this.baseURL}/admin/plants.php?user_id=${user_id}`;
+
+        const config = {
             method: 'POST',
-            body: { ...plantData, user_id }
-        });
+            body: formData, // Don't set Content-Type, browser will set it with boundary
+        };
+
+        try {
+            const response = await fetch(url, config);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Plant creation failed');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Create Admin Plant Error:', error);
+            throw error;
+        }
     }
 
-    async updateAdminPlant(plantId, plantData) {
+    async updateAdminPlant(plantId, formData) {
+        // This method should also accept FormData
         const user_id = this.getCurrentUserId();
-        return this.request('admin/plants.php', {
-            method: 'PUT',
-            body: { id: plantId, ...plantData, user_id }
-        });
+        const url = `${this.baseURL}/admin/plants.php?id=${plantId}&user_id=${user_id}`;
+
+        const config = {
+            method: 'POST', // Use POST with _method=PUT for form data
+            body: formData,
+        };
+
+        // Add _method field to formData to indicate PUT
+        formData.append('_method', 'PUT');
+
+        try {
+            const response = await fetch(url, config);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Plant update failed');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Update Admin Plant Error:', error);
+            throw error;
+        }
     }
 
     async deleteAdminPlant(plantId) {

@@ -117,6 +117,12 @@ const Header = ({ onProfileClick, user }) => {
   };
 
 
+  // Add this helper near the top of the component
+  const getAvatarUrl = (avatarPath) => {
+    if (!avatarPath) return 'https://i.pravatar.cc/150?img=12';
+    if (avatarPath.startsWith('http')) return avatarPath;
+    return `http://localhost${avatarPath}`;
+  };
 
 
   const getWeatherData = () => {
@@ -220,7 +226,7 @@ const Header = ({ onProfileClick, user }) => {
           <span className="greeting-emoji">{getSeasonalEmoji()}</span>
           <div className="greeting-text-wrapper">
             <h1 className="greeting-title">
-              {getGreeting()}, {displayUser?.name?.split(' ')[0] || 'Gardener'}!
+              {getGreeting()}, {displayUser?.username?.split(' ')[0] || displayUser?.name?.split(' ')[0] || 'Gardener'}!
             </h1>
             <div className="greeting-details">
               <span className="date-info">
@@ -296,7 +302,7 @@ const Header = ({ onProfileClick, user }) => {
           <div className="user-avatar-container">
             <div className="user-avatar-wrapper">
               <img
-                src={displayUser?.avatar || "https://i.pravatar.cc/150?img=12"}
+                src={getAvatarUrl(displayUser?.avatar)}
                 alt={displayUser?.name || "User"}
                 className="user-avatar-image"
               />

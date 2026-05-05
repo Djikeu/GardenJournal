@@ -32,7 +32,7 @@ function App() {
   });
   const [authView, setAuthView] = useState('login');
   const [currentUser, setCurrentUser] = useState(() => {
-    const savedUser = localStorage.getItem('currentUser');
+    const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
   const [selectedPlantId, setSelectedPlantId] = useState(null);
@@ -130,7 +130,7 @@ function App() {
         setCurrentUser(response.user);
 
         localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('currentUser', JSON.stringify(response.user));
+        localStorage.setItem('user', JSON.stringify(response.user));
         localStorage.setItem('user_id', response.user.id);
 
         showNotification('Welcome back!', 'Successfully signed in', 'success');
@@ -151,13 +151,12 @@ function App() {
     setSelectedDiscussionId(null);
 
     localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('currentUser');
+    localStorage.removeItem('user'); 
     localStorage.removeItem('user_id');
 
     window.history.replaceState(null, null, ' ');
-
     showNotification('Goodbye!', 'You have been logged out', 'info');
-  };
+};
 
   const handleRegister = async (registerData) => {
     try {

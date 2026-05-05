@@ -5,6 +5,53 @@
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+.admin-dashboard .table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.admin-dashboard .table-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-dashboard .search-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.admin-dashboard .search-box input {
+  padding: 8px 12px;
+  border: none;
+  outline: none;
+  width: 250px;
+  font-size: 14px;
+}
+
+.admin-dashboard .search-box button {
+  padding: 8px 12px;
+  background: #10b981;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-dashboard .btn.btn-primary {
+  white-space: nowrap;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
 .search-box {
   display: flex;
@@ -228,3 +275,4 @@
   padding: 40px;
   color: #6b7280;
 }
+

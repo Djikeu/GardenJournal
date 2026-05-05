@@ -572,7 +572,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     border: 1px solid #e5e7eb;
     transition: all 0.3s ease;
-    height: 280px;
+    min-height: 280px;
     display: flex;
     flex-direction: column;
 }
@@ -584,6 +584,7 @@
 }
 
 .journal-card-inner {
+    flex: 1;
     padding: 16px;
     height: 100%;
     display: flex;
@@ -749,7 +750,7 @@
 
 /* List View Adjustments */
 .entries-grid.list-view .journal-card {
-    height: 160px;
+     min-height: 100px;
 }
 
 .entries-grid.list-view .journal-card-inner {

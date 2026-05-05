@@ -16,18 +16,22 @@ const Sidebar = ({ activeView, setActiveView, onLogout, user }) => {
     ],
     community: [
       { id: 'community', icon: 'fas fa-users', label: 'Community Forum' }
-    ],
-    suggestions: [
-      { id: 'suggest-plant', icon: 'fas fa-plus-circle', label: 'Suggest New Plant' },
-      { id: 'my-requests', icon: 'fas fa-clipboard-list', label: 'My Requests' }
     ]
   };
+
+  // Only show suggestion features for non-admin users
+  const suggestionItems = [
+    { id: 'suggest-plant', icon: 'fas fa-plus-circle', label: 'Suggest New Plant' },
+    { id: 'my-requests', icon: 'fas fa-clipboard-list', label: 'My Requests' }
+  ];
 
   const handleLogout = () => {
     if (onLogout) {
       onLogout();
     }
   };
+
+  const isAdmin = user?.role === 'admin';
 
   return (
     <div className="sidebar">
@@ -112,31 +116,34 @@ const Sidebar = ({ activeView, setActiveView, onLogout, user }) => {
         </ul>
       </nav>
 
-      <nav className="nav-section">
-        <div className="nav-title">Plant Suggestions</div>
-        <ul className="nav-links">
-          {navItems.suggestions.map(item => (
-            <li key={item.id}>
-              <a
-                href="#"
-                className={activeView === item.id ? 'active' : ''}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveView(item.id);
-                }}
-              >
-                <div className="nav-link-content">
-                  <i className={item.icon}></i>
-                  <span>{item.label}</span>
-                </div>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {/* Plant Suggestions Section - Only for non-admin users */}
+      {!isAdmin && (
+        <nav className="nav-section">
+          <div className="nav-title">Plant Suggestions</div>
+          <ul className="nav-links">
+            {suggestionItems.map(item => (
+              <li key={item.id}>
+                <a
+                  href="#"
+                  className={activeView === item.id ? 'active' : ''}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveView(item.id);
+                  }}
+                >
+                  <div className="nav-link-content">
+                    <i className={item.icon}></i>
+                    <span>{item.label}</span>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
 
       {/* Admin Panel Section - Only visible to admin users */}
-      {user?.role === 'admin' && (
+      {isAdmin && (
         <nav className="nav-section">
           <div className="nav-title">Administration</div>
           <ul className="nav-links">

@@ -100,6 +100,12 @@ const DiscussionDetail = ({ showNotification, user, discussionId, onBack }) => {
     }
   };
 
+  const getAvatarUrl = (avatarPath, userId) => {
+    if (!avatarPath) return `https://i.pravatar.cc/150?u=${userId}`;
+    if (avatarPath.startsWith('http')) return avatarPath;
+    return `http://localhost${avatarPath}`;
+  };
+
   const handleLikeReply = async (replyId, currentLikes, userHasLiked) => {
     if (likingReplies[replyId]) return;
 
@@ -171,7 +177,7 @@ const DiscussionDetail = ({ showNotification, user, discussionId, onBack }) => {
         <div className="discussion-meta">
           <div className="author-info">
             <img
-              src={discussion.author_avatar || `https://i.pravatar.cc/150?u=${discussion.user_id}`}
+              src={getAvatarUrl(discussion.author_avatar, discussion.user_id)}
               alt={discussion.author_name}
               className="author-avatar-large"
             />
@@ -227,7 +233,7 @@ const DiscussionDetail = ({ showNotification, user, discussionId, onBack }) => {
               <div key={reply.id} className="reply-item">
                 <div className="reply-author">
                   <img
-                    src={reply.author_avatar || `https://i.pravatar.cc/150?u=${reply.user_id}`}
+                    src={getAvatarUrl(reply.author_avatar, reply.user_id)}
                     alt={reply.author_name}
                     className="reply-avatar"
                   />

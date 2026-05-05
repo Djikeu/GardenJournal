@@ -9,6 +9,7 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
     const [filterType, setFilterType] = useState('all');
     const [viewMode, setViewMode] = useState('grid');
     const [addingPlant, setAddingPlant] = useState(null);
+    const [sortBy, setSortBy] = useState('name'); // Add this for sorting
 
     useEffect(() => {
         loadPlants();
@@ -47,13 +48,8 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
                 encyclopedia_id: plant.id
             };
 
-            console.log('➕ Adding plant data:', plantData);
-            console.log('👤 Current user from props:', user);
-            console.log('🔑 User ID from localStorage:', localStorage.getItem('user_id'));
-
             const response = await apiService.createPlant(plantData);
             if (response.success) {
-                console.log('✅ Plant added successfully:', response.data);
                 showNotification('Success', `${plant.name} added to your collection!`, 'success');
                 setPlants(prevPlants =>
                     prevPlants.map(p =>
@@ -62,7 +58,6 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
                 );
             }
         } catch (error) {
-            console.error('❌ Add plant error:', error);
             showNotification('Error', `Failed to add plant: ${error.message}`, 'error');
         } finally {
             setAddingPlant(null);
@@ -95,25 +90,62 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
         return colors[type] || '#7db36e';
     };
 
-    const getCareLevel = (type) => {
+    const getCareLevel = (plant) => {
+        // Check if plant has difficulty_level or care_level
+        let careValue = '';
+        if (plant.difficulty_level) {
+            careValue = plant.difficulty_level.toLowerCase();
+        } else if (plant.care_level) {
+            careValue = plant.care_level.toLowerCase();
+        } else if (plant.difficulty) {
+            careValue = plant.difficulty.toLowerCase();
+        } else {
+            // Fallback to type-based
+            const typeLevels = {
+                'succulent': 'easy',
+                'herb': 'easy',
+                'indoor': 'moderate',
+                'outdoor': 'moderate',
+                'vegetable': 'moderate',
+                'flowering': 'advanced',
+                'tropical': 'advanced'
+            };
+            careValue = typeLevels[plant.type] || 'moderate';
+        }
+        
         const levels = {
-            'succulent': { level: 'Easy', color: '#10b981' },
-            'indoor': { level: 'Moderate', color: '#f59e0b' },
-            'herb': { level: 'Easy', color: '#10b981' },
-            'outdoor': { level: 'Moderate', color: '#f59e0b' },
-            'vegetable': { level: 'Moderate', color: '#f59e0b' },
-            'flowering': { level: 'Advanced', color: '#ef4444' },
-            'tropical': { level: 'Advanced', color: '#ef4444' }
+            'easy': { level: 'Easy', color: '#10b981' },
+            'beginner': { level: 'Easy', color: '#10b981' },
+            'moderate': { level: 'Moderate', color: '#f59e0b' },
+            'intermediate': { level: 'Moderate', color: '#f59e0b' },
+            'advanced': { level: 'Advanced', color: '#ef4444' },
+            'difficult': { level: 'Advanced', color: '#ef4444' }
         };
-        return levels[type] || { level: 'Moderate', color: '#f59e0b' };
+        
+        return levels[careValue] || { level: 'Moderate', color: '#f59e0b' };
     };
 
-    const filteredPlants = plants.filter(plant => {
+    // Filter plants - keep existing filter logic
+    let filteredPlants = plants.filter(plant => {
         const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (plant.species && plant.species.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesType = filterType === 'all' || plant.type === filterType;
         return matchesSearch && matchesType;
     });
+
+    // Add sorting
+    if (sortBy === 'name') {
+        filteredPlants.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === 'care_level') {
+        const careOrder = { 'easy': 1, 'moderate': 2, 'advanced': 3 };
+        filteredPlants.sort((a, b) => {
+            const aCare = getCareLevel(a).level.toLowerCase();
+            const bCare = getCareLevel(b).level.toLowerCase();
+            return (careOrder[aCare] || 2) - (careOrder[bCare] || 2);
+        });
+    } else if (sortBy === 'type') {
+        filteredPlants.sort((a, b) => (a.type || '').localeCompare(b.type || ''));
+    }
 
     const plantTypes = ['all', 'indoor', 'outdoor', 'succulent', 'tropical', 'vegetable', 'flowering', 'herb'];
 
@@ -182,6 +214,18 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
                             )}
                         </div>
                     </div>
+                    {/* Add sort dropdown */}
+                    <div className="sort-dropdown">
+                        <select 
+                            value={sortBy} 
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="sort-select"
+                        >
+                            <option value="name">Sort by: Name</option>
+                            <option value="care_level">Sort by: Care Level</option>
+                            <option value="type">Sort by: Type</option>
+                        </select>
+                    </div>
                 </div>
 
                 {/* Filter Chips */}
@@ -246,20 +290,12 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
                                 <h3>Showing {filteredPlants.length} {filteredPlants.length === 1 ? 'plant' : 'plants'}</h3>
                                 <p>Explore our plant collection below</p>
                             </div>
-                            <div className="results-sort">
-                                <span>Sort by:</span>
-                                <select className="sort-select">
-                                    <option>Name (A-Z)</option>
-                                    <option>Care Level</option>
-                                    <option>Type</option>
-                                </select>
-                            </div>
                         </div>
 
                         {/* Plants Grid/List */}
                         <div className={`plants-container ${viewMode}-view`}>
                             {filteredPlants.map(plant => {
-                                const careInfo = getCareLevel(plant.type);
+                                const careInfo = getCareLevel(plant);
                                 const isAdding = addingPlant === plant.id;
                                 const isAdded = plant.is_added > 0;
 

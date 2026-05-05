@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
 import '../../admin.css';
+import '../../PlantRequestForm.css';
 
 const AdminDashboard = ({ showNotification, user }) => {
   const [users, setUsers] = useState([]);
@@ -15,16 +16,48 @@ const AdminDashboard = ({ showNotification, user }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingPlant, setEditingPlant] = useState(null);
   const [showPlantModal, setShowPlantModal] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  
+  // Comprehensive plant form data matching PlantRequestForm structure
   const [plantFormData, setPlantFormData] = useState({
-    name: '',
-    species: '',
-    type: 'indoor',
+    common_name: '',
+    scientific_name: '',
+    family: '',
+    genus: '',
     description: '',
-    light_requirements: '',
-    watering_schedule: '',
-    difficulty: 'Easy',
-    status: 'healthy'
+    care_instructions: {
+      watering: '',
+      sunlight: '',
+      temperature: '',
+      humidity: '',
+      soil: '',
+      fertilizer: ''
+    },
+    difficulty_level: 'beginner',
+    growth_rate: 'medium',
+    max_height: '',
+    bloom_time: '',
+    is_indoor: true,
+    is_outdoor: false,
+    poisonous: false,
+    additional_info: ''
   });
+
+  const [images, setImages] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  const [formLoading, setFormLoading] = useState(false);
+
+  const difficultyLevels = [
+    { value: 'beginner', label: 'Beginner', color: '#2ecc71' },
+    { value: 'intermediate', label: 'Intermediate', color: '#f39c12' },
+    { value: 'advanced', label: 'Advanced', color: '#e74c3c' }
+  ];
+
+  const growthRates = [
+    { value: 'slow', label: 'Slow' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'fast', label: 'Fast' }
+  ];
 
   // Load plants function
   const loadPlants = async (page = 1) => {
@@ -42,18 +75,101 @@ const AdminDashboard = ({ showNotification, user }) => {
     }
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      setPlantFormData(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value
+        }
+      }));
+    } else {
+      setPlantFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    const maxFiles = 5;
+
+    if (images.length + files.length > maxFiles) {
+      showNotification('Error', `Maximum ${maxFiles} images allowed`, 'error');
+      return;
+    }
+
+    for (const file of files) {
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const maxSize = 5 * 1024 * 1024;
+
+      if (!validTypes.includes(file.type)) {
+        showNotification('Error', `${file.name} is not a valid image type`, 'error');
+        return;
+      }
+
+      if (file.size > maxSize) {
+        showNotification('Error', `${file.name} is too large (max 5MB)`, 'error');
+        return;
+      }
+    }
+
+    setImages(prev => [...prev, ...files]);
+    const newPreviewUrls = files.map(file => URL.createObjectURL(file));
+    setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+  };
+
+  const removeImage = (index) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+    URL.revokeObjectURL(previewUrls[index]);
+    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
   // Plant management functions
   const handleUpdatePlant = async () => {
     try {
-      const response = await apiService.updateAdminPlant(editingPlant.id, plantFormData);
+      setFormLoading(true);
+      
+      const submitFormData = new FormData();
+      submitFormData.append('common_name', plantFormData.common_name);
+      submitFormData.append('scientific_name', plantFormData.scientific_name);
+      submitFormData.append('family', plantFormData.family);
+      submitFormData.append('genus', plantFormData.genus);
+      submitFormData.append('description', plantFormData.description);
+      submitFormData.append('care_instructions', JSON.stringify(plantFormData.care_instructions));
+      submitFormData.append('difficulty_level', plantFormData.difficulty_level);
+      submitFormData.append('growth_rate', plantFormData.growth_rate);
+      submitFormData.append('max_height', plantFormData.max_height);
+      submitFormData.append('bloom_time', plantFormData.bloom_time);
+      submitFormData.append('is_indoor', plantFormData.is_indoor ? '1' : '0');
+      submitFormData.append('is_outdoor', plantFormData.is_outdoor ? '1' : '0');
+      submitFormData.append('poisonous', plantFormData.poisonous ? '1' : '0');
+      submitFormData.append('additional_info', plantFormData.additional_info);
+      
+      // Add new images if any
+      images.forEach((image, index) => {
+        submitFormData.append(`images[]`, image);
+      });
+      
+      const response = await apiService.updateAdminPlant(editingPlant.id, submitFormData);
+      
       if (response.success) {
         showNotification('Success', 'Plant updated successfully', 'success');
         setShowPlantModal(false);
-        setEditingPlant(null);
+        resetForm();
         loadPlants(plantsPagination.page);
+      } else {
+        throw new Error(response.message || 'Update failed');
       }
     } catch (error) {
-      showNotification('Error', 'Failed to update plant', 'error');
+      console.error('Update plant error:', error);
+      showNotification('Error', error.message || 'Failed to update plant', 'error');
+    } finally {
+      setFormLoading(false);
     }
   };
 
@@ -72,40 +188,123 @@ const AdminDashboard = ({ showNotification, user }) => {
   };
 
   const handleCreatePlant = async () => {
+    if (!plantFormData.common_name.trim()) {
+      showNotification('Error', 'Plant common name is required', 'error');
+      return;
+    }
+
+    if (!plantFormData.scientific_name.trim()) {
+      showNotification('Error', 'Plant scientific name is required', 'error');
+      return;
+    }
+
+    if (images.length === 0) {
+      showNotification('Error', 'Please upload at least one image', 'error');
+      return;
+    }
+
     try {
-      const response = await apiService.createAdminPlant(plantFormData);
+      setFormLoading(true);
+      
+      const submitFormData = new FormData();
+      submitFormData.append('common_name', plantFormData.common_name);
+      submitFormData.append('scientific_name', plantFormData.scientific_name);
+      submitFormData.append('family', plantFormData.family);
+      submitFormData.append('genus', plantFormData.genus);
+      submitFormData.append('description', plantFormData.description);
+      submitFormData.append('care_instructions', JSON.stringify(plantFormData.care_instructions));
+      submitFormData.append('difficulty_level', plantFormData.difficulty_level);
+      submitFormData.append('growth_rate', plantFormData.growth_rate);
+      submitFormData.append('max_height', plantFormData.max_height);
+      submitFormData.append('bloom_time', plantFormData.bloom_time);
+      submitFormData.append('is_indoor', plantFormData.is_indoor ? '1' : '0');
+      submitFormData.append('is_outdoor', plantFormData.is_outdoor ? '1' : '0');
+      submitFormData.append('poisonous', plantFormData.poisonous ? '1' : '0');
+      submitFormData.append('additional_info', plantFormData.additional_info);
+      submitFormData.append('status', 'approved');
+      submitFormData.append('admin_created', 'true');
+
+      images.forEach((image, index) => {
+        submitFormData.append(`images[]`, image);
+      });
+
+      const response = await apiService.createAdminPlant(submitFormData);
+
       if (response.success) {
-        showNotification('Success', 'Plant created successfully', 'success');
+        showNotification('Success', 'Plant created successfully!', 'success');
         setShowPlantModal(false);
-        setPlantFormData({
-          name: '',
-          species: '',
-          type: 'indoor',
-          description: '',
-          light_requirements: '',
-          watering_schedule: '',
-          difficulty: 'Easy',
-          status: 'healthy'
-        });
+        resetForm();
         loadPlants(plantsPagination.page);
+      } else {
+        throw new Error(response.message || 'Creation failed');
       }
     } catch (error) {
-      showNotification('Error', 'Failed to create plant', 'error');
+      console.error('Create plant error:', error);
+      showNotification('Error', error.message || 'Failed to create plant', 'error');
+    } finally {
+      setFormLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setPlantFormData({
+      common_name: '',
+      scientific_name: '',
+      family: '',
+      genus: '',
+      description: '',
+      care_instructions: {
+        watering: '',
+        sunlight: '',
+        temperature: '',
+        humidity: '',
+        soil: '',
+        fertilizer: ''
+      },
+      difficulty_level: 'beginner',
+      growth_rate: 'medium',
+      max_height: '',
+      bloom_time: '',
+      is_indoor: true,
+      is_outdoor: false,
+      poisonous: false,
+      additional_info: ''
+    });
+    setImages([]);
+    setPreviewUrls([]);
+    setCurrentStep(1);
+    setEditingPlant(null);
   };
 
   const openEditModal = (plant) => {
     setEditingPlant(plant);
     setPlantFormData({
-      name: plant.name,
-      species: plant.species || '',
-      type: plant.type,
+      common_name: plant.common_name || plant.name || '',
+      scientific_name: plant.scientific_name || plant.species || '',
+      family: plant.family || '',
+      genus: plant.genus || '',
       description: plant.description || '',
-      light_requirements: plant.light_requirements || '',
-      watering_schedule: plant.watering_schedule || '',
-      difficulty: plant.difficulty || 'Easy',
-      status: plant.status || 'healthy'
+      care_instructions: plant.care_instructions ? 
+        (typeof plant.care_instructions === 'string' ? JSON.parse(plant.care_instructions) : plant.care_instructions) : {
+          watering: '',
+          sunlight: '',
+          temperature: '',
+          humidity: '',
+          soil: '',
+          fertilizer: ''
+        },
+      difficulty_level: plant.difficulty_level || plant.difficulty?.toLowerCase() || 'beginner',
+      growth_rate: plant.growth_rate || 'medium',
+      max_height: plant.max_height || '',
+      bloom_time: plant.bloom_time || '',
+      is_indoor: plant.is_indoor !== undefined ? plant.is_indoor : true,
+      is_outdoor: plant.is_outdoor || false,
+      poisonous: plant.poisonous || false,
+      additional_info: plant.additional_info || ''
     });
+    setImages([]);
+    setPreviewUrls([]);
+    setCurrentStep(1);
     setShowPlantModal(true);
   };
 
@@ -196,13 +395,6 @@ const AdminDashboard = ({ showNotification, user }) => {
         >
           <i className="fas fa-seedling"></i>
           Plant Management
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'system' ? 'active' : ''}`}
-          onClick={() => setActiveTab('system')}
-        >
-          <i className="fas fa-cog"></i>
-          System Settings
         </button>
       </div>
 
@@ -305,7 +497,7 @@ const AdminDashboard = ({ showNotification, user }) => {
                       <td>
                         <div className="user-cell">
                           <img
-                            src={user.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=10b981&color=fff'}
+                            src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=10b981&color=fff`}
                             alt={user.name}
                             className="user-avatar"
                           />
@@ -324,7 +516,7 @@ const AdminDashboard = ({ showNotification, user }) => {
                         </select>
                       </td>
                       <td>
-                        <span className="level-badge">Lv {user.level}</span>
+                        <span className="level-badge">Lv {user.level || 1}</span>
                       </td>
                       <td>
                         <span className={`status-badge ${user.is_active ? 'active' : 'inactive'}`}>
@@ -375,17 +567,7 @@ const AdminDashboard = ({ showNotification, user }) => {
                 <button 
                   className="btn btn-primary"
                   onClick={() => {
-                    setEditingPlant(null);
-                    setPlantFormData({
-                      name: '',
-                      species: '',
-                      type: 'indoor',
-                      description: '',
-                      light_requirements: '',
-                      watering_schedule: '',
-                      difficulty: 'Easy',
-                      status: 'healthy'
-                    });
+                    resetForm();
                     setShowPlantModal(true);
                   }}
                 >
@@ -408,11 +590,11 @@ const AdminDashboard = ({ showNotification, user }) => {
                       <tr>
                         <th>Image</th>
                         <th>Name</th>
-                        <th>Species</th>
-                        <th>Type</th>
-                        <th>Owner</th>
-                        <th>Status</th>
+                        <th>Scientific Name</th>
                         <th>Difficulty</th>
+                        <th>Growth Rate</th>
+                        <th>Indoor/Outdoor</th>
+                        <th>Status</th>
                         <th>Created</th>
                         <th>Actions</th>
                       </tr>
@@ -426,24 +608,14 @@ const AdminDashboard = ({ showNotification, user }) => {
                             <button 
                               className="btn btn-primary"
                               onClick={() => {
-                                setEditingPlant(null);
-                                setPlantFormData({
-                                  name: '',
-                                  species: '',
-                                  type: 'indoor',
-                                  description: '',
-                                  light_requirements: '',
-                                  watering_schedule: '',
-                                  difficulty: 'Easy',
-                                  status: 'healthy'
-                                });
+                                resetForm();
                                 setShowPlantModal(true);
                               }}
                             >
                               Add Your First Plant
                             </button>
-                          </td>
-                        </tr>
+                           </td>
+                         </tr>
                       ) : (
                         plants.map(plant => (
                           <tr key={plant.id}>
@@ -451,11 +623,11 @@ const AdminDashboard = ({ showNotification, user }) => {
                               {plant.image_url ? (
                                 <img 
                                   src={plant.image_url} 
-                                  alt={plant.name}
+                                  alt={plant.common_name || plant.name}
                                   className="plant-thumbnail"
                                   onError={(e) => {
                                     e.target.onerror = null;
-                                    e.target.src = 'https://via.placeholder.com/50x50?text=No+Image';
+                                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Crect width='50' height='50' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-size='10'%3ENo Image%3C/text%3E%3C/svg%3E";
                                   }}
                                 />
                               ) : (
@@ -465,31 +637,19 @@ const AdminDashboard = ({ showNotification, user }) => {
                               )}
                             </td>
                             <td>
-                              <strong>{plant.name}</strong>
+                              <strong>{plant.common_name || plant.name}</strong>
                             </td>
-                            <td>{plant.species || '-'}</td>
+                            <td>{plant.scientific_name || plant.species || '-'}</td>
                             <td>
-                              <span className={`type-badge ${plant.type}`}>
-                                {plant.type}
+                              <span className={`difficulty-badge ${(plant.difficulty_level || plant.difficulty || 'beginner').toLowerCase()}`}>
+                                {plant.difficulty_level || plant.difficulty || 'Beginner'}
                               </span>
                             </td>
+                            <td>{plant.growth_rate || 'Medium'}</td>
                             <td>
-                              <div className="owner-info">
-                                <span>{plant.owner_name || `User #${plant.user_id}`}</span>
-                                {plant.owner_email && (
-                                  <small>{plant.owner_email}</small>
-                                )}
-                              </div>
-                            </td>
-                            <td>
-                              <span className={`status-badge ${plant.status}`}>
-                                {plant.status}
-                              </span>
-                            </td>
-                            <td>
-                              <span className={`difficulty-badge ${plant.difficulty?.toLowerCase()}`}>
-                                {plant.difficulty || 'Easy'}
-                              </span>
+                              {(plant.is_indoor || plant.type === 'indoor') && <span className="type-badge indoor">Indoor</span>}
+                              {(plant.is_outdoor || plant.type === 'outdoor') && <span className="type-badge outdoor">Outdoor</span>}
+                              {!plant.is_indoor && !plant.is_outdoor && plant.type !== 'indoor' && plant.type !== 'outdoor' && <span>-</span>}
                             </td>
                             <td>
                               {new Date(plant.created_at).toLocaleDateString()}
@@ -505,7 +665,7 @@ const AdminDashboard = ({ showNotification, user }) => {
                                 </button>
                                 <button
                                   className="btn-icon delete"
-                                  onClick={() => handleDeletePlant(plant.id, plant.name)}
+                                  onClick={() => handleDeletePlant(plant.id, plant.common_name || plant.name)}
                                   title="Delete Plant"
                                 >
                                   <i className="fas fa-trash"></i>
@@ -543,231 +703,398 @@ const AdminDashboard = ({ showNotification, user }) => {
             )}
           </div>
         )}
-
-        {/* System Settings Tab */}
-        {activeTab === 'system' && (
-          <div className="system-settings">
-            <div className="settings-header">
-              <h3>System Settings</h3>
-              <p>Configure application settings and preferences</p>
-            </div>
-            
-            <div className="settings-grid">
-              <div className="setting-card">
-                <h4>
-                  <i className="fas fa-globe"></i>
-                  Application Settings
-                </h4>
-                <div className="setting-item">
-                  <label>Site Name</label>
-                  <input type="text" defaultValue="Botanic Journal" />
-                </div>
-                <div className="setting-item">
-                  <label>Site Description</label>
-                  <textarea rows="2" defaultValue="Cultivate Your Green Space" />
-                </div>
-                <div className="setting-item">
-                  <label>Maintenance Mode</label>
-                  <label className="switch">
-                    <input type="checkbox" />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="setting-card">
-                <h4>
-                  <i className="fas fa-users"></i>
-                  User Settings
-                </h4>
-                <div className="setting-item">
-                  <label>Allow New Registrations</label>
-                  <label className="switch">
-                    <input type="checkbox" defaultChecked />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-                <div className="setting-item">
-                  <label>Default User Level</label>
-                  <input type="number" defaultValue="1" min="1" max="10" />
-                </div>
-                <div className="setting-item">
-                  <label>Require Email Verification</label>
-                  <label className="switch">
-                    <input type="checkbox" />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="setting-card">
-                <h4>
-                  <i className="fas fa-palette"></i>
-                  Appearance
-                </h4>
-                <div className="setting-item">
-                  <label>Theme</label>
-                  <select defaultValue="light">
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                    <option value="auto">Auto</option>
-                  </select>
-                </div>
-                <div className="setting-item">
-                  <label>Primary Color</label>
-                  <input type="color" defaultValue="#10b981" />
-                </div>
-              </div>
-
-              <div className="setting-card">
-                <h4>
-                  <i className="fas fa-database"></i>
-                  Data Management
-                </h4>
-                <div className="setting-item">
-                  <button className="btn btn-secondary">
-                    <i className="fas fa-download"></i>
-                    Export All Data
-                  </button>
-                </div>
-                <div className="setting-item">
-                  <button className="btn btn-danger">
-                    <i className="fas fa-trash"></i>
-                    Clear Cache
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Plant Edit/Create Modal */}
+      {/* Plant Create/Edit Modal with Multi-step Form */}
       {showPlantModal && (
         <div className="modal-overlay" onClick={() => setShowPlantModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content large-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>
                 <i className={`fas ${editingPlant ? 'fa-edit' : 'fa-plus-circle'}`}></i>
-                {editingPlant ? 'Edit Plant' : 'Create New Plant'}
+                {editingPlant ? 'Edit Plant' : 'Add New Plant'}
               </h3>
               <button className="close-btn" onClick={() => setShowPlantModal(false)}>
                 <i className="fas fa-times"></i>
               </button>
             </div>
             <div className="modal-body">
-              <div className="form-group">
-                <label>Plant Name *</label>
-                <input
-                  type="text"
-                  value={plantFormData.name}
-                  onChange={(e) => setPlantFormData({...plantFormData, name: e.target.value})}
-                  placeholder="e.g., Monstera Deliciosa"
-                  required
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Species</label>
-                <input
-                  type="text"
-                  value={plantFormData.species}
-                  onChange={(e) => setPlantFormData({...plantFormData, species: e.target.value})}
-                  placeholder="e.g., Monstera deliciosa"
-                />
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Type</label>
-                  <select
-                    value={plantFormData.type}
-                    onChange={(e) => setPlantFormData({...plantFormData, type: e.target.value})}
-                  >
-                    <option value="indoor">Indoor</option>
-                    <option value="outdoor">Outdoor</option>
-                    <option value="succulent">Succulent</option>
-                    <option value="tropical">Tropical</option>
-                    <option value="vegetable">Vegetable</option>
-                    <option value="flowering">Flowering</option>
-                  </select>
+              {/* Progress Steps */}
+              <div className="progress-steps">
+                <div className={`step ${currentStep >= 1 ? 'active' : ''}`}>
+                  <div className="step-number">1</div>
+                  <div className="step-label">Basic Info</div>
                 </div>
-                
-                <div className="form-group">
-                  <label>Difficulty</label>
-                  <select
-                    value={plantFormData.difficulty}
-                    onChange={(e) => setPlantFormData({...plantFormData, difficulty: e.target.value})}
-                  >
-                    <option value="Easy">Easy</option>
-                    <option value="Moderate">Moderate</option>
-                    <option value="Advanced">Advanced</option>
-                  </select>
+                <div className={`step ${currentStep >= 2 ? 'active' : ''}`}>
+                  <div className="step-number">2</div>
+                  <div className="step-label">Care Instructions</div>
                 </div>
-                
-                <div className="form-group">
-                  <label>Status</label>
-                  <select
-                    value={plantFormData.status}
-                    onChange={(e) => setPlantFormData({...plantFormData, status: e.target.value})}
-                  >
-                    <option value="healthy">Healthy</option>
-                    <option value="warning">Warning</option>
-                    <option value="danger">Danger</option>
-                  </select>
+                <div className={`step ${currentStep >= 3 ? 'active' : ''}`}>
+                  <div className="step-number">3</div>
+                  <div className="step-label">Images & Submit</div>
                 </div>
               </div>
-              
-              <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  rows="3"
-                  value={plantFormData.description}
-                  onChange={(e) => setPlantFormData({...plantFormData, description: e.target.value})}
-                  placeholder="Describe the plant, its characteristics, and care tips..."
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Light Requirements</label>
-                <input
-                  type="text"
-                  value={plantFormData.light_requirements}
-                  onChange={(e) => setPlantFormData({...plantFormData, light_requirements: e.target.value})}
-                  placeholder="e.g., Bright indirect light, Full sun, Low light"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Watering Schedule</label>
-                <input
-                  type="text"
-                  value={plantFormData.watering_schedule}
-                  onChange={(e) => setPlantFormData({...plantFormData, watering_schedule: e.target.value})}
-                  placeholder="e.g., Every 2-3 weeks, Weekly, Twice weekly"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Image URL (optional)</label>
-                <input
-                  type="text"
-                  value={plantFormData.image_url || ''}
-                  onChange={(e) => setPlantFormData({...plantFormData, image_url: e.target.value})}
-                  placeholder="https://example.com/plant-image.jpg"
-                />
-              </div>
+
+              {/* Step 1: Basic Info */}
+              {currentStep === 1 && (
+                <div className="form-section">
+                  <div className="form-group">
+                    <label>
+                      <i className="fas fa-leaf"></i>
+                      Common Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="common_name"
+                      value={plantFormData.common_name}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Monstera Deliciosa"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>
+                      <i className="fas fa-microscope"></i>
+                      Scientific Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="scientific_name"
+                      value={plantFormData.scientific_name}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Monstera deliciosa"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Family</label>
+                      <input
+                        type="text"
+                        name="family"
+                        value={plantFormData.family}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Araceae"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Genus</label>
+                      <input
+                        type="text"
+                        name="genus"
+                        value={plantFormData.genus}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Monstera"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Description</label>
+                    <textarea
+                      name="description"
+                      value={plantFormData.description}
+                      onChange={handleInputChange}
+                      rows="4"
+                      placeholder="Describe the plant's appearance, characteristics, and any interesting facts..."
+                    />
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Difficulty Level</label>
+                      <select
+                        name="difficulty_level"
+                        value={plantFormData.difficulty_level}
+                        onChange={handleInputChange}
+                      >
+                        {difficultyLevels.map(level => (
+                          <option key={level.value} value={level.value}>
+                            {level.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Growth Rate</label>
+                      <select
+                        name="growth_rate"
+                        value={plantFormData.growth_rate}
+                        onChange={handleInputChange}
+                      >
+                        {growthRates.map(rate => (
+                          <option key={rate.value} value={rate.value}>
+                            {rate.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Max Height</label>
+                      <input
+                        type="text"
+                        name="max_height"
+                        value={plantFormData.max_height}
+                        onChange={handleInputChange}
+                        placeholder="e.g., 3-6 feet"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Bloom Time</label>
+                      <input
+                        type="text"
+                        name="bloom_time"
+                        value={plantFormData.bloom_time}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Spring, Summer"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row checkboxes">
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        name="is_indoor"
+                        checked={plantFormData.is_indoor}
+                        onChange={(e) => setPlantFormData(prev => ({ ...prev, is_indoor: e.target.checked }))}
+                      />
+                      <span>Indoor Plant</span>
+                    </label>
+
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        name="is_outdoor"
+                        checked={plantFormData.is_outdoor}
+                        onChange={(e) => setPlantFormData(prev => ({ ...prev, is_outdoor: e.target.checked }))}
+                      />
+                      <span>Outdoor Plant</span>
+                    </label>
+
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        name="poisonous"
+                        checked={plantFormData.poisonous}
+                        onChange={(e) => setPlantFormData(prev => ({ ...prev, poisonous: e.target.checked }))}
+                      />
+                      <span>Toxic/Poisonous</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Care Instructions */}
+              {currentStep === 2 && (
+                <div className="form-section">
+                  <div className="form-group">
+                    <label>
+                      <i className="fas fa-tint"></i>
+                      Watering Needs
+                    </label>
+                    <textarea
+                      name="care_instructions.watering"
+                      value={plantFormData.care_instructions.watering}
+                      onChange={handleInputChange}
+                      rows="2"
+                      placeholder="How often should it be watered? Any special watering requirements?"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>
+                      <i className="fas fa-sun"></i>
+                      Sunlight Requirements
+                    </label>
+                    <textarea
+                      name="care_instructions.sunlight"
+                      value={plantFormData.care_instructions.sunlight}
+                      onChange={handleInputChange}
+                      rows="2"
+                      placeholder="Direct sunlight, indirect, shade? How many hours?"
+                    />
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>
+                        <i className="fas fa-thermometer-half"></i>
+                        Temperature Range
+                      </label>
+                      <input
+                        type="text"
+                        name="care_instructions.temperature"
+                        value={plantFormData.care_instructions.temperature}
+                        onChange={handleInputChange}
+                        placeholder="e.g., 65-75°F (18-24°C)"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>
+                        <i className="fas fa-tachometer-alt"></i>
+                        Humidity
+                      </label>
+                      <input
+                        type="text"
+                        name="care_instructions.humidity"
+                        value={plantFormData.care_instructions.humidity}
+                        onChange={handleInputChange}
+                        placeholder="e.g., High humidity (60-80%)"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>
+                      <i className="fas fa-mountain"></i>
+                      Soil Type
+                    </label>
+                    <textarea
+                      name="care_instructions.soil"
+                      value={plantFormData.care_instructions.soil}
+                      onChange={handleInputChange}
+                      rows="2"
+                      placeholder="Preferred soil type, pH level, drainage requirements..."
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>
+                      <i className="fas fa-flask"></i>
+                      Fertilizer Needs
+                    </label>
+                    <textarea
+                      name="care_instructions.fertilizer"
+                      value={plantFormData.care_instructions.fertilizer}
+                      onChange={handleInputChange}
+                      rows="2"
+                      placeholder="Type, frequency, and season of fertilization..."
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Additional Information</label>
+                    <textarea
+                      name="additional_info"
+                      value={plantFormData.additional_info}
+                      onChange={handleInputChange}
+                      rows="3"
+                      placeholder="Any other important information about this plant..."
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Images & Submit */}
+              {currentStep === 3 && (
+                <div className="form-section">
+                  <div className="form-group">
+                    <label>
+                      <i className="fas fa-images"></i>
+                      Plant Images *
+                    </label>
+                    <div className="image-upload-area">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageUpload}
+                        className="image-input"
+                        id="admin-plant-images"
+                      />
+                      <label htmlFor="admin-plant-images" className="upload-label">
+                        <i className="fas fa-cloud-upload-alt"></i>
+                        <span>Click to upload images</span>
+                        <small>Max 5 images, up to 5MB each</small>
+                      </label>
+                    </div>
+
+                    {previewUrls.length > 0 && (
+                      <div className="image-preview-grid">
+                        {previewUrls.map((url, index) => (
+                          <div key={index} className="image-preview-item">
+                            <img src={url} alt={`Preview ${index + 1}`} />
+                            <button
+                              type="button"
+                              className="remove-image"
+                              onClick={() => removeImage(index)}
+                            >
+                              <i className="fas fa-times"></i>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="summary-box">
+                    <h4>Plant Summary</h4>
+                    <p><strong>Plant Name:</strong> {plantFormData.common_name || 'Not provided'}</p>
+                    <p><strong>Scientific Name:</strong> {plantFormData.scientific_name || 'Not provided'}</p>
+                    <p><strong>Difficulty:</strong> {difficultyLevels.find(l => l.value === plantFormData.difficulty_level)?.label || 'Beginner'}</p>
+                    <p><strong>Growth Rate:</strong> {plantFormData.growth_rate || 'Medium'}</p>
+                    <p><strong>Images:</strong> {images.length} image(s) selected</p>
+                    <p className="info-text">
+                      <i className="fas fa-info-circle"></i>
+                      As admin, this plant will be immediately available in the encyclopedia.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="modal-footer">
+              {currentStep > 1 && (
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setCurrentStep(prev => prev - 1)}
+                >
+                  <i className="fas fa-arrow-left"></i>
+                  Previous
+                </button>
+              )}
+
+              {currentStep < 3 ? (
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => setCurrentStep(prev => prev + 1)}
+                >
+                  Next
+                  <i className="fas fa-arrow-right"></i>
+                </button>
+              ) : (
+                <button
+                  className="btn-primary"
+                  onClick={editingPlant ? handleUpdatePlant : handleCreatePlant}
+                  disabled={formLoading || !plantFormData.common_name || !plantFormData.scientific_name || images.length === 0}
+                >
+                  {formLoading ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i>
+                      {editingPlant ? 'Updating...' : 'Creating...'}
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-check"></i>
+                      {editingPlant ? 'Update Plant' : 'Create Plant'}
+                    </>
+                  )}
+                </button>
+              )}
+              
               <button className="btn-secondary" onClick={() => setShowPlantModal(false)}>
                 Cancel
-              </button>
-              <button 
-                className="btn-primary"
-                onClick={editingPlant ? handleUpdatePlant : handleCreatePlant}
-                disabled={!plantFormData.name}
-              >
-                {editingPlant ? 'Update Plant' : 'Create Plant'}
               </button>
             </div>
           </div>
