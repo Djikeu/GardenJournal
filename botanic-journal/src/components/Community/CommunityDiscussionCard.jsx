@@ -118,7 +118,6 @@ const CommunityDiscussionCard = ({ discussion, user, onUpdate }) => {
               </span>
             </div>
           </div>
-
           <div className="discussion-stats">
             <span className="stat-item">
               <i className="fas fa-eye"></i>

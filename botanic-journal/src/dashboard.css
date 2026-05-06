@@ -332,8 +332,8 @@
 }
 
 .summary-icon {
-  width: 56px;
-  height: 56px;
+  width: 86px;
+  height: 66px;
   background: var(--sage-100);
   border-radius: 20px;
   display: flex;

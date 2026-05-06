@@ -1,40 +1,64 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Sidebar = ({ activeView, setActiveView, onLogout, user }) => {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [activeView]);
+
   const navItems = {
     main: [
       { id: 'dashboard', icon: 'fas fa-home', label: 'Dashboard' },
       { id: 'plants', icon: 'fas fa-leaf', label: 'My Plants' },
       { id: 'tasks', icon: 'fas fa-tasks', label: 'Care Tasks' },
       { id: 'journal', icon: 'fas fa-book', label: 'Plant Journal' },
-      { id: 'encyclopedia', icon: 'fas fa-book-open', label: 'Plant Encyclopedia' }
+      { id: 'encyclopedia', icon: 'fas fa-book-open', label: 'Encyclopedia' },
     ],
     analytics: [
       { id: 'analytics', icon: 'fas fa-chart-line', label: 'Analytics' },
       { id: 'planner', icon: 'fas fa-calendar-alt', label: 'Garden Planner' },
-      { id: 'forecast', icon: 'fas fa-cloud-sun-rain', label: 'Weather Forecast' }
+      { id: 'forecast', icon: 'fas fa-cloud-sun-rain', label: 'Weather Forecast' },
     ],
     community: [
-      { id: 'community', icon: 'fas fa-users', label: 'Community Forum' }
-    ]
+      { id: 'community', icon: 'fas fa-users', label: 'Community Forum' },
+    ],
   };
 
-  // Only show suggestion features for non-admin users
   const suggestionItems = [
     { id: 'suggest-plant', icon: 'fas fa-plus-circle', label: 'Suggest New Plant' },
-    { id: 'my-requests', icon: 'fas fa-clipboard-list', label: 'My Requests' }
+    { id: 'my-requests', icon: 'fas fa-clipboard-list', label: 'My Requests' },
   ];
-
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout();
-    }
-  };
 
   const isAdmin = user?.role === 'admin';
 
-  return (
-    <div className="sidebar">
+  const bottomTabs = [
+    { id: 'dashboard', icon: 'fas fa-home', label: 'Home' },
+    { id: 'plants', icon: 'fas fa-leaf', label: 'Plants' },
+    { id: 'tasks', icon: 'fas fa-tasks', label: 'Tasks' },
+    { id: 'community', icon: 'fas fa-users', label: 'Community' },
+  ];
+
+  const NavLink = ({ item }) => (
+    <li>
+      <a
+        href="#"
+        className={`nav-links-item${activeView === item.id ? ' active' : ''}`}
+        onClick={(e) => {
+          e.preventDefault();
+          setActiveView(item.id);
+        }}
+      >
+        <div className="nav-link-content">
+          <i className={item.icon}></i>
+          <span>{item.label}</span>
+        </div>
+      </a>
+    </li>
+  );
+
+  const SidebarContent = () => (
+    <>
       <div className="logo-container">
         <div className="logo">
           <div className="logo-icon">
@@ -47,152 +71,56 @@ const Sidebar = ({ activeView, setActiveView, onLogout, user }) => {
         </div>
       </div>
 
-      <nav className="nav-section">
-        <div className="nav-title">Main Menu</div>
-        <ul className="nav-links">
-          {navItems.main.map(item => (
-            <li key={item.id}>
-              <a
-                href="#"
-                className={activeView === item.id ? 'active' : ''}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveView(item.id);
-                }}
-              >
-                <div className="nav-link-content">
-                  <i className={item.icon}></i>
-                  <span>{item.label}</span>
-                </div>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      <nav className="nav-section">
-        <div className="nav-title">Analytics & Planning</div>
-        <ul className="nav-links">
-          {navItems.analytics.map(item => (
-            <li key={item.id}>
-              <a
-                href="#"
-                className={activeView === item.id ? 'active' : ''}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveView(item.id);
-                }}
-              >
-                <div className="nav-link-content">
-                  <i className={item.icon}></i>
-                  <span>{item.label}</span>
-                </div>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      <nav className="nav-section">
-        <div className="nav-title">Community</div>
-        <ul className="nav-links">
-          {navItems.community.map(item => (
-            <li key={item.id}>
-              <a
-                href="#"
-                className={activeView === item.id ? 'active' : ''}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveView(item.id);
-                }}
-              >
-                <div className="nav-link-content">
-                  <i className={item.icon}></i>
-                  <span>{item.label}</span>
-                </div>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      {/* Plant Suggestions Section - Only for non-admin users */}
-      {!isAdmin && (
+      <div className="sidebar-scroll">
         <nav className="nav-section">
-          <div className="nav-title">Plant Suggestions</div>
+          <div className="nav-title">Main Menu</div>
           <ul className="nav-links">
-            {suggestionItems.map(item => (
-              <li key={item.id}>
-                <a
-                  href="#"
-                  className={activeView === item.id ? 'active' : ''}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setActiveView(item.id);
-                  }}
-                >
-                  <div className="nav-link-content">
-                    <i className={item.icon}></i>
-                    <span>{item.label}</span>
-                  </div>
-                </a>
-              </li>
-            ))}
+            {navItems.main.map(item => <NavLink key={item.id} item={item} />)}
           </ul>
         </nav>
-      )}
 
-      {/* Admin Panel Section - Only visible to admin users */}
-      {isAdmin && (
         <nav className="nav-section">
-          <div className="nav-title">Administration</div>
+          <div className="nav-title">Analytics & Planning</div>
           <ul className="nav-links">
-            <li>
-              <a
-                href="#"
-                className={activeView === 'admin' ? 'active' : ''}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveView('admin');
-                }}
-              >
-                <div className="nav-link-content">
-                  <i className="fas fa-shield-alt"></i>
-                  <span>Admin Panel</span>
-                </div>
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className={activeView === 'plant-requests' ? 'active' : ''}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveView('plant-requests');
-                }}
-              >
-                <div className="nav-link-content">
-                  <i className="fas fa-clipboard-list"></i>
-                  <span>Plant Requests</span>
-                </div>
-              </a>
-            </li>
+            {navItems.analytics.map(item => <NavLink key={item.id} item={item} />)}
           </ul>
         </nav>
-      )}
 
-      {/* Logout Section */}
+        <nav className="nav-section">
+          <div className="nav-title">Community</div>
+          <ul className="nav-links">
+            {navItems.community.map(item => <NavLink key={item.id} item={item} />)}
+          </ul>
+        </nav>
+
+        {!isAdmin && (
+          <nav className="nav-section">
+            <div className="nav-title">Plant Suggestions</div>
+            <ul className="nav-links">
+              {suggestionItems.map(item => <NavLink key={item.id} item={item} />)}
+            </ul>
+          </nav>
+        )}
+
+        {isAdmin && (
+          <nav className="nav-section">
+            <div className="nav-title">Administration</div>
+            <ul className="nav-links">
+              <NavLink item={{ id: 'admin', icon: 'fas fa-shield-alt', label: 'Admin Panel' }} />
+              <NavLink item={{ id: 'plant-requests', icon: 'fas fa-clipboard-list', label: 'Plant Requests' }} />
+            </ul>
+          </nav>
+        )}
+      </div>
+
       <div className="sidebar-footer">
         <div className="nav-section">
           <ul className="nav-links">
             <li>
               <a
                 href="#"
-                className="logout-btn"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleLogout();
-                }}
+                className="nav-links-item logout-link"
+                onClick={(e) => { e.preventDefault(); onLogout?.(); }}
               >
                 <div className="nav-link-content">
                   <i className="fas fa-sign-out-alt"></i>
@@ -203,7 +131,51 @@ const Sidebar = ({ activeView, setActiveView, onLogout, user }) => {
           </ul>
         </div>
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* DESKTOP sidebar - sakriven na mobilnom via CSS */}
+      <div className="sidebar">
+        <SidebarContent />
+      </div>
+
+      {/* MOBILE wrapper - sakriven na desktopu via CSS */}
+      <div className="mobile-nav-wrapper">
+        <div
+          className={`drawer-overlay${drawerOpen ? ' visible' : ''}`}
+          onClick={() => setDrawerOpen(false)}
+        />
+
+        <div className={`mobile-drawer${drawerOpen ? ' open' : ''}`}>
+          <div className="drawer-handle-bar" onClick={() => setDrawerOpen(false)}>
+            <div className="drawer-handle"></div>
+          </div>
+          <SidebarContent />
+        </div>
+
+        <nav className="bottom-nav">
+          {bottomTabs.map(tab => (
+            <button
+              key={tab.id}
+              className={`bottom-tab${activeView === tab.id ? ' active' : ''}`}
+              onClick={() => setActiveView(tab.id)}
+            >
+              <i className={tab.icon}></i>
+              <span>{tab.label}</span>
+            </button>
+          ))}
+          <button
+            className={`bottom-tab${drawerOpen ? ' active' : ''}`}
+            onClick={() => setDrawerOpen(prev => !prev)}
+          >
+            <i className="fas fa-bars"></i>
+            <span>More</span>
+          </button>
+        </nav>
+      </div>
+    </>
   );
 };
 

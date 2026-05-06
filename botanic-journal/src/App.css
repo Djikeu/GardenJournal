@@ -62,45 +62,9 @@
   padding: 0;
   box-sizing: border-box;
 }
-.container {
-  display: flex;
-  min-height: 100vh;
-  position: relative;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  height: 100vh;        /* ADD THIS */
-  overflow: hidden;     /* ADD THIS */
-}
 
-.main-content {
-  flex: 1;
-  padding: 30px;
-  overflow-y: auto;     /* This stays — makes only the content scroll */
-  width: 100%;
-  min-width: 0;
-  position: relative;
-}
 
-.sidebar {
-  width: 320px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 30px 0;
-  height: 100vh;        /* Keep this */
-  overflow-y: auto;     /* Keep this */
-  position: sticky;     /* Keep this, now it'll work */
-  top: 0;
-  flex-shrink: 0;
-  z-index: 100;
-}
 
-/* Remove or adjust the ::before pseudo-element that's causing width issues */
-.main-content::before {
-    display: none !important;
-    content: none !important;
-}
 
 /* OR if you want to keep it but not affect layout: */
 .main-content::before {
@@ -194,12 +158,7 @@ body {
   overflow-x: hidden;
 }
 
-.container {
-  display: flex;
-  min-height: 100vh;
-  position: relative;
-  width: 100%;
-}
+
 
 
 
@@ -380,30 +339,6 @@ body {
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-2px); }
-}
-
-/* Enhanced Main Content */
-.main-content {
-  flex: 1;
-  padding: 30px;
-  overflow-y: auto;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="0.5" fill="%23e8f4e8" opacity="0.3"/><circle cx="80" cy="40" r="0.3" fill="%23e8f4e8" opacity="0.2"/><circle cx="40" cy="80" r="0.4" fill="%23e8f4e8" opacity="0.25"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-  position: relative;
-  min-width: 0; /* Prevent flex item from overflowing */
-}
-
-.main-content::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 50%;
-  height: 100%;
-  background: radial-gradient(circle at top right, 
-      rgba(125, 179, 110, 0.1) 0%, 
-      transparent 50%);
-  pointer-events: none;
-  z-index: 0;
 }
 
 .header {
@@ -911,10 +846,8 @@ body {
 }
 
 @media (max-width: 992px) {
-  .sidebar {
-    width: 280px;
-  }
-  
+
+
   .dashboard-grid {
     grid-template-columns: repeat(6, 1fr);
   }
@@ -924,12 +857,6 @@ body {
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
-  }
-  
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: static;
   }
   
   .nav-links {
@@ -3309,3 +3236,316 @@ input:checked + .slider:before {
   background: #ef4444;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   DODAJ OVO NA KRAJ App.css
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Desktop: sakrij mobile wrapper */
+.mobile-nav-wrapper {
+  display: none;
+}
+
+/* Desktop: sidebar ostaje vidljiv */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar scroll area */
+.sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* nav-links-item - isto kao stari .nav-links a */
+.nav-links-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  color: var(--neutral-600);
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.nav-links-item:hover {
+  background: rgba(125, 179, 110, 0.1);
+  color: var(--forest-700);
+  transform: translateX(4px);
+}
+
+.nav-links-item.active {
+  background: var(--gradient-2);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.logout-link {
+  color: #ef4444 !important;
+}
+.logout-link:hover {
+  background: rgba(239, 68, 68, 0.08) !important;
+  color: #dc2626 !important;
+}
+
+/* ── MOBILE ─────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+
+  /* Sakrij desktop sidebar */
+  .sidebar {
+    display: none !important;
+  }
+
+  /* Prikaži mobile wrapper */
+  .mobile-nav-wrapper {
+    display: block;
+  }
+
+  /* Container layout na mobilnom */
+  .container {
+    flex-direction: column !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  /* Main content scrolluje, 64px prostor za bottom nav */
+  .main-content {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 16px !important;
+    padding-bottom: 80px !important;
+    height: 0 !important; /* ključno: sprječava overflow */
+    min-height: 0 !important;
+  }
+
+  /* ── Bottom Tab Bar ───────────────────────────────────────── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: white;
+    border-top: 1px solid rgba(125, 179, 110, 0.25);
+    display: flex;
+    align-items: stretch;
+    z-index: 1000;
+    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  .bottom-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    font-size: 10px;
+    font-weight: 500;
+    font-family: var(--font-primary);
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s;
+  }
+
+  .bottom-tab i {
+    font-size: 19px;
+    transition: transform 0.15s;
+  }
+
+  .bottom-tab.active {
+    color: var(--forest-700, #4a7c4a);
+  }
+
+  .bottom-tab.active i {
+    transform: translateY(-2px);
+  }
+
+  /* ── Overlay ──────────────────────────────────────────────── */
+  .drawer-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1001;
+  }
+
+  .drawer-overlay.visible {
+    display: block;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* ── Slide-up Drawer ──────────────────────────────────────── */
+  .mobile-drawer {
+    position: fixed;
+    bottom: 64px;
+    left: 0;
+    right: 0;
+    max-height: 78vh;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    z-index: 1002;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(110%);
+    transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+  }
+
+  .mobile-drawer.open {
+    transform: translateY(0);
+  }
+
+  .drawer-handle-bar {
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .drawer-handle {
+    width: 36px;
+    height: 4px;
+    background: #d1d5db;
+    border-radius: 2px;
+  }
+
+  .mobile-drawer .sidebar-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-drawer .sidebar-footer {
+    flex-shrink: 0;
+    border-top: 1px solid rgba(125, 179, 110, 0.2);
+  }
+
+  .mobile-drawer .logo-container {
+    padding: 8px 20px 12px;
+    margin-bottom: 0;
+  }
+}
+
+
+/* Fix zeleni overlay koji prekriva sadržaj /
+.main-content::before {
+  display: none !important;
+}
+ 
+/ Desktop: container mora biti flex ROW (sidebar lijevo, content desno) /
+@media (min-width: 768px) {
+  .container {
+    display: flex !important;
+    flex-direction: row !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+  }
+ 
+  .sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 280px !important;
+    min-width: 280px !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    flex-shrink: 0 !important;
+  }
+ 
+  .main-content {
+    flex: 1 !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    padding: 30px !important;
+    min-width: 0 !important;
+  }
+ 
+  / Sakrij mobile nav na desktopu /
+  .mobile-nav-wrapper {
+    display: none !important;
+  }
+}
+ 
+/ Mobile: fix visina content-a */
+@media (max-width: 767px) {
+  .main-content {
+    flex: 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding: 16px !important;
+    padding-bottom: 80px !important;
+  }
+ 
+  .container {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+}
+
+
+
+@media (min-width: 768px) {
+  .container {
+    display: flex !important;
+    flex-direction: row !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    align-items: stretch !important;
+  }
+ 
+  .sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    /* Vraća originalni izgled sidebara */
+    background: white !important;
+    border-right: 1px solid rgba(125, 179, 110, 0.2) !important;
+  }
+ 
+  .main-content {
+    flex: 1 !important;
+    width: auto !important;
+    max-width: none !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 30px !important;
+    min-width: 0 !important;
+  }
+ 
+  .main-content::before {
+    display: none !important;
+  }
+ 
+  .mobile-nav-wrapper {
+    display: none !important;
+  }
+}

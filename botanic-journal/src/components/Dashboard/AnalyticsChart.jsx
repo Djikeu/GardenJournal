@@ -1,596 +1,388 @@
 import React, { useState, useEffect } from 'react';
 import {
   Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  RadialLinearScale,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
+  CategoryScale, LinearScale, PointElement, LineElement,
+  BarElement, ArcElement, Title, Tooltip, Legend, Filler
 } from 'chart.js';
-import { Line, Bar, Pie, Radar } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
 import { apiService } from '../../services/api';
 
-// Register ChartJS components
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  RadialLinearScale,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
+  CategoryScale, LinearScale, PointElement, LineElement,
+  BarElement, ArcElement, Title, Tooltip, Legend, Filler
 );
 
-// Color palette
-const COLORS = {
-  primary: {
-    main: '#10B981',     // Emerald green
-    light: 'rgba(16, 185, 129, 0.1)',
-    dark: '#059669'
-  },
-  secondary: {
-    main: '#F59E0B',     // Amber
-    light: 'rgba(245, 158, 11, 0.1)',
-    dark: '#D97706'
-  },
-  accent: {
-    main: '#3B82F6',     // Blue
-    light: 'rgba(59, 130, 246, 0.1)',
-    dark: '#2563EB'
-  },
-  neutral: {
-    100: '#F9FAFB',
-    200: '#E5E7EB',
-    300: '#D1D5DB',
-    700: '#374151',
-    900: '#111827'
-  }
+const C = {
+  green:  { solid: '#1D9E75', light: 'rgba(29,158,117,0.12)', dark: '#0F6E56' },
+  amber:  { solid: '#EF9F27', light: 'rgba(239,159,39,0.15)' },
+  red:    { solid: '#E24B4A', light: 'rgba(226,75,74,0.12)'  },
+  blue:   { solid: '#378ADD', light: 'rgba(55,138,221,0.12)' },
+  purple: { solid: '#7F77DD' },
+  coral:  { solid: '#D85A30' },
+  gray:   { text: '#6B7280', border: '#E5E7EB', bg: '#F9FAFB', dark: '#374151' }
 };
 
-const AnalyticsChart = ({ showNotification, user }) => {
-  const [loading, setLoading] = useState(true);
-  const [plantsData, setPlantsData] = useState([]);
-  const [timeRange, setTimeRange] = useState('month');
+const TYPE_COLORS = [C.blue.solid, C.green.solid, C.amber.solid, C.red.solid, C.purple.solid, C.coral.solid];
 
-  // Load user plants data
-  useEffect(() => {
-    loadPlantsData();
-  }, [user]);
+const TASK_TYPE_ICONS = {
+  watering:    '💧',
+  fertilizing: '🌿',
+  pruning:     '✂️',
+  repotting:   '🪴',
+  pest_control:'🐛',
+  other:       '📋',
+};
 
-  const loadPlantsData = async () => {
+const TOOLTIP_STYLE = {
+  backgroundColor: 'rgba(17,24,39,0.92)',
+  padding: 10,
+  cornerRadius: 8,
+  titleFont: { size: 12 },
+  bodyFont: { size: 12 },
+  borderColor: 'rgba(255,255,255,0.08)',
+  borderWidth: 1,
+};
+
+// Build full 30-day added-plants series from recentActivity
+function buildActivitySeries(recentActivity) {
+  const now = new Date();
+  const map = {};
+  (recentActivity || []).forEach(r => { map[r.date] = parseInt(r.count, 10); });
+  return Array.from({ length: 30 }, (_, i) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() - (29 - i));
+    const key = d.toISOString().split('T')[0];
+    const label = d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
+    return { label, value: map[key] || 0 };
+  });
+}
+
+// Build 14-day upcoming tasks series
+function buildUpcomingSeries(tasks) {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return Array.from({ length: 14 }, (_, i) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() + i);
+    const key = d.toISOString().split('T')[0];
+    const label = i === 0 ? 'Today'
+      : i === 1 ? 'Tomorrow'
+      : d.toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' });
+    const dayTasks = tasks.filter(t => !t.completed && t.due_date?.split('T')[0] === key);
+    return { key, label, count: dayTasks.length, tasks: dayTasks };
+  });
+}
+
+function countOverdue(tasks) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return tasks.filter(t => {
+    if (t.completed || !t.due_date) return false;
+    return new Date(t.due_date.split('T')[0]) < today;
+  }).length;
+}
+
+const AnalyticsChart = ({ showNotification }) => {
+  const [loading, setLoading]     = useState(true);
+  const [analytics, setAnalytics] = useState(null);
+  const [tasks, setTasks]         = useState([]);
+
+  useEffect(() => { load(); }, []);
+
+  const load = async () => {
     try {
       setLoading(true);
-      const response = await apiService.getPlants();
-      if (response.success) {
-        setPlantsData(response.data);
-        console.log('📊 Analytics: Loaded', response.data.length, 'plants');
-      } else {
-        throw new Error(response.message || 'Failed to load plant data');
-      }
-    } catch (error) {
-      console.error('❌ Analytics error:', error);
-      showNotification('Error', error.message, 'error');
+      const [analyticsRes, tasksRes] = await Promise.all([
+        apiService.getAnalytics(),
+        apiService.getTasks(),
+      ]);
+      if (!analyticsRes.success) throw new Error(analyticsRes.message || 'Failed to load analytics');
+      if (!tasksRes.success)     throw new Error(tasksRes.message   || 'Failed to load tasks');
+      setAnalytics(analyticsRes.data);
+      setTasks(tasksRes.data || []);
+    } catch (err) {
+      showNotification?.('Error', err.message, 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  // Calculate analytics from plant data
-  const calculateHealthScore = (plant) => {
-    // Calculate health score based on plant properties
-    let score = 75; // Base score
-    
-    // Status-based adjustments
-    if (plant.status === 'healthy') score += 20;
-    else if (plant.status === 'warning') score += 5;
-    // else danger: keep base score
-    
-    // Type-based adjustments
-    if (plant.type === 'succulent') score += 5; // Succulents are hardy
-    if (plant.is_favorite) score += 3; // Favorite plants are probably well-cared for
-    
-    // Add random variation for demo (in real app, use actual health metrics)
-    score += Math.floor(Math.random() * 10) - 5;
-    
-    return Math.min(Math.max(score, 60), 100); // Keep between 60-100
+  if (loading) return (
+    <div style={s.card}>
+      <div style={s.cardHeader}><span style={s.cardTitle}>Plant Analytics</span></div>
+      <div style={s.loadingWrap}>
+        <div style={s.spinner} />
+        <p style={{ color: C.gray.text, fontSize: 13, marginTop: 12 }}>Loading analytics…</p>
+      </div>
+    </div>
+  );
+
+  if (!analytics) return null;
+
+  const { totalPlants, favorites, healthyPlants, types, statuses, recentActivity } = analytics;
+
+  // ── TASK STATS ────────────────────────────────────────────────
+  const pendingTasks   = tasks.filter(t => !t.completed);
+  const completedTasks = tasks.filter(t => t.completed);
+  const overdue        = countOverdue(tasks);
+  const todayStr       = new Date().toISOString().split('T')[0];
+  const dueToday       = pendingTasks.filter(t => t.due_date?.split('T')[0] === todayStr).length;
+  const upcomingSeries = buildUpcomingSeries(tasks);
+  const totalUpcoming  = upcomingSeries.reduce((a, b) => a + b.count, 0);
+
+  const taskTypeCounts = pendingTasks.reduce((acc, t) => {
+    const type = t.type || 'other';
+    acc[type] = (acc[type] || 0) + 1;
+    return acc;
+  }, {});
+
+  // ── STAT CARDS ────────────────────────────────────────────────
+  const warningCount = parseInt(statuses.find(x => x.status === 'warning')?.count || 0, 10);
+  const dangerCount  = parseInt(statuses.find(x => x.status === 'danger')?.count  || 0, 10);
+
+  const stats = [
+    { label: 'Total plants',    value: totalPlants,          sub: `${types.length} species`,                                                          color: C.blue.solid   },
+    { label: 'Healthy',         value: healthyPlants,        sub: `${totalPlants ? Math.round(healthyPlants / totalPlants * 100) : 0}% of collection`, color: C.green.solid  },
+    { label: 'Pending tasks',   value: pendingTasks.length,  sub: overdue > 0 ? `${overdue} overdue` : `${dueToday} due today`,                       color: overdue > 0 ? C.red.solid : C.amber.solid },
+    { label: 'Completed tasks', value: completedTasks.length,sub: tasks.length > 0 ? `${Math.round(completedTasks.length / tasks.length * 100)}% done` : '—', color: C.purple.solid },
+  ];
+
+  // ── ADDED PLANTS LINE CHART (30 days, unchanged) ──────────────
+  const activitySeries = buildActivitySeries(recentActivity);
+  const totalAdded     = activitySeries.reduce((a, b) => a + b.value, 0);
+
+  const activityChartData = {
+    labels: activitySeries.map(d => d.label),
+    datasets: [{
+      label: 'Plants added',
+      data: activitySeries.map(d => d.value),
+      borderColor: C.green.solid,
+      backgroundColor: C.green.light,
+      tension: 0.4,
+      fill: true,
+      pointRadius: activitySeries.map(d => d.value > 0 ? 4 : 0),
+      pointBackgroundColor: C.green.solid,
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      pointHoverRadius: 7,
+    }]
   };
 
-  // Generate time series data based on plant creation dates
-  const generateTimeSeriesData = () => {
-    const last6Months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    
-    // Count plants created per month
-    const plantsPerMonth = last6Months.map(() => 0);
-    
-    // For demo: simulate plant growth over time
-    // In real app, you'd track actual plant health measurements over time
-    const healthData = [75, 78, 82, 80, 85, 88];
-    const growthData = [65, 70, 75, 78, 82, 85];
-    
-    return {
-      labels: last6Months,
-      healthScores: healthData,
-      growthRates: growthData,
-      plantCounts: plantsPerMonth
-    };
-  };
-
-  // 1. MAIN TREND CHART
-  const trendData = (() => {
-    const timeSeries = generateTimeSeriesData();
-    return {
-      labels: timeSeries.labels,
-      datasets: [
-        {
-          label: 'Avg. Plant Health',
-          data: timeSeries.healthScores,
-          borderColor: COLORS.primary.main,
-          backgroundColor: COLORS.primary.light,
-          tension: 0.4,
-          fill: true,
-          pointBackgroundColor: COLORS.primary.main,
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 3,
-          pointRadius: 6,
-          pointHoverRadius: 10
-        },
-        {
-          label: 'Collection Growth',
-          data: timeSeries.growthData || [0, 1, 3, 5, 8, plantsData.length],
-          borderColor: COLORS.secondary.main,
-          backgroundColor: COLORS.secondary.light,
-          tension: 0.4,
-          fill: false,
-          borderDash: [5, 5],
-          pointBackgroundColor: COLORS.secondary.main,
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 3,
-          pointRadius: 6,
-          pointHoverRadius: 10
-        }
-      ]
-    };
-  })();
-
-  // 2. PLANT TYPE DISTRIBUTION
-  const plantTypeData = (() => {
-    const typeCounts = {};
-    plantsData.forEach(plant => {
-      typeCounts[plant.type] = (typeCounts[plant.type] || 0) + 1;
-    });
-
-    const types = Object.keys(typeCounts);
-    return {
-      labels: types.map(t => t.charAt(0).toUpperCase() + t.slice(1)),
-      datasets: [{
-        label: 'Number of Plants',
-        data: types.map(t => typeCounts[t]),
-        backgroundColor: types.map((_, i) => {
-          const colors = [
-            COLORS.primary.main,
-            COLORS.accent.main,
-            COLORS.secondary.main,
-            '#8B5CF6', // Purple
-            '#EC4899', // Pink
-            '#06B6D4'  // Cyan
-          ];
-          return colors[i % colors.length];
-        }),
-        borderRadius: 8,
-        borderSkipped: false
-      }]
-    };
-  })();
-
-  // 3. HEALTH STATUS DISTRIBUTION
-  const healthStatusData = (() => {
-    const statusCounts = { healthy: 0, warning: 0, danger: 0 };
-    plantsData.forEach(plant => {
-      if (statusCounts[plant.status] !== undefined) {
-        statusCounts[plant.status]++;
-      }
-    });
-
-    return {
-      labels: ['Healthy', 'Warning', 'Needs Attention'],
-      datasets: [{
-        data: [statusCounts.healthy, statusCounts.warning, statusCounts.danger],
-        backgroundColor: [
-          COLORS.primary.main,  // Healthy - green
-          COLORS.secondary.main, // Warning - yellow
-          '#EF4444'              // Danger - red
-        ],
-        borderWidth: 2,
-        borderColor: '#fff',
-        hoverOffset: 15
-      }]
-    };
-  })();
-
-  // 4. CARE REQUIREMENTS ANALYSIS
-  const careRequirementsData = (() => {
-    const lightLevels = {};
-    const waterSchedules = {};
-    
-    plantsData.forEach(plant => {
-      if (plant.light_requirements) {
-        lightLevels[plant.light_requirements] = (lightLevels[plant.light_requirements] || 0) + 1;
-      }
-      if (plant.watering_schedule) {
-        waterSchedules[plant.watering_schedule] = (waterSchedules[plant.watering_schedule] || 0) + 1;
-      }
-    });
-
-    return {
-      lightLevels,
-      waterSchedules
-    };
-  })();
-
-  // Chart options
-  const trendOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
+  const activityOptions = {
+    responsive: true, maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          usePointStyle: true,
-          padding: 15,
-          font: { size: 12, weight: '500' }
-        }
-      },
+      legend: { display: false },
       tooltip: {
-        backgroundColor: 'rgba(17, 24, 39, 0.9)',
-        padding: 12,
-        cornerRadius: 8
+        ...TOOLTIP_STYLE,
+        callbacks: {
+          title: ctx => activitySeries[ctx[0].dataIndex]?.label || '',
+          label: ctx => ` ${ctx.raw} plant${ctx.raw !== 1 ? 's' : ''} added`,
+        }
       }
     },
     scales: {
       x: {
-        grid: { color: COLORS.neutral[200] }
-      },
-      y: {
-        beginAtZero: false,
-        min: 50,
-        max: 100,
-        grid: { color: COLORS.neutral[200] },
+        grid: { display: false },
         ticks: {
-          callback: (value) => `${value}%`
+          color: C.gray.text, font: { size: 10 }, maxRotation: 0, autoSkip: false,
+          callback: (_, i) => i % 5 === 0 ? activitySeries[i]?.label : ''
         }
-      }
+      },
+      y: { beginAtZero: true, grid: { color: C.gray.border }, ticks: { color: C.gray.text, font: { size: 11 }, stepSize: 1, precision: 0 } }
     }
   };
 
-  const barOptions = {
-    ...trendOptions,
+  // ── TYPE BAR CHART ────────────────────────────────────────────
+  const typeChartData = {
+    labels: types.map(t => t.type.charAt(0).toUpperCase() + t.type.slice(1)),
+    datasets: [{
+      label: 'Plants',
+      data: types.map(t => parseInt(t.count, 10)),
+      backgroundColor: types.map((_, i) => TYPE_COLORS[i % TYPE_COLORS.length]),
+      borderRadius: 6, borderSkipped: false,
+    }]
+  };
+
+  const typeOptions = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { ...TOOLTIP_STYLE, callbacks: { label: ctx => ` ${ctx.raw} plant${ctx.raw !== 1 ? 's' : ''}` } } },
     scales: {
-      x: { grid: { display: false } },
-      y: { beginAtZero: true, grid: { color: COLORS.neutral[200] } }
+      x: { grid: { display: false }, ticks: { color: C.gray.text, font: { size: 11 } } },
+      y: { beginAtZero: true, grid: { color: C.gray.border }, ticks: { color: C.gray.text, stepSize: 1, precision: 0 } }
     }
   };
 
-  const pieOptions = {
-    ...trendOptions,
+  // ── UPCOMING TASKS LINE CHART (replaces health doughnut) ──────
+  const upcomingChartData = {
+    labels: upcomingSeries.map(b => b.label),
+    datasets: [{
+      label: 'Tasks due',
+      data: upcomingSeries.map(b => b.count),
+      borderColor: C.amber.solid,
+      backgroundColor: C.amber.light,
+      tension: 0.4,
+      fill: true,
+      pointRadius: upcomingSeries.map(b => b.count > 0 ? 5 : 0),
+      pointBackgroundColor: upcomingSeries.map(b => b.count > 0 ? C.amber.solid : 'transparent'),
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      pointHoverRadius: 7,
+    }]
+  };
+
+  const upcomingOptions = {
+    responsive: true, maintainAspectRatio: false,
     plugins: {
-      ...trendOptions.plugins,
+      legend: { display: false },
       tooltip: {
-        ...trendOptions.plugins.tooltip,
+        ...TOOLTIP_STYLE,
         callbacks: {
-          label: (context) => {
-            const label = context.label || '';
-            const value = context.raw || 0;
-            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-            const percentage = Math.round((value / total) * 100);
-            return `${label}: ${value} plants (${percentage}%)`;
+          title: ctx => upcomingSeries[ctx[0].dataIndex]?.label || '',
+          label: ctx => ` ${ctx.raw} task${ctx.raw !== 1 ? 's' : ''} due`,
+          afterBody: ctx => {
+            const bucket = upcomingSeries[ctx[0].dataIndex];
+            if (!bucket?.tasks?.length) return [];
+            return ['', ...bucket.tasks.slice(0, 4).map(t =>
+              `  ${TASK_TYPE_ICONS[t.type] || '📋'} ${t.plant_name || 'General'}: ${t.title}`
+            )];
           }
         }
       }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: {
+          color: C.gray.text, font: { size: 10 }, maxRotation: 35, autoSkip: false,
+          callback: (_, i) => {
+            if (i === 0 || i === 1) return upcomingSeries[i]?.label;
+            return i % 3 === 0 ? upcomingSeries[i]?.label : '';
+          }
+        }
+      },
+      y: { beginAtZero: true, grid: { color: C.gray.border }, ticks: { color: C.gray.text, font: { size: 11 }, stepSize: 1, precision: 0 } }
     }
   };
 
-  // Quick stats
-  const stats = [
-    { 
-      label: 'Total Plants', 
-      value: plantsData.length, 
-      change: '+2', 
-      icon: '🌿', 
-      color: COLORS.primary.main 
-    },
-    { 
-      label: 'Avg. Health Score', 
-      value: plantsData.length > 0 
-        ? Math.round(plantsData.reduce((sum, plant) => sum + calculateHealthScore(plant), 0) / plantsData.length) + '%'
-        : '0%', 
-      change: '+5%', 
-      icon: '📈', 
-      color: COLORS.accent.main 
-    },
-    { 
-      label: 'Favorites', 
-      value: plantsData.filter(p => p.is_favorite).length, 
-      change: '+1', 
-      icon: '⭐', 
-      color: COLORS.secondary.main 
-    },
-    { 
-      label: 'Plant Types', 
-      value: new Set(plantsData.map(p => p.type)).size, 
-      change: '+1', 
-      icon: '🌱', 
-      color: '#8B5CF6' 
-    }
-  ];
-
-  const careStats = [
-    { 
-      label: 'Most Common Light', 
-      value: Object.keys(careRequirementsData.lightLevels).length > 0
-        ? Object.entries(careRequirementsData.lightLevels)
-            .sort(([,a], [,b]) => b - a)[0][0]
-        : 'N/A',
-      icon: '☀️'
-    },
-    { 
-      label: 'Watering Frequency', 
-      value: Object.keys(careRequirementsData.waterSchedules).length > 0
-        ? Object.entries(careRequirementsData.waterSchedules)
-            .sort(([,a], [,b]) => b - a)[0][0]
-        : 'N/A',
-      icon: '💧'
-    }
-  ];
-
-  if (loading) {
-    return (
-      <div className="card" style={{ gridColumn: 'span 8' }}>
-        <div className="card-header">
-          <h3 className="card-title">
-            <i className="fas fa-chart-line"></i>
-            Plant Health Analytics
-          </h3>
-        </div>
-        <div className="chart-container" style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="loading-spinner">Loading analytics...</div>
-        </div>
-      </div>
-    );
-  }
+  // ── TIP ───────────────────────────────────────────────────────
+  let tip = 'Everything looks good — all caught up!';
+  if (overdue > 0)          tip = `${overdue} task${overdue > 1 ? 's are' : ' is'} overdue — take care of them first.`;
+  else if (dueToday > 0)    tip = `${dueToday} task${dueToday > 1 ? 's are' : ' is'} due today.`;
+  else if (dangerCount > 0) tip = `${dangerCount} plant${dangerCount > 1 ? 's need' : ' needs'} urgent attention.`;
+  else if (totalUpcoming === 0 && pendingTasks.length === 0) tip = 'No upcoming tasks. Add care tasks to track your plant routine.';
 
   return (
-    <div className="card" style={{ gridColumn: 'span 8' }}>
-      <div className="card-header">
-        <h3 className="card-title">
-          <i className="fas fa-chart-line"></i>
-          Plant Health Analytics
-          <span className="subtitle">Based on your {plantsData.length} plants</span>
-        </h3>
-        <div className="card-actions">
-          <button className="card-btn" onClick={loadPlantsData} title="Refresh">
-            <i className="fas fa-sync-alt"></i>
-          </button>
-          <button className="card-btn" title="Export">
-            <i className="fas fa-download"></i>
-          </button>
+    <div style={s.card}>
+
+      {/* HEADER */}
+      <div style={s.cardHeader}>
+        <div>
+          <span style={s.cardTitle}>Plant Analytics</span>
+          <span style={s.cardSub}>{totalPlants} plants · {tasks.length} total tasks</span>
         </div>
+        <button style={s.refreshBtn} onClick={load} title="Refresh">↻</button>
       </div>
 
-      {/* Stats Summary */}
-      <div className="stats-summary-analytics">
-        {stats.map((stat, index) => (
-          <div key={index} className="stat-item">
-            <div className="stat-icon" style={{ backgroundColor: `${stat.color}15` }}>
-              <span style={{ color: stat.color }}>{stat.icon}</span>
-            </div>
-            <div className="stat-content">
-              <div className="stat-value">{stat.value}</div>
-              <div className="stat-label">{stat.label}</div>
-              <div className="stat-change positive">
-                <i className="fas fa-arrow-up"></i>
-                {stat.change}
-              </div>
-            </div>
+      {/* STAT CARDS */}
+      <div style={s.statsGrid}>
+        {stats.map((st, i) => (
+          <div key={i} style={s.statCard}>
+            <div style={{ ...s.statVal, color: st.color }}>{st.value}</div>
+            <div style={s.statLabel}>{st.label}</div>
+            <div style={s.statSub}>{st.sub}</div>
           </div>
         ))}
       </div>
 
-      {/* Main Chart */}
-      <div className="chart-container" style={{ height: '300px', marginTop: '20px' }}>
-        <Line data={trendData} options={trendOptions} />
-      </div>
-
-      {/* Additional Charts Row */}
-      <div className="charts-row" style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
-        {/* Plant Types Distribution */}
-        <div className="chart-mini" style={{ flex: 1 }}>
-          <div className="chart-header">
-            <h4>Plant Types</h4>
-          </div>
-          <div className="chart-container" style={{ height: '200px' }}>
-            <Bar data={plantTypeData} options={barOptions} />
-          </div>
+      {/* ADDED PLANTS — 30 days (unchanged) */}
+      <div style={s.section}>
+        <div style={s.sectionHeader}>
+          <span style={s.sectionTitle}>Plants added — last 30 days</span>
+          <span style={{ ...s.badge, background: C.green.light, color: C.green.dark }}>{totalAdded} total</span>
         </div>
-
-        {/* Health Status */}
-        <div className="chart-mini" style={{ flex: 1 }}>
-          <div className="chart-header">
-            <h4>Health Status</h4>
-          </div>
-          <div className="chart-container" style={{ height: '200px' }}>
-            <Pie data={healthStatusData} options={pieOptions} />
-          </div>
+        <div style={{ height: 200 }}>
+          <Line data={activityChartData} options={activityOptions} />
         </div>
       </div>
 
-      {/* Care Requirements */}
-      {plantsData.length > 0 && (
-        <div className="care-insights" style={{ marginTop: '20px', padding: '15px', background: COLORS.neutral[100], borderRadius: '8px' }}>
-          <h4 style={{ marginBottom: '10px' }}>📋 Care Insights</h4>
-          <div style={{ display: 'flex', gap: '20px' }}>
-            {careStats.map((stat, index) => (
-              <div key={index} className="care-stat">
-                <span className="care-icon">{stat.icon}</span>
-                <div>
-                  <div className="care-label">{stat.label}</div>
-                  <div className="care-value">{stat.value}</div>
-                </div>
+      {/* BOTTOM ROW: plant types + upcoming tasks */}
+      <div style={s.bottomRow}>
+
+        {/* Plant types bar chart */}
+        <div style={s.miniCard}>
+          <span style={s.sectionTitle}>Plants by type</span>
+          <div style={{ height: 180, marginTop: 10 }}>
+            <Bar data={typeChartData} options={typeOptions} />
+          </div>
+        </div>
+
+        {/* Upcoming tasks line chart — replaces health status doughnut */}
+        <div style={s.miniCard}>
+          <div style={s.sectionHeader}>
+            <span style={s.sectionTitle}>Upcoming tasks — 14 days</span>
+            {totalUpcoming > 0 && (
+              <span style={{ ...s.badge, background: C.amber.light, color: '#92400E' }}>{totalUpcoming} scheduled</span>
+            )}
+          </div>
+          {totalUpcoming === 0
+            ? <div style={s.empty}>No tasks scheduled</div>
+            : <div style={{ height: 160 }}>
+                <Line data={upcomingChartData} options={upcomingOptions} />
               </div>
-            ))}
-          </div>
-          <div style={{ fontSize: '12px', color: COLORS.neutral[700], marginTop: '10px' }}>
-            <i className="fas fa-lightbulb"></i>
-            <span>Tip: {plantsData.length === 1 
-              ? 'Add more plants to see detailed analytics' 
-              : plantsData.filter(p => p.status === 'healthy').length === plantsData.length
-                ? 'All your plants are healthy! Keep up the great work.'
-                : 'Check plants marked as "warning" or "danger" for special care needs.'}
-            </span>
-          </div>
+          }
+          {/* Care type pills inside the card */}
+          {Object.keys(taskTypeCounts).length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+              {Object.entries(taskTypeCounts)
+                .sort((a, b) => b[1] - a[1])
+                .map(([type, count]) => (
+                  <div key={type} style={s.typePill}>
+                    <span>{TASK_TYPE_ICONS[type] || '📋'}</span>
+                    <span style={{ color: C.gray.dark, fontSize: 11 }}>
+                      {type.replace('_', ' ').replace(/^\w/, c => c.toUpperCase())}
+                    </span>
+                    <span style={s.pillBadge}>{count}</span>
+                  </div>
+                ))
+              }
+            </div>
+          )}
         </div>
-      )}
 
-      <style jsx>{`
-        .subtitle {
-          font-size: 12px;
-          color: ${COLORS.neutral[700]};
-          margin-left: 10px;
-          font-weight: normal;
-        }
+      </div>
 
-        .stats-summary-analytics {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 10px;
-          margin: 20px 0;
-          padding: 15px;
-          background: ${COLORS.neutral[100]};
-          border-radius: 8px;
-        }
+      {/* TIP */}
+      <div style={s.tip}>
+        <span style={{ color: C.green.dark, fontWeight: 500 }}>Tip: </span>{tip}
+      </div>
 
-        .stat-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 10px;
-          background: white;
-          border-radius: 8px;
-          box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        .stat-icon {
-          width: 40px;
-          height: 40px;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 18px;
-        }
-
-        .stat-content {
-          flex: 1;
-        }
-
-        .stat-value {
-          font-size: 20px;
-          font-weight: 700;
-          color: ${COLORS.neutral[900]};
-          margin-bottom: 2px;
-        }
-
-        .stat-label {
-          font-size: 12px;
-          color: ${COLORS.neutral[700]};
-          margin-bottom: 4px;
-        }
-
-        .stat-change {
-          font-size: 11px;
-          font-weight: 500;
-        }
-
-        .stat-change.positive {
-          color: ${COLORS.primary.main};
-        }
-
-        .chart-mini {
-          background: white;
-          padding: 15px;
-          border-radius: 8px;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .chart-mini .chart-header h4 {
-          margin: 0 0 10px 0;
-          font-size: 14px;
-          color: ${COLORS.neutral[900]};
-        }
-
-        .care-insights {
-          border-left: 4px solid ${COLORS.primary.main};
-        }
-
-        .care-stat {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 10px;
-          background: white;
-          border-radius: 6px;
-          min-width: 180px;
-        }
-
-        .care-icon {
-          font-size: 20px;
-          background: ${COLORS.primary.light};
-          color: ${COLORS.primary.main};
-          width: 40px;
-          height: 40px;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .care-label {
-          font-size: 12px;
-          color: ${COLORS.neutral[700]};
-        }
-
-        .care-value {
-          font-size: 16px;
-          font-weight: 600;
-          color: ${COLORS.neutral[900]};
-        }
-
-        .loading-spinner {
-          color: ${COLORS.neutral[700]};
-          font-size: 14px;
-        }
-
-        @media (max-width: 768px) {
-          .stats-summary-analytics {
-            grid-template-columns: repeat(2, 1fr);
-          }
-          
-          .charts-row {
-            flex-direction: column;
-          }
-        }
-      `}</style>
     </div>
   );
+};
+
+const s = {
+  card:         { background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: '20px 24px', gridColumn: 'span 8' },
+  cardHeader:   { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
+  cardTitle:    { fontSize: 16, fontWeight: 600, color: '#111827', display: 'block' },
+  cardSub:      { fontSize: 12, color: '#6B7280', display: 'block', marginTop: 2 },
+  refreshBtn:   { background: 'none', border: '1px solid #E5E7EB', borderRadius: 6, padding: '4px 10px', fontSize: 16, cursor: 'pointer', color: '#6B7280', lineHeight: 1 },
+  statsGrid:    { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 20 },
+  statCard:     { background: '#F9FAFB', borderRadius: 8, padding: 14, textAlign: 'center' },
+  statVal:      { fontSize: 26, fontWeight: 700, marginBottom: 4 },
+  statLabel:    { fontSize: 12, color: '#6B7280', marginBottom: 2 },
+  statSub:      { fontSize: 11, color: '#9CA3AF' },
+  section:      { background: '#F9FAFB', borderRadius: 8, padding: '14px 16px', marginBottom: 16 },
+  sectionHeader:{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  sectionTitle: { fontSize: 12, fontWeight: 500, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.04em' },
+  badge:        { fontSize: 11, borderRadius: 20, padding: '2px 8px', fontWeight: 500 },
+  bottomRow:    { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 },
+  miniCard:     { background: '#F9FAFB', borderRadius: 8, padding: '14px 16px' },
+  tip:          { borderLeft: '3px solid #1D9E75', paddingLeft: 12, fontSize: 13, color: '#6B7280', lineHeight: 1.6 },
+  empty:        { textAlign: 'center', color: '#9CA3AF', fontSize: 13, padding: '24px 0' },
+  typePill:     { display: 'flex', alignItems: 'center', gap: 5, background: '#fff', border: '1px solid #E5E7EB', borderRadius: 20, padding: '3px 9px', fontSize: 12 },
+  pillBadge:    { background: '#F3F4F6', borderRadius: 10, padding: '1px 6px', fontSize: 11, fontWeight: 600, color: '#374151' },
+  loadingWrap:  { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 300 },
+  spinner:      { width: 28, height: 28, borderRadius: '50%', border: '3px solid #E5E7EB', borderTopColor: '#1D9E75', animation: 'spin 0.8s linear infinite' },
 };
 
 export default AnalyticsChart;

@@ -217,7 +217,7 @@ function App() {
 
     switch (activeView) {
       case 'dashboard':
-        return <Dashboard showNotification={showNotification} user={currentUser} />;
+        return <Dashboard showNotification={showNotification} user={currentUser} onNavigate={handleSetActiveView} />;
       case 'plants':
         return <MyPlants
           showNotification={showNotification}
@@ -230,7 +230,7 @@ function App() {
           return <AdminDashboard showNotification={showNotification} user={currentUser} />;
         } else {
           showNotification('Access Denied', 'Admin access required', 'error');
-          return <Dashboard showNotification={showNotification} user={currentUser} />;
+          return <Dashboard showNotification={showNotification} user={currentUser} onNavigate={handleSetActiveView} />;
         }
       case 'tasks':
         return <CareTasks showNotification={showNotification} user={currentUser} />;
@@ -293,10 +293,10 @@ function App() {
           />;
         } else {
           showNotification('Access Denied', 'Admin access required', 'error');
-          return <Dashboard showNotification={showNotification} user={currentUser} />;
+          return <Dashboard showNotification={showNotification} user={currentUser} onNavigate={handleSetActiveView} />;
         }
       default:
-        return <Dashboard showNotification={showNotification} user={currentUser} />;
+        return <Dashboard showNotification={showNotification} user={currentUser} onNavigate={handleSetActiveView} />;
     }
   };
 
