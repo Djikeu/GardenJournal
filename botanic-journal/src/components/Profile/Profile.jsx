@@ -393,7 +393,28 @@ const Profile = ({ showNotification, user }) => {
             <div className="stat-footer-modern">
               <span className="stat-label-modern">Task Completion</span>
               <span className="stat-trend-modern">
-                <i className="fas fa-trend-up"></i> This month
+                <i className="fas fa-chart-line"></i> Overall rate
+              </span>
+            </div>
+          </div>
+
+          <div className="stat-card-modern">
+            <div className="stat-header-modern">
+              <div
+                className="stat-icon-modern streak"
+                style={{ background: (userStats?.currentStreak || 0) > 0 ? '#fff7ed' : '#f3f4f6', color: (userStats?.currentStreak || 0) > 0 ? '#f97316' : '#9ca3af' }}
+              >
+                <i className="fas fa-fire"></i>
+              </div>
+              <div className="stat-number-modern">{userStats?.currentStreak ?? 0}</div>
+            </div>
+            <div className="stat-footer-modern">
+              <span className="stat-label-modern">Current Streak</span>
+              <span className="stat-trend-modern">
+                <i className="fas fa-trophy"></i>
+                {userStats?.longestStreak > 0
+                  ? `Best: ${userStats.longestStreak} day${userStats.longestStreak === 1 ? '' : 's'}`
+                  : 'Start today!'}
               </span>
             </div>
           </div>
@@ -406,9 +427,19 @@ const Profile = ({ showNotification, user }) => {
               <i className="fas fa-history"></i>
               Recent Activity
             </h3>
-            {userStats?.recentActivity?.length > 0 && (
-              <span className="activity-count">{userStats.recentActivity.length} activities</span>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {userStats?.recentActivity?.length > 0 && (
+                <span className="activity-count">{userStats.recentActivity.length} activities</span>
+              )}
+              <button
+                className="btn-icon"
+                onClick={loadUserStats}
+                title="Refresh activity"
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#6b7280' }}
+              >
+                <i className="fas fa-sync-alt"></i>
+              </button>
+            </div>
           </div>
           <div className="activity-list-modern">
             {userStats?.recentActivity?.length > 0 ? (

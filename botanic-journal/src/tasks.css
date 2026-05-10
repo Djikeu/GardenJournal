@@ -163,20 +163,44 @@
 }
 
 .tasks-loading .loading-spinner {
-  font-size: 3rem;
-  color: #10b981;
+  width: 70px;
+  height: 70px;
+  border: 4px solid rgba(16, 185, 129, 0.15);
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
   margin-bottom: 20px;
-  animation: pulse 2s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  color: #10b981;
+}
+
+.tasks-loading .loading-spinner i {
+  font-size: 1.6rem;
+  color: #10b981;
+  animation: spin-reverse 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spin-reverse {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
 }
 
 @keyframes pulse {
-  0%, 100% { 
-    opacity: 1; 
-    transform: scale(1); 
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
   }
-  50% { 
-    opacity: 0.7; 
-    transform: scale(1.1); 
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
   }
 }
 

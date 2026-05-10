@@ -9,6 +9,7 @@ const MyPlants = ({ showNotification, user, onShowPlantDetails }) => {  // Add o
   const [filterType, setFilterType] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [sortBy, setSortBy] = useState('latest');
 
   useEffect(() => {
     if (user) {
@@ -90,12 +91,28 @@ const MyPlants = ({ showNotification, user, onShowPlantDetails }) => {  // Add o
   };
 
   // Filter user's plants
-  const filteredPlants = plants.filter(plant => {
+  let filteredPlants = plants.filter(plant => {
     const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       plant.species?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType === 'all' || plant.type === filterType;
     return matchesSearch && matchesFilter;
   });
+
+  // Apply sorting
+  const getDateValue = (p) => {
+    const d = p.created_at || p.added_at || p.date_added || p.updated_at;
+    return d ? new Date(d).getTime() : 0;
+  };
+
+  if (sortBy === 'latest') {
+    filteredPlants = [...filteredPlants].sort((a, b) => getDateValue(b) - getDateValue(a));
+  } else if (sortBy === 'name') {
+    filteredPlants = [...filteredPlants].sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortBy === 'favorites') {
+    filteredPlants = [...filteredPlants].sort((a, b) => (b.is_favorite ? 1 : 0) - (a.is_favorite ? 1 : 0));
+  } else if (sortBy === 'type') {
+    filteredPlants = [...filteredPlants].sort((a, b) => (a.type || '').localeCompare(b.type || ''));
+  }
 
   const plantTypes = ['all', 'indoor', 'outdoor', 'succulent', 'tropical', 'vegetable', 'flowering'];
 
@@ -331,11 +348,15 @@ const MyPlants = ({ showNotification, user, onShowPlantDetails }) => {  // Add o
                 <p>Manage your plant collection below</p>
               </div>
               <div className="sort-control">
-                <select className="sort-select">
-                  <option>Name (A-Z)</option>
-                  <option>Recently Added</option>
-                  <option>Favorites First</option>
-                  <option>Type</option>
+                <select
+                  className="sort-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="latest">Sort by: Latest</option>
+                  <option value="name">Name (A-Z)</option>
+                  <option value="favorites">Favorites First</option>
+                  <option value="type">Type</option>
                 </select>
               </div>
             </div>

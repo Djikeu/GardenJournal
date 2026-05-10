@@ -291,9 +291,10 @@ class ApiService {
         }
     }
 
-    // Get user statistics
+    // Get user statistics (totals, completion rate, streak, recent activity)
     async getUserStats() {
-        const url = `${this.baseURL}/stats.php`;
+        const user_id = this.getCurrentUserId();
+        const url = `${this.baseURL}/user-stats.php?user_id=${user_id}`;
         const config = {
             method: 'GET',
             headers: {

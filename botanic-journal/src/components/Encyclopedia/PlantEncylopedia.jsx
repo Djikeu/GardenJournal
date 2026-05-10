@@ -9,7 +9,7 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
     const [filterType, setFilterType] = useState('all');
     const [viewMode, setViewMode] = useState('grid');
     const [addingPlant, setAddingPlant] = useState(null);
-    const [sortBy, setSortBy] = useState('name'); // Add this for sorting
+    const [sortBy, setSortBy] = useState('latest'); // Add this for sorting
 
     useEffect(() => {
         loadPlants();
@@ -134,7 +134,14 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
     });
 
     // Add sorting
-    if (sortBy === 'name') {
+    const getDateValue = (p) => {
+        const d = p.created_at || p.added_at || p.updated_at;
+        return d ? new Date(d).getTime() : 0;
+    };
+
+    if (sortBy === 'latest') {
+        filteredPlants.sort((a, b) => getDateValue(b) - getDateValue(a));
+    } else if (sortBy === 'name') {
         filteredPlants.sort((a, b) => a.name.localeCompare(b.name));
     } else if (sortBy === 'care_level') {
         const careOrder = { 'easy': 1, 'moderate': 2, 'advanced': 3 };
@@ -216,11 +223,12 @@ const PlantEncyclopedia = ({ showNotification, user, onShowPlantDetails}) => {
                     </div>
                     {/* Add sort dropdown */}
                     <div className="sort-dropdown">
-                        <select 
-                            value={sortBy} 
+                        <select
+                            value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                             className="sort-select"
                         >
+                            <option value="latest">Sort by: Latest</option>
                             <option value="name">Sort by: Name</option>
                             <option value="care_level">Sort by: Care Level</option>
                             <option value="type">Sort by: Type</option>

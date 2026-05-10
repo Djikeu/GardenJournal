@@ -69,12 +69,14 @@ const CareTasks = ({ showNotification }) => {
           task.id === taskId ? { ...task, completed: true, progress: 100 } : task
         ));
         showNotification('Task Completed!', 'Great job! Your plant will thank you.', 'success');
+        // Notify other components (Header streak/pending count) that data changed
+        window.dispatchEvent(new Event('user-data-updated'));
       } else {
-        throw new Error(response.message);
+        throw new Error(response.message || 'Failed to complete task');
       }
     } catch (error) {
       console.error('Failed to complete task:', error);
-      showNotification('Error', 'Failed to complete task. Please try again.', 'error');
+      showNotification('Error', error.message || 'Failed to complete task. Please try again.', 'error');
     }
   };
 
@@ -732,8 +734,17 @@ const CareTasks = ({ showNotification }) => {
                   <input
                     type="date"
                     id="task-due-date"
+                    min={new Date().toISOString().split('T')[0]}
                     value={newTask.due_date}
-                    onChange={(e) => handleInputChange('due_date', e.target.value)}
+                    onChange={(e) => {
+                      const today = new Date().toISOString().split('T')[0];
+                      if (e.target.value && e.target.value < today) {
+                        showNotification('Invalid Date', 'Due date cannot be in the past.', 'error');
+                        handleInputChange('due_date', today);
+                      } else {
+                        handleInputChange('due_date', e.target.value);
+                      }
+                    }}
                   />
                 </div>
               </div>

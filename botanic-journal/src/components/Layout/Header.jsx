@@ -14,13 +14,29 @@ const Header = ({ onProfileClick, user }) => {
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [plantsCount, setPlantsCount] = useState(0);
   const [pendingTasksCount, setPendingTasksCount] = useState(0);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [longestStreak, setLongestStreak] = useState(0);
 
   const WEATHERAPI_KEY = '768f43eeeb0d4627ace203556261004';
 
   useEffect(() => {
     loadUserData();
     loadPlantsAndTasks();
+    loadStreak();
     getWeatherData();
+
+    // Refresh streak/tasks/plants whenever the user changes views, since
+    // completing a task / adding a plant should bump the streak count.
+    const handleHashChange = () => {
+      loadPlantsAndTasks();
+      loadStreak();
+    };
+    const handleUserDataUpdated = () => {
+      loadPlantsAndTasks();
+      loadStreak();
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener('user-data-updated', handleUserDataUpdated);
 
     // Update time every minute
     const timer = setInterval(() => {
@@ -35,8 +51,22 @@ const Header = ({ onProfileClick, user }) => {
     return () => {
       clearInterval(timer);
       clearInterval(weatherTimer);
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('user-data-updated', handleUserDataUpdated);
     };
   }, []);
+
+  const loadStreak = async () => {
+    try {
+      const response = await apiService.getUserStats();
+      if (response.success && response.data) {
+        setCurrentStreak(response.data.currentStreak || 0);
+        setLongestStreak(response.data.longestStreak || 0);
+      }
+    } catch (error) {
+      console.error('Failed to load streak:', error);
+    }
+  };
 
   const loadUserData = async () => {
     try {
@@ -341,11 +371,20 @@ const Header = ({ onProfileClick, user }) => {
                 {plantsCount} plants
               </span>
             </div>
-            <div className="user-streak">
-              <i className="fas fa-fire"></i>
-              <span className="streak-days">7 day streak</span>
+            <div className="user-streak" title={longestStreak > 0 ? `Longest streak: ${longestStreak} days` : ''}>
+              <i className="fas fa-fire" style={{ color: currentStreak > 0 ? '#f97316' : '#9ca3af' }}></i>
+              <span className="streak-days">
+                {currentStreak === 0
+                  ? 'Start your streak!'
+                  : `${currentStreak} day${currentStreak === 1 ? '' : 's'} streak`}
+              </span>
               <div className="streak-progress">
-                <div className="streak-fill" style={{ width: '70%' }}></div>
+                <div
+                  className="streak-fill"
+                  style={{
+                    width: `${Math.min(100, (currentStreak / Math.max(7, longestStreak || 7)) * 100)}%`
+                  }}
+                ></div>
               </div>
             </div>
           </div>

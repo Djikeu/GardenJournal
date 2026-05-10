@@ -292,17 +292,6 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                         <i className="fas fa-arrow-left"></i>
                         <span>Back</span>
                     </button>
-                    <div className="header-actions">
-                        <button className="btn-icon" title="Share">
-                            <i className="fas fa-share-alt"></i>
-                        </button>
-                        <button className="btn-icon" title="Print">
-                            <i className="fas fa-print"></i>
-                        </button>
-                        <button className="btn-icon" title="Bookmark">
-                            <i className="fas fa-bookmark"></i>
-                        </button>
-                    </div>
                 </div>
 
                 {/* Plant Header Section */}
@@ -436,7 +425,10 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                                 <i className="fas fa-heart"></i>
                                 Favorite
                             </button>
-                            <button className="btn-outline">
+                            <button
+                                className="btn-outline"
+                                onClick={() => { window.location.hash = 'community'; }}
+                            >
                                 <i className="fas fa-question-circle"></i>
                                 Ask Expert
                             </button>

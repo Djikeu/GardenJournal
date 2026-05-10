@@ -241,15 +241,26 @@ function handleUpdateTask($db, $user_id, $data)
 
     foreach ($allowedFields as $field) {
         if (isset($data[$field])) {
+            $value = $data[$field];
+            // Cast booleans to ints for MySQL TINYINT columns (PDO does not bind PHP booleans reliably)
+            if ($field === 'completed') {
+                $value = ($value === true || $value === 1 || $value === '1' || $value === 'true') ? 1 : 0;
+            }
+            // plant_id should be NULL when empty, not 0 or ''
+            if ($field === 'plant_id' && ($value === '' || $value === 0 || $value === '0')) {
+                $value = null;
+            }
             $updates[] = "$field = :$field";
-            $params[":$field"] = $data[$field];
+            $params[":$field"] = $value;
         }
     }
 
-    // Handle progress auto-update when completing task
-    if (isset($data['completed'])) {
+    // Handle progress auto-update when completing task — but only if progress
+    // wasn't explicitly provided in the same request (avoids duplicate placeholder)
+    if (isset($data['completed']) && !isset($data['progress'])) {
+        $completed_val = ($data['completed'] === true || $data['completed'] === 1 || $data['completed'] === '1' || $data['completed'] === 'true') ? 1 : 0;
         $updates[] = "progress = :progress";
-        $params[":progress"] = $data['completed'] ? 100 : 0;
+        $params[":progress"] = $completed_val ? 100 : 0;
     }
 
     if (empty($updates)) {

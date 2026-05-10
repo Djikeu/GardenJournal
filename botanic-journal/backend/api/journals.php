@@ -22,11 +22,17 @@ $journal = new Journal($db);
 $method = $_SERVER['REQUEST_METHOD'];
 $user_id = null;
 
-if ($method === 'GET') {
-    $user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : null;
-} else {
+// Always check the query string first (used by GET, DELETE, and some PUT calls)
+if (isset($_GET['user_id'])) {
+    $user_id = intval($_GET['user_id']);
+}
+
+// Fallback to JSON body for POST/PUT/PATCH where the query string isn't used
+if (!$user_id && $method !== 'GET') {
     $data = json_decode(file_get_contents("php://input"), true);
-    $user_id = isset($data['user_id']) ? intval($data['user_id']) : null;
+    if (is_array($data) && isset($data['user_id'])) {
+        $user_id = intval($data['user_id']);
+    }
 }
 
 if (!$user_id) {

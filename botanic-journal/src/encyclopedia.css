@@ -533,13 +533,41 @@
 .encyclopedia-loading {
     text-align: center;
     padding: 80px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-.loading-spinner {
-    font-size: 48px;
-    color: var(--forest-500);
+.encyclopedia-loading .loading-spinner {
+    width: 70px;
+    height: 70px;
+    border: 4px solid rgba(125, 179, 110, 0.15);
+    border-top-color: var(--forest-500, #7db36e);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
     margin-bottom: 20px;
-    animation: pulse 2s infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: var(--forest-500, #7db36e);
+}
+
+.encyclopedia-loading .loading-spinner i {
+    font-size: 26px;
+    color: var(--forest-500, #7db36e);
+    animation: spin-reverse 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes spin-reverse {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(-360deg); }
 }
 
 @keyframes pulse {
