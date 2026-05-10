@@ -20,6 +20,7 @@ import AdminDashboard from './components/Admin/AdminDashboard';
 import PlantRequestForm from './components/PlantRequest/PlantRequestForm';
 import MyPlantRequests from './components/PlantRequest/MyPlantRequests';
 import PlantRequestManager from './components/Admin/PlantRequestManager';
+import PlantDoctor from './components/PlantDoctor/PlantDoctor';
 import { apiService } from './services/api';
 import './index.css';
 import './App.css';
@@ -63,7 +64,8 @@ function App() {
       const validViews = [
         'dashboard', 'plants', 'tasks', 'journal', 'encyclopedia',
         'analytics', 'planner', 'profile', 'plant-detail', 'community',
-        'discussion-detail', 'suggest-plant', 'my-requests', 'plant-requests', 'admin'
+        'discussion-detail', 'suggest-plant', 'my-requests', 'plant-requests', 'admin',
+        'plant-doctor'
       ];
 
       if (hash && validViews.includes(hash)) {
@@ -236,6 +238,8 @@ function App() {
         return <CareTasks showNotification={showNotification} user={currentUser} />;
       case 'journal':
         return <PlantJournal showNotification={showNotification} user={currentUser} />;
+      case 'plant-doctor':
+        return <PlantDoctor showNotification={showNotification} user={currentUser} />;
       case 'encyclopedia':
         return <PlantEncyclopedia
           showNotification={showNotification}

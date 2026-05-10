@@ -920,6 +920,50 @@ class ApiService {
         });
     }
 
+    // ============================================
+    // PLANT DOCTOR (AI image diagnosis)
+    // ============================================
+
+    // Submit an image (and optional notes / plant_id) for AI diagnosis
+    async diagnosePlant({ imageFile, notes = '', plantId = null }) {
+        const user_id = this.getCurrentUserId();
+        const url = `${this.baseURL}/plant-doctor.php?user_id=${user_id}`;
+
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        if (notes) formData.append('notes', notes);
+        if (plantId) formData.append('plant_id', plantId);
+
+        try {
+            const response = await fetch(url, { method: 'POST', body: formData });
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Diagnosis failed');
+            }
+            return data;
+        } catch (error) {
+            console.error('Diagnose Plant Error:', error);
+            throw error;
+        }
+    }
+
+    async getDiagnoses() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-doctor.php?user_id=${user_id}`);
+    }
+
+    async getDiagnosis(id) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-doctor.php?id=${id}&user_id=${user_id}`);
+    }
+
+    async deleteDiagnosis(id) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-doctor.php?id=${id}&user_id=${user_id}`, {
+            method: 'DELETE'
+        });
+    }
+
     // Upload image for discussion or reply
     async uploadCommunityImage(formData) {
         const url = `${this.baseURL}/community/upload.php`;

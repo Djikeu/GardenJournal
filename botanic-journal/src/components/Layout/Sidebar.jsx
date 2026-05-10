@@ -14,6 +14,7 @@ const Sidebar = ({ activeView, setActiveView, onLogout, user }) => {
       { id: 'tasks', icon: 'fas fa-tasks', label: 'Care Tasks' },
       { id: 'journal', icon: 'fas fa-book', label: 'Plant Journal' },
       { id: 'encyclopedia', icon: 'fas fa-book-open', label: 'Encyclopedia' },
+      { id: 'plant-doctor', icon: 'fas fa-stethoscope', label: 'Plant Doctor' },
     ],
     analytics: [
       { id: 'analytics', icon: 'fas fa-chart-line', label: 'Analytics' },

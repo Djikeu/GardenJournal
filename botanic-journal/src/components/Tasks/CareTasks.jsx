@@ -589,7 +589,7 @@ const CareTasks = ({ showNotification }) => {
 
                         {/* Task Actions */}
                         <div className="task-actions">
-                          {!task.completed && (
+                          {!task.completed ? (
                             <>
                               <button
                                 className="btn-primary task-action-btn"
@@ -606,8 +606,7 @@ const CareTasks = ({ showNotification }) => {
                                 Snooze
                               </button>
                             </>
-                          )}
-                          {task.completed && (
+                          ) : (
                             <div className="completed-badge">
                               <i className="fas fa-check-circle"></i>
                               Completed
@@ -615,19 +614,14 @@ const CareTasks = ({ showNotification }) => {
                           )}
                         </div>
 
-                        {/* Urgency Indicator */}
-                        {urgencyLevel === 'overdue' && (
+                        {/* Urgency Indicator — only show "Overdue" since "Urgent"
+                            is already conveyed by the High priority badge */}
+                        {urgencyLevel === 'overdue' ? (
                           <div className="urgency-indicator overdue">
                             <i className="fas fa-exclamation-triangle"></i>
                             Overdue
                           </div>
-                        )}
-                        {urgencyLevel === 'urgent' && (
-                          <div className="urgency-indicator urgent">
-                            <i className="fas fa-exclamation-circle"></i>
-                            Urgent
-                          </div>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   );
