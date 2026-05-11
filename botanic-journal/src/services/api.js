@@ -964,6 +964,147 @@ class ApiService {
         });
     }
 
+    // ============================================
+    // PLANT CHAT (Gemini gardening assistant)
+    // ============================================
+    async sendChatMessage(message) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-chat.php?user_id=${user_id}`, {
+            method: 'POST',
+            body: { message }
+        });
+    }
+
+    async getChatHistory() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-chat.php?user_id=${user_id}`);
+    }
+
+    async clearChatHistory() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-chat.php?user_id=${user_id}`, {
+            method: 'DELETE'
+        });
+    }
+
+    // ============================================
+    // DAILY CARE NOTE (Gemini-generated)
+    // ============================================
+    async getDailyCareNote({ weather = '', temp = '', humidity = '', force = false } = {}) {
+        const user_id = this.getCurrentUserId();
+        const params = new URLSearchParams({ user_id });
+        if (weather)  params.append('weather', weather);
+        if (temp !== '' && temp != null)         params.append('temp', temp);
+        if (humidity !== '' && humidity != null) params.append('humidity', humidity);
+        if (force) params.append('force', '1');
+        return this.request(`daily-care-note.php?${params}`);
+    }
+
+    // ============================================
+    // GARDEN MAP DESIGNER (drag-and-drop placements per zone)
+    // ============================================
+    async getGardenMap(zone) {
+        const user_id = this.getCurrentUserId();
+        const params = new URLSearchParams({ user_id });
+        if (zone) params.append('zone', zone);
+        return this.request(`garden-map.php?${params}`);
+    }
+
+    async saveGardenMap(zone, placements) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`garden-map.php?user_id=${user_id}`, {
+            method: 'POST',
+            body: { zone, placements }
+        });
+    }
+
+    async clearGardenMapZone(zone) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`garden-map.php?user_id=${user_id}&zone=${zone}`, {
+            method: 'DELETE'
+        });
+    }
+
+    // ============================================
+    // SOCIAL — discover, follow, public profiles
+    // ============================================
+    async discoverGardeners(query = '') {
+        const user_id = this.getCurrentUserId();
+        const params = new URLSearchParams({ user_id, action: 'discover' });
+        if (query) params.append('q', query);
+        return this.request(`social.php?${params}`);
+    }
+
+    async getFollowing() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`social.php?user_id=${user_id}&action=following`);
+    }
+
+    async getFollowers() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`social.php?user_id=${user_id}&action=followers`);
+    }
+
+    async getPublicProfile(targetUserId) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`social.php?user_id=${user_id}&action=profile&target=${targetUserId}`);
+    }
+
+    async followUserById(targetUserId) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`social.php?user_id=${user_id}`, {
+            method: 'POST',
+            body: { target_user_id: targetUserId }
+        });
+    }
+
+    async unfollowUserById(targetUserId) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`social.php?user_id=${user_id}&target=${targetUserId}`, {
+            method: 'DELETE'
+        });
+    }
+
+    // ============================================
+    // DIRECT MESSAGES
+    // ============================================
+    async getConversations() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`direct-messages.php?user_id=${user_id}`);
+    }
+
+    async getConversation(otherUserId) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`direct-messages.php?user_id=${user_id}&with=${otherUserId}`);
+    }
+
+    async sendDirectMessage(toUserId, content) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`direct-messages.php?user_id=${user_id}`, {
+            method: 'POST',
+            body: { to: toUserId, content }
+        });
+    }
+
+    async markMessagesRead(fromUserId) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`direct-messages.php?user_id=${user_id}`, {
+            method: 'PATCH',
+            body: { from: fromUserId }
+        });
+    }
+
+    // ============================================
+    // JOURNAL VISIBILITY
+    // ============================================
+    async setJournalVisibility(journalId, isPublic) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`journals.php?id=${journalId}&user_id=${user_id}`, {
+            method: 'PATCH',
+            body: { id: journalId, is_public: isPublic ? 1 : 0, user_id }
+        });
+    }
+
     // Upload image for discussion or reply
     async uploadCommunityImage(formData) {
         const url = `${this.baseURL}/community/upload.php`;

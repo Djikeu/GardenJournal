@@ -1,6 +1,6 @@
 <?php
 header("Access-Control-Allow-Origin: http://localhost:5173");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
 
@@ -17,6 +17,11 @@ use BotanicJournal\Journal;
 $database = new Database();
 $db = $database->getConnection();
 $journal = new Journal($db);
+
+// Ensure the is_public column exists (idempotent)
+try {
+    $db->exec("ALTER TABLE journals ADD COLUMN is_public TINYINT(1) NOT NULL DEFAULT 0");
+} catch (PDOException $e) { /* already exists, ignore */ }
 
 // Get user_id from request
 $method = $_SERVER['REQUEST_METHOD'];
@@ -149,6 +154,36 @@ switch($method) {
                 'success' => false,
                 'message' => 'Failed to update journal'
             ]);
+        }
+        break;
+
+    case 'PATCH':
+        // Toggle visibility (is_public) — separate from full PUT so we don't risk touching the model
+        $id = isset($_GET['id']) ? intval($_GET['id']) : null;
+        $data = json_decode(file_get_contents("php://input"), true);
+        if (!$id && isset($data['id'])) $id = intval($data['id']);
+        if (!$id) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Journal ID is required']);
+            break;
+        }
+        if (!isset($data['is_public'])) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'is_public field is required']);
+            break;
+        }
+        $isPublic = $data['is_public'] ? 1 : 0;
+        $stmt = $db->prepare("UPDATE journals SET is_public = :p WHERE id = :id AND user_id = :uid");
+        $ok = $stmt->execute([':p' => $isPublic, ':id' => $id, ':uid' => $user_id]);
+        if ($ok && $stmt->rowCount() > 0) {
+            echo json_encode([
+                'success' => true,
+                'message' => $isPublic ? 'Journal is now public' : 'Journal is now private',
+                'data'    => ['id' => $id, 'is_public' => $isPublic]
+            ]);
+        } else {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'Journal not found or no change']);
         }
         break;
 

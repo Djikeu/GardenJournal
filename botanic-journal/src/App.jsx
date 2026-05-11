@@ -21,9 +21,12 @@ import PlantRequestForm from './components/PlantRequest/PlantRequestForm';
 import MyPlantRequests from './components/PlantRequest/MyPlantRequests';
 import PlantRequestManager from './components/Admin/PlantRequestManager';
 import PlantDoctor from './components/PlantDoctor/PlantDoctor';
+import PlantChat from './components/PlantChat/PlantChat';
+import GardenMapDesigner from './components/GardenMap/GardenMapDesigner';
 import { apiService } from './services/api';
 import './index.css';
 import './App.css';
+import './dark-mode.css';
 
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -65,7 +68,7 @@ function App() {
         'dashboard', 'plants', 'tasks', 'journal', 'encyclopedia',
         'analytics', 'planner', 'profile', 'plant-detail', 'community',
         'discussion-detail', 'suggest-plant', 'my-requests', 'plant-requests', 'admin',
-        'plant-doctor'
+        'plant-doctor', 'plant-chat', 'garden-map'
       ];
 
       if (hash && validViews.includes(hash)) {
@@ -240,6 +243,10 @@ function App() {
         return <PlantJournal showNotification={showNotification} user={currentUser} />;
       case 'plant-doctor':
         return <PlantDoctor showNotification={showNotification} user={currentUser} />;
+      case 'plant-chat':
+        return <PlantChat showNotification={showNotification} user={currentUser} />;
+      case 'garden-map':
+        return <GardenMapDesigner showNotification={showNotification} user={currentUser} />;
       case 'encyclopedia':
         return <PlantEncyclopedia
           showNotification={showNotification}

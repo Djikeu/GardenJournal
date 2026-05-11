@@ -15,10 +15,12 @@ const Sidebar = ({ activeView, setActiveView, onLogout, user }) => {
       { id: 'journal', icon: 'fas fa-book', label: 'Plant Journal' },
       { id: 'encyclopedia', icon: 'fas fa-book-open', label: 'Encyclopedia' },
       { id: 'plant-doctor', icon: 'fas fa-stethoscope', label: 'Plant Doctor' },
+      { id: 'plant-chat', icon: 'fas fa-comments', label: 'Plant Assistant' },
     ],
     analytics: [
       { id: 'analytics', icon: 'fas fa-chart-line', label: 'Analytics' },
       { id: 'planner', icon: 'fas fa-calendar-alt', label: 'Garden Planner' },
+      { id: 'garden-map', icon: 'fas fa-map-location-dot', label: 'Garden Map' },
       { id: 'forecast', icon: 'fas fa-cloud-sun-rain', label: 'Weather Forecast' },
     ],
     community: [

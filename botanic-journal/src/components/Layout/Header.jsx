@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
+import { useTheme } from '../../hooks/useTheme';
 import '../../Header.css'; // We'll create a new CSS file for the redesigned header
 
 const Header = ({ onProfileClick, user }) => {
+  const { isDark, toggleTheme } = useTheme();
   const [headerUser, setHeaderUser] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [weather, setWeather] = useState({
@@ -296,6 +298,16 @@ const Header = ({ onProfileClick, user }) => {
       </div>
 
       <div className="header-right">
+        {/* Theme toggle */}
+        <button
+          className="theme-toggle"
+          onClick={toggleTheme}
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          <i className={`fas ${isDark ? 'fa-sun' : 'fa-moon'}`}></i>
+        </button>
+
         {/* Working Weather Mini Card */}
         <div className={`weather-mini-card ${weatherLoading ? 'loading' : getWeatherClass(weather.condition, currentTime.getHours())}`}>
           {weatherLoading ? (

@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { apiService } from '../../services/api';
 import '../../dashboard.css';
 
 // ─── DAILY ROTATING CONTENT ──────────────────────────────────────────────────
@@ -111,6 +112,28 @@ const Dashboard = ({ showNotification, onNavigate }) => {
   const todayQuote = useMemo(() => QUOTES[getDayIndex(QUOTES)], []);
   const todayTip   = useMemo(() => TIPS[getDayIndex(TIPS)], []);
 
+  // ── AI Daily Care Note ─────────────────────────────────
+  const [dailyNote, setDailyNote] = useState(null);
+  const [noteLoading, setNoteLoading] = useState(true);
+  const [noteRefreshing, setNoteRefreshing] = useState(false);
+
+  useEffect(() => { loadDailyNote(false); }, []);
+
+  const loadDailyNote = async (force) => {
+    try {
+      if (force) setNoteRefreshing(true);
+      else setNoteLoading(true);
+      const res = await apiService.getDailyCareNote({ force });
+      if (res.success && res.data) setDailyNote(res.data);
+    } catch (e) {
+      // Silent fail — widget shows fallback
+      console.error('Daily note error:', e);
+    } finally {
+      setNoteLoading(false);
+      setNoteRefreshing(false);
+    }
+  };
+
   const goToCommunity = () => {
     if (onNavigate) onNavigate('community');
   };
@@ -187,6 +210,50 @@ const Dashboard = ({ showNotification, onNavigate }) => {
 
         {/* RIGHT COLUMN */}
         <div className="dashboard-right">
+
+          {/* AI Daily Care Note */}
+          <div className="ai-note-card">
+            <div className="ai-note-header">
+              <div className="ai-note-title">
+                <div className="ai-note-icon">
+                  <i className="fas fa-wand-magic-sparkles"></i>
+                </div>
+                <div>
+                  <h3>Today's Note</h3>
+                  <p className="ai-note-sub">Personalized for your collection</p>
+                </div>
+              </div>
+              <button
+                className="ai-note-refresh"
+                onClick={() => loadDailyNote(true)}
+                disabled={noteRefreshing}
+                title="Generate a fresh note"
+              >
+                <i className={`fas fa-arrows-rotate ${noteRefreshing ? 'fa-spin' : ''}`}></i>
+              </button>
+            </div>
+            <div className="ai-note-body">
+              {noteLoading ? (
+                <div className="ai-note-skeleton">
+                  <div className="ai-skeleton-line" style={{ width: '95%' }}></div>
+                  <div className="ai-skeleton-line" style={{ width: '88%' }}></div>
+                  <div className="ai-skeleton-line" style={{ width: '70%' }}></div>
+                </div>
+              ) : dailyNote?.note ? (
+                <p className="ai-note-text">{dailyNote.note}</p>
+              ) : (
+                <p className="ai-note-fallback">
+                  Take a moment with your plants today — even a quiet check-in counts.
+                </p>
+              )}
+              {dailyNote?.weather_summary && (
+                <div className="ai-note-meta">
+                  <i className="fas fa-cloud-sun"></i>
+                  {dailyNote.weather_summary}
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Plant Health Monitor — reference values */}
           <div className="health-monitor-card">

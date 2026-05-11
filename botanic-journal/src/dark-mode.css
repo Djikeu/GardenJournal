@@ -1,0 +1,448 @@
+/* ================================================================
+   Dark Mode — kicks in when <html data-theme="dark"> is set.
+   Single override file: leaves brand greens alone, swaps neutral
+   surfaces, text, borders, and inputs.
+================================================================ */
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Surface tokens — overrideable per-component if needed */
+  --bj-bg:           #0f172a;   /* page background */
+  --bj-surface:      #1e293b;   /* card background */
+  --bj-surface-2:    #273449;   /* nested / hover */
+  --bj-surface-3:    #334155;   /* deeper */
+  --bj-border:       #334155;
+  --bj-border-soft:  #1f2937;
+  --bj-text:         #e5e7eb;
+  --bj-text-muted:   #94a3b8;
+  --bj-text-subtle:  #64748b;
+  --bj-input-bg:     #1e293b;
+}
+
+/* ── Global surfaces ─────────────────────────────────── */
+[data-theme="dark"],
+[data-theme="dark"] body,
+[data-theme="dark"] .container,
+[data-theme="dark"] .app,
+[data-theme="dark"] .main-content {
+  background: #0f172a !important;
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] body { background: #0f172a !important; }
+
+/* Containers with hardcoded light backgrounds */
+[data-theme="dark"] .my-plants-container,
+[data-theme="dark"] .plant-journal-container,
+[data-theme="dark"] .care-tasks,
+[data-theme="dark"] .plant-encyclopedia,
+[data-theme="dark"] .pd-container,
+[data-theme="dark"] .pc-container,
+[data-theme="dark"] .gm-container,
+[data-theme="dark"] .profile-container-modern,
+[data-theme="dark"] .plant-detail-wrapper {
+  background: #0f172a !important;
+}
+
+/* ── Sidebar ─────────────────────────────────────────── */
+[data-theme="dark"] .sidebar,
+[data-theme="dark"] .mobile-drawer {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  color: #e5e7eb;
+}
+[data-theme="dark"] .logo-text h1,
+[data-theme="dark"] .logo-text p,
+[data-theme="dark"] .nav-title {
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .nav-links-item {
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .nav-links-item:hover {
+  background: #1e293b !important;
+  color: #ffffff !important;
+}
+[data-theme="dark"] .nav-links-item.active {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #d1fae5 !important;
+}
+[data-theme="dark"] .bottom-nav,
+[data-theme="dark"] .bottom-tab {
+  background: #111827 !important;
+  color: #cbd5e1;
+}
+[data-theme="dark"] .bottom-tab.active { color: #4caf50; }
+
+/* ── Header ──────────────────────────────────────────── */
+[data-theme="dark"] .dashboard-header {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+[data-theme="dark"] .greeting-title,
+[data-theme="dark"] .user-fullname { color: #f3f4f6 !important; }
+[data-theme="dark"] .greeting-details,
+[data-theme="dark"] .user-meta-info,
+[data-theme="dark"] .date-info,
+[data-theme="dark"] .time-info { color: #cbd5e1 !important; }
+[data-theme="dark"] .quick-stat {
+  background: #1e293b !important;
+  color: #e5e7eb !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .user-profile-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .user-profile-card:hover {
+  background: #273449 !important;
+}
+
+/* ── Cards & generic surfaces ───────────────────────── */
+[data-theme="dark"] .card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .stat-card-compact,
+[data-theme="dark"] .stat-card-modern,
+[data-theme="dark"] .plant-card,
+[data-theme="dark"] .plant-card-enhanced,
+[data-theme="dark"] .plant-card-inner,
+[data-theme="dark"] .task-card,
+[data-theme="dark"] .journal-card,
+[data-theme="dark"] .journal-form-card,
+[data-theme="dark"] .journal-entries-card,
+[data-theme="dark"] .post-item,
+[data-theme="dark"] .health-monitor-card,
+[data-theme="dark"] .spotlight-card,
+[data-theme="dark"] .tasks-card,
+[data-theme="dark"] .wisdom-card,
+[data-theme="dark"] .community-pulse,
+[data-theme="dark"] .growth-summary-card,
+[data-theme="dark"] .pd-card,
+[data-theme="dark"] .pc-panel,
+[data-theme="dark"] .gm-canvas-header,
+[data-theme="dark"] .gm-palette,
+[data-theme="dark"] .gm-zones,
+[data-theme="dark"] .profile-card-modern,
+[data-theme="dark"] .activity-card-modern,
+[data-theme="dark"] .empty-state,
+[data-theme="dark"] .no-results,
+[data-theme="dark"] .plant-detail-container {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e5e7eb !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Slightly different shade for "inner" or nested cards */
+[data-theme="dark"] .task-card-inner,
+[data-theme="dark"] .plant-card-content,
+[data-theme="dark"] .card-body,
+[data-theme="dark"] .stats-grid-compact,
+[data-theme="dark"] .detail-card,
+[data-theme="dark"] .related-plant-card {
+  background: #1e293b !important;
+  color: #e5e7eb !important;
+}
+
+/* Headings & body text */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 { color: #f3f4f6; }
+
+[data-theme="dark"] p,
+[data-theme="dark"] li,
+[data-theme="dark"] span,
+[data-theme="dark"] label {
+  color: inherit;
+}
+
+[data-theme="dark"] .task-title,
+[data-theme="dark"] .plant-name,
+[data-theme="dark"] .journal-title,
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .stat-number,
+[data-theme="dark"] .stat-value,
+[data-theme="dark"] .stat-value-compact,
+[data-theme="dark"] .stat-number-modern { color: #f3f4f6 !important; }
+
+[data-theme="dark"] .task-description,
+[data-theme="dark"] .task-plant,
+[data-theme="dark"] .plant-species,
+[data-theme="dark"] .plant-description,
+[data-theme="dark"] .journal-text,
+[data-theme="dark"] .journal-date,
+[data-theme="dark"] .stat-label,
+[data-theme="dark"] .stat-label-compact,
+[data-theme="dark"] .stat-label-modern,
+[data-theme="dark"] .stat-trend-compact,
+[data-theme="dark"] .meta-label,
+[data-theme="dark"] .meta-value,
+[data-theme="dark"] .info-label,
+[data-theme="dark"] .info-value { color: #cbd5e1 !important; }
+
+[data-theme="dark"] .text-counter,
+[data-theme="dark"] .hero-subtitle,
+[data-theme="dark"] .post-time,
+[data-theme="dark"] .progress-text { color: #94a3b8 !important; }
+
+/* Card headers */
+[data-theme="dark"] .card-header {
+  border-bottom-color: #334155 !important;
+}
+
+/* ── Inputs / forms ──────────────────────────────────── */
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] input[type="search"],
+[data-theme="dark"] input[type="date"],
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] textarea,
+[data-theme="dark"] select,
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .form-textarea,
+[data-theme="dark"] .search-input,
+[data-theme="dark"] .search-input-enhanced,
+[data-theme="dark"] .sort-select {
+  background: #0f172a !important;
+  color: #e5e7eb !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .form-select:focus,
+[data-theme="dark"] .form-textarea:focus {
+  border-color: #4caf50 !important;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.18) !important;
+}
+[data-theme="dark"] ::placeholder { color: #64748b !important; }
+
+[data-theme="dark"] .search-box,
+[data-theme="dark"] .search-box-enhanced {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .filter-section,
+[data-theme="dark"] .controls-section,
+[data-theme="dark"] .controls-row,
+[data-theme="dark"] .tasks-controls,
+[data-theme="dark"] .encyclopedia-controls,
+[data-theme="dark"] .journal-controls {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .filter-chip {
+  background: #273449 !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .filter-chip:hover {
+  background: #334155 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Buttons (only the neutral ones — leave brand greens alone) */
+[data-theme="dark"] .btn-outline,
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark"] .pc-clear-btn,
+[data-theme="dark"] .pd-icon-btn,
+[data-theme="dark"] .card-btn,
+[data-theme="dark"] .btn-icon,
+[data-theme="dark"] .view-btn {
+  background: #273449 !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .btn-outline:hover,
+[data-theme="dark"] .btn-secondary:hover,
+[data-theme="dark"] .pd-icon-btn:hover,
+[data-theme="dark"] .card-btn:hover,
+[data-theme="dark"] .btn-icon:hover,
+[data-theme="dark"] .view-btn:hover {
+  background: #334155 !important;
+  color: #f3f4f6 !important;
+}
+[data-theme="dark"] .view-btn.active {
+  background: linear-gradient(135deg, #2e7d32, #4caf50) !important;
+  color: white !important;
+}
+
+/* ── Modals ──────────────────────────────────────────── */
+[data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.7) !important; }
+[data-theme="dark"] .modal-content {
+  background: #1e293b !important;
+  color: #e5e7eb !important;
+  border: 1px solid #334155 !important;
+}
+[data-theme="dark"] .modal-header {
+  border-bottom-color: #334155 !important;
+}
+[data-theme="dark"] .modal-header h3 { color: #f3f4f6 !important; }
+[data-theme="dark"] .modal-close {
+  background: #273449 !important;
+  color: #cbd5e1 !important;
+}
+
+/* ── Notifications ───────────────────────────────────── */
+[data-theme="dark"] .notification {
+  background: #1e293b !important;
+  color: #e5e7eb !important;
+  border: 1px solid #334155 !important;
+}
+
+/* ── Plant Doctor ────────────────────────────────────── */
+[data-theme="dark"] .pd-dropzone {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .pd-dropzone:hover {
+  background: #1e293b !important;
+  border-color: #4caf50 !important;
+}
+[data-theme="dark"] .pd-result {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .pd-recs li {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  border-left-color: #4caf50 !important;
+  color: #e5e7eb !important;
+}
+[data-theme="dark"] .pd-history-row:hover { background: #273449 !important; }
+[data-theme="dark"] .pd-history-item.active .pd-history-row { background: rgba(76, 175, 80, 0.12) !important; }
+[data-theme="dark"] .pd-history-detail { background: #1a2436 !important; border-top-color: #334155 !important; }
+[data-theme="dark"] .pd-notes-block p {
+  background: rgba(234, 179, 8, 0.15) !important;
+  color: #fde68a !important;
+}
+
+/* ── Plant Chat ──────────────────────────────────────── */
+[data-theme="dark"] .pc-messages {
+  background: linear-gradient(180deg, #1a2436 0%, #1e293b 100%) !important;
+}
+[data-theme="dark"] .pc-assistant .pc-bubble {
+  background: #273449 !important;
+  border-color: #334155 !important;
+  color: #e5e7eb !important;
+}
+[data-theme="dark"] .pc-suggestion {
+  background: #273449 !important;
+  border-color: #334155 !important;
+  color: #e5e7eb !important;
+}
+[data-theme="dark"] .pc-suggestion:hover {
+  background: rgba(76, 175, 80, 0.15) !important;
+  border-color: #4caf50 !important;
+}
+[data-theme="dark"] .pc-input-row { background: #1e293b !important; border-top-color: #334155 !important; }
+[data-theme="dark"] .pc-input { background: #0f172a !important; border-color: #334155 !important; color: #e5e7eb !important; }
+
+/* ── Garden Map ──────────────────────────────────────── */
+[data-theme="dark"] .gm-zone-tab {
+  background: #273449 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .gm-zone-tab:hover { background: #334155 !important; }
+[data-theme="dark"] .gm-palette-item {
+  background: #273449 !important;
+  border-color: #334155 !important;
+  color: #e5e7eb !important;
+}
+[data-theme="dark"] .gm-palette-item:hover {
+  background: rgba(76, 175, 80, 0.12) !important;
+  border-color: #4caf50 !important;
+}
+[data-theme="dark"] .gm-palette-search input {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #e5e7eb !important;
+}
+
+/* The zone canvases — keep their playful tints but darken */
+[data-theme="dark"] .gm-canvas { border-color: #334155 !important; filter: brightness(0.7); }
+
+/* ── Tables / forum / discussions ────────────────────── */
+[data-theme="dark"] table {
+  background: #1e293b !important;
+  color: #e5e7eb !important;
+}
+[data-theme="dark"] th { background: #273449 !important; }
+[data-theme="dark"] td { border-color: #334155 !important; }
+
+[data-theme="dark"] .discussion-card,
+[data-theme="dark"] .reply-card,
+[data-theme="dark"] .community-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e5e7eb !important;
+}
+
+/* ── Plant Detail tabs ───────────────────────────────── */
+[data-theme="dark"] .plant-tabs { background: #1e293b !important; border-color: #334155 !important; }
+[data-theme="dark"] .tab-btn {
+  color: #cbd5e1 !important;
+  background: transparent !important;
+}
+[data-theme="dark"] .tab-btn.active { color: #4caf50 !important; }
+[data-theme="dark"] .tab-content { background: transparent !important; color: #e5e7eb !important; }
+[data-theme="dark"] .timeline-content { background: #273449 !important; color: #e5e7eb !important; }
+
+/* ── Auth pages (Login / Register) ───────────────────── */
+[data-theme="dark"] .auth-container { background: #0f172a !important; }
+[data-theme="dark"] .auth-panel     { background: #0f172a !important; }
+[data-theme="dark"] .auth-header h2 { color: #f3f4f6 !important; }
+[data-theme="dark"] .auth-header p,
+[data-theme="dark"] .auth-footer p,
+[data-theme="dark"] .terms-text   { color: #94a3b8 !important; }
+[data-theme="dark"] .auth-eyebrow {
+  background: rgba(76, 175, 80, 0.15) !important;
+  color: #6ee7b7 !important;
+}
+[data-theme="dark"] .form-helper,
+[data-theme="dark"] .checkbox-label { color: #cbd5e1 !important; }
+
+/* ── Theme toggle button (lives in Header) ───────────── */
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #f59e0b;
+  transition: all 0.25s ease;
+  margin-right: 12px;
+}
+.theme-toggle:hover {
+  transform: rotate(20deg);
+  border-color: #f59e0b;
+}
+[data-theme="dark"] .theme-toggle {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #fbbf24 !important;
+}
+[data-theme="dark"] .theme-toggle:hover {
+  border-color: #fbbf24 !important;
+}
+
+/* Make scrollbars less harsh in dark mode */
+[data-theme="dark"] ::-webkit-scrollbar { width: 10px; height: 10px; }
+[data-theme="dark"] ::-webkit-scrollbar-track { background: #0f172a; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 999px;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #475569; }
