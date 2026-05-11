@@ -11,7 +11,7 @@ import Analytics from './components/Analytics/Analytics';
 import GardenPlanner from './components/Planner/GardenPlanner';
 import WeatherForecast from './components/Weather/WeatherForecast'
 import Notification from './components/UI/Notification';
-import Profile from './components/Profile/profile';
+import Profile from './components/Profile/Profile';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import CommunityForum from './components/Community/CommunityForum';
