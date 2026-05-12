@@ -80,11 +80,24 @@
 
 .ai-note-body { position: relative; }
 .ai-note-text {
-  margin: 0;
   font-size: 0.97rem;
-  line-height: 1.6;
+  line-height: 1.65;
   color: #1f2937;
   font-weight: 500;
+}
+.ai-note-text p {
+  margin: 0 0 12px 0;
+}
+.ai-note-text p:last-child {
+  margin-bottom: 0;
+}
+/* Only style the second-and-final paragraph as soft/italic.
+   When there's just one paragraph, leave it as the strong primary text. */
+.ai-note-text p:last-child:not(:only-child) {
+  color: #4b5563;
+  font-weight: 400;
+  font-size: 0.93rem;
+  font-style: italic;
 }
 .ai-note-fallback {
   margin: 0;

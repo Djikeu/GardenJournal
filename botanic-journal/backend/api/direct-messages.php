@@ -90,7 +90,7 @@ function listConversations($db, $user_id) {
     $sql = "
       SELECT
         u.id   AS user_id,
-        u.username,
+        u.name AS username,
         u.avatar,
         latest.content       AS last_message,
         latest.created_at    AS last_at,
@@ -136,7 +136,7 @@ function getConversation($db, $user_id, $other_id) {
     if ($other_id === $user_id) respond(false, 'Cannot fetch self conversation', null, 400);
 
     // Pull other user's basics
-    $u = $db->prepare("SELECT id, username, avatar FROM users WHERE id = :id");
+    $u = $db->prepare("SELECT id, name AS username, avatar FROM users WHERE id = :id");
     $u->execute([':id' => $other_id]);
     $other = $u->fetch(PDO::FETCH_ASSOC);
     if (!$other) respond(false, 'User not found', null, 404);

@@ -21,10 +21,14 @@ const Sidebar = ({ activeView, setActiveView, onLogout, user }) => {
       { id: 'analytics', icon: 'fas fa-chart-line', label: 'Analytics' },
       { id: 'planner', icon: 'fas fa-calendar-alt', label: 'Garden Planner' },
       { id: 'garden-map', icon: 'fas fa-map-location-dot', label: 'Garden Map' },
+      { id: 'carbon', icon: 'fas fa-earth-americas', label: 'Carbon Offset' },
+      { id: 'anatomy', icon: 'fas fa-microscope', label: 'Plant Anatomy' },
       { id: 'forecast', icon: 'fas fa-cloud-sun-rain', label: 'Weather Forecast' },
     ],
     community: [
       { id: 'community', icon: 'fas fa-users', label: 'Community Forum' },
+      { id: 'gardeners', icon: 'fas fa-user-friends', label: 'Gardeners' },
+      { id: 'messages',  icon: 'fas fa-envelope',     label: 'Messages' },
     ],
   };
 

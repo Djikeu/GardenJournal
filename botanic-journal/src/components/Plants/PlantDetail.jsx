@@ -1,6 +1,8 @@
 // PlantDetail.jsx
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
+import ExportButton from '../Export/ExportButton';
+import { escHtml } from '../../utils/exportReport';
 import '../../detail.css';
 
 const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
@@ -283,6 +285,67 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
     const careInfo = getCareLevel(plant);
     const toxicity = getToxicity(plant);
 
+    // ── Build a printable / downloadable report for this plant ─────────
+    const buildPlantReport = (p) => {
+        if (!p) return { title: 'Plant Report', bodyHtml: '<p>No data.</p>' };
+        const ci = getCareLevel(p);
+        const tox = getToxicity(p);
+        const safe = (v) => escHtml(v ?? '—');
+        const img = p.image_url || p.image || '';
+        return {
+            title: `${p.name} — Plant Report`,
+            bodyHtml: `
+                ${img ? `<img src="${escHtml(img)}" alt="${safe(p.name)}" class="plant-image" />` : ''}
+
+                <p><strong style="font-size: 16px;">${safe(p.name)}</strong>
+                ${p.species ? `<br/><em style="color:#6b7280;">${safe(p.species)}</em>` : ''}</p>
+
+                <p>
+                    <span class="badge">${safe(p.type || 'plant')}</span>
+                    <span class="badge" style="background:#fef3c7;color:#78350f;">${safe(ci.level)} care</span>
+                    <span class="badge" style="background:${tox.safe ? '#d1fae5' : '#fee2e2'};color:${tox.safe ? '#166534' : '#991b1b'};">${safe(tox.text)}</span>
+                </p>
+
+                <h2>Quick Stats</h2>
+                <div class="stat-row">
+                    <div class="stat-card"><div class="num">${safe(p.light_requirements || 'Medium')}</div><div class="lbl">Light</div></div>
+                    <div class="stat-card"><div class="num">${safe(getWateringFrequency(p.watering_schedule))}</div><div class="lbl">Watering</div></div>
+                    <div class="stat-card"><div class="num">${safe(p.temperature_range || '18–26°C')}</div><div class="lbl">Temperature</div></div>
+                </div>
+
+                <h2>Plant Profile</h2>
+                <table>
+                    <tbody>
+                        <tr><th>Common name</th><td>${safe(p.name)}</td></tr>
+                        <tr><th>Species</th><td>${safe(p.species)}</td></tr>
+                        <tr><th>Type</th><td>${safe(p.type)}</td></tr>
+                        <tr><th>Care difficulty</th><td>${safe(ci.level)}</td></tr>
+                        <tr><th>Light requirements</th><td>${safe(p.light_requirements)}</td></tr>
+                        <tr><th>Watering schedule</th><td>${safe(getWateringFrequency(p.watering_schedule))}</td></tr>
+                        <tr><th>Temperature range</th><td>${safe(p.temperature_range || '18–26°C')}</td></tr>
+                        <tr><th>Humidity</th><td>${safe(p.humidity_requirements || '40–60%')}</td></tr>
+                        <tr><th>Growth rate</th><td>${safe(p.growth_rate || 'Moderate')}</td></tr>
+                        <tr><th>Toxicity</th><td>${safe(tox.text)}</td></tr>
+                        <tr><th>Soil</th><td>${safe(getSoilType(p))}</td></tr>
+                        <tr><th>Added</th><td>${p.created_at ? new Date(p.created_at).toLocaleDateString() : '—'}</td></tr>
+                    </tbody>
+                </table>
+
+                ${p.description ? `
+                    <h2>About ${safe(p.name)}</h2>
+                    <p>${safe(p.description)}</p>
+                ` : ''}
+
+                ${p.care_instructions ? `
+                    <h2>Care Instructions</h2>
+                    <ul>
+                        ${p.care_instructions.split('. ').filter(s => s.trim()).map(t => `<li>${safe(t.trim().replace(/\.$/, ''))}.</li>`).join('')}
+                    </ul>
+                ` : ''}
+            `
+        };
+    };
+
     return (
         <div className="plant-detail-wrapper">
             <div className="plant-detail-container">
@@ -292,6 +355,10 @@ const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {
                         <i className="fas fa-arrow-left"></i>
                         <span>Back</span>
                     </button>
+                    <ExportButton
+                        label="Export Report"
+                        getReport={() => buildPlantReport(plant)}
+                    />
                 </div>
 
                 {/* Plant Header Section */}

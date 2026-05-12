@@ -164,15 +164,24 @@ function callGeminiNote($context) {
     }
 
     $systemText =
-        "You are writing a single short, warm, personalized daily care note for a plant owner. " .
-        "Look at their plants, their pending tasks, and today's weather. " .
-        "Output 2-3 sentences (NOT bullet points, NOT a list — flowing prose). " .
-        "Be specific: name 1-2 actual plants, give a concrete suggestion. " .
-        "If the weather is hot/dry: suggest watering or misting. " .
-        "If raining: suggest skipping outdoor watering. " .
-        "If everything looks fine: be encouraging and suggest one nice ritual (rotate a pot, wipe leaves). " .
-        "Tone: friendly knowledgeable friend, never bossy. No greeting (\"Hi!\") and no signoff. " .
-        "Plain text only — no markdown, no emoji.";
+        "You are writing a warm, personal daily care note for a plant owner. The note appears " .
+        "in a prominent widget at the top of their dashboard, so it should feel like a thoughtful, " .
+        "knowledgeable friend dropping by their kitchen with garden advice.\n\n" .
+        "FORMAT:\n" .
+        "  • Two short paragraphs separated by a blank line.\n" .
+        "  • Paragraph 1 (3-4 sentences): the priority for today — reference the weather if given, " .
+        "    name 2-3 of their actual plants by name, and give specific concrete actions tied to those plants.\n" .
+        "  • Paragraph 2 (2-3 sentences): a softer observation — could be an interesting plant fact " .
+        "    relevant to one of their plants, a seasonal tip, an encouraging note about progress, " .
+        "    or a small ritual to enjoy (rotating a pot, wiping leaves, checking new growth).\n\n" .
+        "RULES:\n" .
+        "  • Reference 2-3 plants from the user's actual collection by name. Don't invent species they don't own.\n" .
+        "  • Be specific: instead of 'water your plants', say 'give the snake plant a soak'.\n" .
+        "  • Hot/dry weather → watering, misting, shade. Rainy → skip outdoor watering, watch for fungus. " .
+        "    Cold → protect tropicals from drafts. Mild → pruning, repotting, propagation suggestions.\n" .
+        "  • Tone: warm, observant, never bossy or alarming. Like a friend, not a checklist.\n" .
+        "  • No greeting (\"Hi!\", \"Hello!\") and no signoff (\"Happy gardening!\"). Just dive in.\n" .
+        "  • Plain text only — no markdown, no headings, no bullet points, no emoji.";
 
     $payload = [
         'system_instruction' => ['parts' => [['text' => $systemText]]],
@@ -181,8 +190,11 @@ function callGeminiNote($context) {
             'parts' => [['text' => "Context for today:\n" . $context]],
         ]],
         'generationConfig' => [
-            'temperature'     => 0.8,
-            'maxOutputTokens' => 250,
+            'temperature'     => 0.85,
+            'maxOutputTokens' => 1500,
+            // Gemini 2.5 has built-in "thinking" that consumes tokens before output —
+            // disable it so the entire budget goes to the actual reply.
+            'thinkingConfig'  => [ 'thinkingBudget' => 0 ],
         ],
     ];
 

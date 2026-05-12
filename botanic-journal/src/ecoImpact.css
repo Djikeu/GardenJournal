@@ -1,0 +1,384 @@
+/* ================================================================
+   Carbon Offset Calculator + Plant Anatomy Explorer
+================================================================ */
+
+.eco-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+/* ── Hero ────────────────────────────────────────────── */
+.eco-hero {
+  background: linear-gradient(135deg, #1b3a2b 0%, #2e7d32 55%, #4caf50 100%);
+  color: white;
+  padding: 28px 32px;
+  border-radius: 16px;
+  margin-bottom: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 10px 24px rgba(46,125,50,0.18);
+}
+.eco-hero h1 {
+  margin: 0 0 6px 0;
+  font-size: 1.7rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.eco-hero p {
+  margin: 0;
+  opacity: 0.92;
+  max-width: 580px;
+  line-height: 1.5;
+}
+.eco-hero-leaf {
+  font-size: 5rem;
+  opacity: 0.35;
+}
+
+/* ── Carbon Offset ───────────────────────────────────── */
+.co-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.co-stat {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.co-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--co-accent, #4caf50);
+}
+.co-stat .co-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: var(--co-bg, #d1fae5);
+  color: var(--co-accent, #2e7d32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+.co-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+.co-stat-unit {
+  font-size: 0.95rem;
+  color: #6b7280;
+  font-weight: 500;
+  margin-left: 6px;
+}
+.co-stat-label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+.co-stat-note { font-size: 0.78rem; color: #9ca3af; }
+
+/* Period switcher */
+.co-period {
+  display: inline-flex;
+  background: white;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  padding: 4px;
+  margin-bottom: 18px;
+}
+.co-period button {
+  background: transparent;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #6b7280;
+  font-family: inherit;
+}
+.co-period button.active {
+  background: linear-gradient(135deg, #2e7d32, #4caf50);
+  color: white;
+  box-shadow: 0 2px 6px rgba(46,125,50,0.25);
+}
+
+/* Comparisons */
+.co-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 16px;
+}
+.co-section h3 {
+  margin: 0 0 14px 0;
+  font-size: 1.1rem;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.co-section h3 i { color: #2e7d32; }
+
+.co-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+.co-comparison {
+  background: #fafbf7;
+  border: 1px solid #f3f4f6;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+.co-comparison .emoji {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 6px;
+}
+.co-comparison .num {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}
+.co-comparison .desc {
+  display: block;
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* Per-plant breakdown */
+.co-breakdown-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 720px) {
+  .co-breakdown-list { grid-template-columns: 1fr; }
+}
+.co-plant-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 10px;
+  background: #fafafa;
+  border: 1px solid #f3f4f6;
+}
+.co-plant-row img {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #d1fae5;
+  flex-shrink: 0;
+}
+.co-plant-row .info { flex: 1; min-width: 0; }
+.co-plant-row .info strong {
+  display: block;
+  font-size: 0.92rem;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.co-plant-row .info small {
+  font-size: 0.74rem;
+  color: #6b7280;
+}
+.co-plant-row .nums {
+  text-align: right;
+  font-size: 0.78rem;
+  color: #1f2937;
+  flex-shrink: 0;
+}
+.co-plant-row .nums b { color: #2e7d32; }
+
+/* Methodology disclaimer */
+.co-disclaimer {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 0.82rem;
+  color: #78350f;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  line-height: 1.5;
+  margin-top: 16px;
+}
+.co-disclaimer i { margin-top: 2px; }
+
+/* ── Plant Anatomy Explorer ──────────────────────────── */
+.pa-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  align-items: stretch;
+}
+@media (max-width: 900px) {
+  .pa-wrap { grid-template-columns: 1fr; }
+}
+
+.pa-canvas {
+  background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 50%, #d4e9d3 50%, #b6d8b1 100%);
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 500px;
+}
+.pa-canvas svg {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  display: block;
+}
+
+/* SVG anatomy parts — base style */
+.pa-part {
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  transform-origin: center;
+}
+.pa-part:hover {
+  filter: brightness(1.18) drop-shadow(0 0 8px rgba(255,255,255,0.6));
+}
+.pa-part.dim { opacity: 0.4; }
+.pa-part.active {
+  filter: brightness(1.2) drop-shadow(0 0 10px rgba(255,255,0,0.7));
+}
+
+/* Info panel */
+.pa-info {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+}
+.pa-info .pa-empty {
+  margin: auto;
+  text-align: center;
+  color: #9ca3af;
+}
+.pa-info .pa-empty i { font-size: 2rem; margin-bottom: 10px; display: block; }
+
+.pa-info-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 14px;
+}
+.pa-info h3 {
+  margin: 0 0 6px 0;
+  font-size: 1.5rem;
+  color: #111827;
+}
+.pa-info .pa-tagline {
+  margin: 0 0 18px 0;
+  color: #6b7280;
+  font-size: 0.92rem;
+  font-style: italic;
+}
+.pa-info p { margin: 0 0 12px 0; color: #374151; line-height: 1.6; font-size: 0.94rem; }
+
+.pa-facts {
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid #f3f4f6;
+}
+.pa-facts h4 {
+  margin: 0 0 10px 0;
+  font-size: 0.78rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.pa-fact {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 12px;
+  background: #fafafa;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+  color: #1f2937;
+}
+.pa-fact i {
+  color: #f59e0b;
+  margin-top: 3px;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+
+/* Part chips below the SVG */
+.pa-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: center;
+}
+.pa-chip {
+  background: white;
+  border: 1px solid #e5e7eb;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1f2937;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.pa-chip:hover { border-color: #4caf50; }
+.pa-chip.active {
+  background: linear-gradient(135deg, #2e7d32, #4caf50);
+  color: white;
+  border-color: transparent;
+}
+.pa-chip .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--chip-color, #4caf50);
+}

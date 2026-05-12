@@ -501,21 +501,42 @@ const PlantJournal = ({ showNotification, user }) => {
 
                                                 {/* Actions - Added bottom padding */}
                                                 <div className="journal-actions">
-                                                    <button 
+                                                    <button
                                                         className="btn btn-outline btn-sm"
                                                         onClick={() => handleEditJournal(journal)}
                                                     >
                                                         <i className="fas fa-edit"></i>
                                                         Edit
                                                     </button>
-                                                    <button 
+                                                    <button
+                                                        className={`btn btn-sm ${journal.is_public == 1 ? 'btn-success' : 'btn-outline'}`}
+                                                        onClick={async () => {
+                                                            const next = journal.is_public == 1 ? 0 : 1;
+                                                            try {
+                                                                const res = await apiService.setJournalVisibility(journal.id, next);
+                                                                if (res.success) {
+                                                                    setJournals(prev => prev.map(j =>
+                                                                        j.id === journal.id ? { ...j, is_public: next } : j
+                                                                    ));
+                                                                    showNotification('Updated', next ? 'Entry is now public' : 'Entry is now private', 'success');
+                                                                }
+                                                            } catch (e) {
+                                                                showNotification('Error', e.message || 'Could not change visibility', 'error');
+                                                            }
+                                                        }}
+                                                        title={journal.is_public == 1 ? 'Public — anyone can see this on your profile' : 'Private — only you can see this'}
+                                                    >
+                                                        <i className={`fas ${journal.is_public == 1 ? 'fa-globe' : 'fa-lock'}`}></i>
+                                                        {journal.is_public == 1 ? 'Public' : 'Private'}
+                                                    </button>
+                                                    <button
                                                         className="btn btn-outline btn-sm"
                                                         onClick={() => handleDeleteJournal(journal.id)}
                                                     >
                                                         <i className="fas fa-trash"></i>
                                                         Delete
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         className="btn btn-primary btn-sm"
                                                         onClick={() => handleReadMore(journal)}
                                                     >

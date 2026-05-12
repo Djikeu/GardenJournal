@@ -94,7 +94,7 @@ function handleGet($db, $user_id) {
 function discoverUsers($db, $user_id) {
     $q = isset($_GET['q']) ? trim($_GET['q']) : '';
 
-    $sql = "SELECT u.id, u.username, u.email, u.avatar, u.created_at,
+    $sql = "SELECT u.id, u.name AS username, u.email, u.avatar, u.created_at,
                    (SELECT COUNT(*) FROM plants    p WHERE p.user_id = u.id) AS plants_count,
                    (SELECT COUNT(*) FROM journals  j WHERE j.user_id = u.id AND j.is_public = 1) AS public_journals_count,
                    (SELECT COUNT(*) FROM user_follows f WHERE f.followed_id = u.id) AS followers_count,
@@ -104,7 +104,7 @@ function discoverUsers($db, $user_id) {
     $params = [':me' => $user_id];
 
     if ($q !== '') {
-        $sql .= " AND (u.username LIKE :q OR u.email LIKE :q) ";
+        $sql .= " AND (u.name LIKE :q OR u.email LIKE :q) ";
         $params[':q'] = "%$q%";
     }
     $sql .= " ORDER BY plants_count DESC, u.created_at DESC LIMIT 50";
@@ -115,7 +115,7 @@ function discoverUsers($db, $user_id) {
 }
 
 function listFollowing($db, $user_id) {
-    $stmt = $db->prepare("SELECT u.id, u.username, u.avatar, u.email, f.created_at AS followed_since,
+    $stmt = $db->prepare("SELECT u.id, u.name AS username, u.avatar, u.email, f.created_at AS followed_since,
                                  (SELECT COUNT(*) FROM plants p WHERE p.user_id = u.id) AS plants_count
                           FROM user_follows f
                           JOIN users u ON u.id = f.followed_id
@@ -126,7 +126,7 @@ function listFollowing($db, $user_id) {
 }
 
 function listFollowers($db, $user_id) {
-    $stmt = $db->prepare("SELECT u.id, u.username, u.avatar, u.email, f.created_at AS following_since,
+    $stmt = $db->prepare("SELECT u.id, u.name AS username, u.avatar, u.email, f.created_at AS following_since,
                                  (SELECT COUNT(*) FROM plants p WHERE p.user_id = u.id) AS plants_count,
                                  EXISTS(SELECT 1 FROM user_follows f2 WHERE f2.follower_id = :uid AND f2.followed_id = u.id) AS i_follow_back
                           FROM user_follows f
@@ -142,7 +142,7 @@ function getPublicProfile($db, $viewer_id) {
     if (!$target) respond(false, 'target user id required', null, 400);
 
     // User basic
-    $stmt = $db->prepare("SELECT id, username, email, avatar, created_at, role
+    $stmt = $db->prepare("SELECT id, name AS username, email, avatar, created_at, role
                           FROM users WHERE id = :id");
     $stmt->execute([':id' => $target]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);

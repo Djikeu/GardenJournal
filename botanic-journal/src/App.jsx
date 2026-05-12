@@ -23,6 +23,11 @@ import PlantRequestManager from './components/Admin/PlantRequestManager';
 import PlantDoctor from './components/PlantDoctor/PlantDoctor';
 import PlantChat from './components/PlantChat/PlantChat';
 import GardenMapDesigner from './components/GardenMap/GardenMapDesigner';
+import Gardeners from './components/Social/Gardeners';
+import PublicProfile from './components/Social/PublicProfile';
+import Messages from './components/Social/Messages';
+import CarbonOffset from './components/EcoImpact/CarbonOffset';
+import PlantAnatomy from './components/EcoImpact/PlantAnatomy';
 import { apiService } from './services/api';
 import './index.css';
 import './App.css';
@@ -42,6 +47,8 @@ function App() {
   const [selectedPlantId, setSelectedPlantId] = useState(null);
   const [showPlantDetailModal, setShowPlantDetailModal] = useState(false);
   const [selectedDiscussionId, setSelectedDiscussionId] = useState(null);
+  const [selectedProfileId, setSelectedProfileId] = useState(null);
+  const [chatWithUserId, setChatWithUserId] = useState(null);
 
   // Handle hash-based navigation
   useEffect(() => {
@@ -68,7 +75,9 @@ function App() {
         'dashboard', 'plants', 'tasks', 'journal', 'encyclopedia',
         'analytics', 'planner', 'profile', 'plant-detail', 'community',
         'discussion-detail', 'suggest-plant', 'my-requests', 'plant-requests', 'admin',
-        'plant-doctor', 'plant-chat', 'garden-map'
+        'plant-doctor', 'plant-chat', 'garden-map',
+        'gardeners', 'messages', 'public-profile',
+        'carbon', 'anatomy'
       ];
 
       if (hash && validViews.includes(hash)) {
@@ -205,6 +214,16 @@ function App() {
     window.history.back();
   };
 
+  const showPublicProfile = (userId) => {
+    setSelectedProfileId(userId);
+    setActiveView('public-profile');
+  };
+
+  const openChatWith = (userId) => {
+    setChatWithUserId(userId);
+    setActiveView('messages');
+  };
+
   const renderContent = () => {
     if (!isAuthenticated) {
       return authView === 'login' ? (
@@ -247,6 +266,29 @@ function App() {
         return <PlantChat showNotification={showNotification} user={currentUser} />;
       case 'garden-map':
         return <GardenMapDesigner showNotification={showNotification} user={currentUser} />;
+      case 'gardeners':
+        return <Gardeners
+          showNotification={showNotification}
+          onShowProfile={showPublicProfile}
+          onOpenChat={openChatWith}
+        />;
+      case 'public-profile':
+        return <PublicProfile
+          showNotification={showNotification}
+          targetUserId={selectedProfileId}
+          onBack={() => { setSelectedProfileId(null); setActiveView('gardeners'); }}
+          onOpenChat={openChatWith}
+        />;
+      case 'messages':
+        return <Messages
+          showNotification={showNotification}
+          user={currentUser}
+          initialUserId={chatWithUserId}
+        />;
+      case 'carbon':
+        return <CarbonOffset showNotification={showNotification} />;
+      case 'anatomy':
+        return <PlantAnatomy />;
       case 'encyclopedia':
         return <PlantEncyclopedia
           showNotification={showNotification}

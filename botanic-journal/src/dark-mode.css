@@ -7,17 +7,17 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  /* Surface tokens — overrideable per-component if needed */
-  --bj-bg:           #0f172a;   /* page background */
-  --bj-surface:      #1e293b;   /* card background */
-  --bj-surface-2:    #273449;   /* nested / hover */
-  --bj-surface-3:    #334155;   /* deeper */
-  --bj-border:       #334155;
-  --bj-border-soft:  #1f2937;
-  --bj-text:         #e5e7eb;
-  --bj-text-muted:   #94a3b8;
-  --bj-text-subtle:  #64748b;
-  --bj-input-bg:     #1e293b;
+  /* Surface tokens — refined for better contrast and depth */
+  --bj-bg:           #0a0f1c;   /* page background — slightly deeper */
+  --bj-surface:      #14202f;   /* card background */
+  --bj-surface-2:    #1e2d40;   /* nested / hover */
+  --bj-surface-3:    #2a3b53;   /* deeper */
+  --bj-border:       #2a3b53;
+  --bj-border-soft:  #1a2536;
+  --bj-text:         #f1f5f9;   /* primary text — brighter */
+  --bj-text-muted:   #cbd5e1;
+  --bj-text-subtle:  #94a3b8;
+  --bj-input-bg:     #0a0f1c;
 }
 
 /* ── Global surfaces ─────────────────────────────────── */
@@ -26,11 +26,11 @@
 [data-theme="dark"] .container,
 [data-theme="dark"] .app,
 [data-theme="dark"] .main-content {
-  background: #0f172a !important;
+  background: #0a0f1c !important;
   color: #e5e7eb;
 }
 
-[data-theme="dark"] body { background: #0f172a !important; }
+[data-theme="dark"] body { background: #0a0f1c !important; }
 
 /* Containers with hardcoded light backgrounds */
 [data-theme="dark"] .my-plants-container,
@@ -42,7 +42,7 @@
 [data-theme="dark"] .gm-container,
 [data-theme="dark"] .profile-container-modern,
 [data-theme="dark"] .plant-detail-wrapper {
-  background: #0f172a !important;
+  background: #0a0f1c !important;
 }
 
 /* ── Sidebar ─────────────────────────────────────────── */
@@ -61,7 +61,7 @@
   color: #cbd5e1 !important;
 }
 [data-theme="dark"] .nav-links-item:hover {
-  background: #1e293b !important;
+  background: #14202f !important;
   color: #ffffff !important;
 }
 [data-theme="dark"] .nav-links-item.active {
@@ -87,16 +87,16 @@
 [data-theme="dark"] .date-info,
 [data-theme="dark"] .time-info { color: #cbd5e1 !important; }
 [data-theme="dark"] .quick-stat {
-  background: #1e293b !important;
-  color: #e5e7eb !important;
-  border-color: #334155 !important;
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
 }
 [data-theme="dark"] .user-profile-card {
-  background: #1e293b !important;
-  border-color: #334155 !important;
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
 }
 [data-theme="dark"] .user-profile-card:hover {
-  background: #273449 !important;
+  background: #1e2d40 !important;
 }
 
 /* ── Cards & generic surfaces ───────────────────────── */
@@ -128,9 +128,9 @@
 [data-theme="dark"] .empty-state,
 [data-theme="dark"] .no-results,
 [data-theme="dark"] .plant-detail-container {
-  background: #1e293b !important;
-  border-color: #334155 !important;
-  color: #e5e7eb !important;
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
 }
 
@@ -141,8 +141,8 @@
 [data-theme="dark"] .stats-grid-compact,
 [data-theme="dark"] .detail-card,
 [data-theme="dark"] .related-plant-card {
-  background: #1e293b !important;
-  color: #e5e7eb !important;
+  background: #14202f !important;
+  color: #f1f5f9 !important;
 }
 
 /* Headings & body text */
@@ -209,9 +209,9 @@
 [data-theme="dark"] .search-input,
 [data-theme="dark"] .search-input-enhanced,
 [data-theme="dark"] .sort-select {
-  background: #0f172a !important;
-  color: #e5e7eb !important;
-  border-color: #334155 !important;
+  background: #0a0f1c !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
 }
 [data-theme="dark"] input:focus,
 [data-theme="dark"] textarea:focus,
@@ -226,8 +226,8 @@
 
 [data-theme="dark"] .search-box,
 [data-theme="dark"] .search-box-enhanced {
-  background: #0f172a !important;
-  border-color: #334155 !important;
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
 }
 [data-theme="dark"] .filter-section,
 [data-theme="dark"] .controls-section,
@@ -235,12 +235,12 @@
 [data-theme="dark"] .tasks-controls,
 [data-theme="dark"] .encyclopedia-controls,
 [data-theme="dark"] .journal-controls {
-  background: #1e293b !important;
-  border-color: #334155 !important;
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
 }
 [data-theme="dark"] .filter-chip {
-  background: #273449 !important;
-  border-color: #334155 !important;
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
   color: #cbd5e1 !important;
 }
 [data-theme="dark"] .filter-chip:hover {
@@ -256,8 +256,8 @@
 [data-theme="dark"] .card-btn,
 [data-theme="dark"] .btn-icon,
 [data-theme="dark"] .view-btn {
-  background: #273449 !important;
-  border-color: #334155 !important;
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
   color: #cbd5e1 !important;
 }
 [data-theme="dark"] .btn-outline:hover,
@@ -277,8 +277,8 @@
 /* ── Modals ──────────────────────────────────────────── */
 [data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.7) !important; }
 [data-theme="dark"] .modal-content {
-  background: #1e293b !important;
-  color: #e5e7eb !important;
+  background: #14202f !important;
+  color: #f1f5f9 !important;
   border: 1px solid #334155 !important;
 }
 [data-theme="dark"] .modal-header {
@@ -286,37 +286,37 @@
 }
 [data-theme="dark"] .modal-header h3 { color: #f3f4f6 !important; }
 [data-theme="dark"] .modal-close {
-  background: #273449 !important;
+  background: #1e2d40 !important;
   color: #cbd5e1 !important;
 }
 
 /* ── Notifications ───────────────────────────────────── */
 [data-theme="dark"] .notification {
-  background: #1e293b !important;
-  color: #e5e7eb !important;
+  background: #14202f !important;
+  color: #f1f5f9 !important;
   border: 1px solid #334155 !important;
 }
 
 /* ── Plant Doctor ────────────────────────────────────── */
 [data-theme="dark"] .pd-dropzone {
-  background: #0f172a !important;
-  border-color: #334155 !important;
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
 }
 [data-theme="dark"] .pd-dropzone:hover {
-  background: #1e293b !important;
+  background: #14202f !important;
   border-color: #4caf50 !important;
 }
 [data-theme="dark"] .pd-result {
-  background: #0f172a !important;
-  border-color: #334155 !important;
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
 }
 [data-theme="dark"] .pd-recs li {
-  background: #1e293b !important;
-  border-color: #334155 !important;
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
   border-left-color: #4caf50 !important;
-  color: #e5e7eb !important;
+  color: #f1f5f9 !important;
 }
-[data-theme="dark"] .pd-history-row:hover { background: #273449 !important; }
+[data-theme="dark"] .pd-history-row:hover { background: #1e2d40 !important; }
 [data-theme="dark"] .pd-history-item.active .pd-history-row { background: rgba(76, 175, 80, 0.12) !important; }
 [data-theme="dark"] .pd-history-detail { background: #1a2436 !important; border-top-color: #334155 !important; }
 [data-theme="dark"] .pd-notes-block p {
@@ -329,75 +329,75 @@
   background: linear-gradient(180deg, #1a2436 0%, #1e293b 100%) !important;
 }
 [data-theme="dark"] .pc-assistant .pc-bubble {
-  background: #273449 !important;
-  border-color: #334155 !important;
-  color: #e5e7eb !important;
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
 }
 [data-theme="dark"] .pc-suggestion {
-  background: #273449 !important;
-  border-color: #334155 !important;
-  color: #e5e7eb !important;
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
 }
 [data-theme="dark"] .pc-suggestion:hover {
   background: rgba(76, 175, 80, 0.15) !important;
   border-color: #4caf50 !important;
 }
-[data-theme="dark"] .pc-input-row { background: #1e293b !important; border-top-color: #334155 !important; }
-[data-theme="dark"] .pc-input { background: #0f172a !important; border-color: #334155 !important; color: #e5e7eb !important; }
+[data-theme="dark"] .pc-input-row { background: #14202f !important; border-top-color: #334155 !important; }
+[data-theme="dark"] .pc-input { background: #0a0f1c !important; border-color: #2a3b53 !important; color: #f1f5f9 !important; }
 
 /* ── Garden Map ──────────────────────────────────────── */
 [data-theme="dark"] .gm-zone-tab {
-  background: #273449 !important;
+  background: #1e2d40 !important;
   color: #cbd5e1 !important;
 }
 [data-theme="dark"] .gm-zone-tab:hover { background: #334155 !important; }
 [data-theme="dark"] .gm-palette-item {
-  background: #273449 !important;
-  border-color: #334155 !important;
-  color: #e5e7eb !important;
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
 }
 [data-theme="dark"] .gm-palette-item:hover {
   background: rgba(76, 175, 80, 0.12) !important;
   border-color: #4caf50 !important;
 }
 [data-theme="dark"] .gm-palette-search input {
-  background: #0f172a !important;
-  border-color: #334155 !important;
-  color: #e5e7eb !important;
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
 }
 
 /* The zone canvases — keep their playful tints but darken */
-[data-theme="dark"] .gm-canvas { border-color: #334155 !important; filter: brightness(0.7); }
+[data-theme="dark"] .gm-canvas { border-color: #2a3b53 !important; filter: brightness(0.7); }
 
 /* ── Tables / forum / discussions ────────────────────── */
 [data-theme="dark"] table {
-  background: #1e293b !important;
-  color: #e5e7eb !important;
+  background: #14202f !important;
+  color: #f1f5f9 !important;
 }
-[data-theme="dark"] th { background: #273449 !important; }
-[data-theme="dark"] td { border-color: #334155 !important; }
+[data-theme="dark"] th { background: #1e2d40 !important; }
+[data-theme="dark"] td { border-color: #2a3b53 !important; }
 
 [data-theme="dark"] .discussion-card,
 [data-theme="dark"] .reply-card,
 [data-theme="dark"] .community-card {
-  background: #1e293b !important;
-  border-color: #334155 !important;
-  color: #e5e7eb !important;
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
 }
 
 /* ── Plant Detail tabs ───────────────────────────────── */
-[data-theme="dark"] .plant-tabs { background: #1e293b !important; border-color: #334155 !important; }
+[data-theme="dark"] .plant-tabs { background: #14202f !important; border-color: #2a3b53 !important; }
 [data-theme="dark"] .tab-btn {
   color: #cbd5e1 !important;
   background: transparent !important;
 }
 [data-theme="dark"] .tab-btn.active { color: #4caf50 !important; }
-[data-theme="dark"] .tab-content { background: transparent !important; color: #e5e7eb !important; }
-[data-theme="dark"] .timeline-content { background: #273449 !important; color: #e5e7eb !important; }
+[data-theme="dark"] .tab-content { background: transparent !important; color: #f1f5f9 !important; }
+[data-theme="dark"] .timeline-content { background: #1e2d40 !important; color: #f1f5f9 !important; }
 
 /* ── Auth pages (Login / Register) ───────────────────── */
-[data-theme="dark"] .auth-container { background: #0f172a !important; }
-[data-theme="dark"] .auth-panel     { background: #0f172a !important; }
+[data-theme="dark"] .auth-container { background: #0a0f1c !important; }
+[data-theme="dark"] .auth-panel     { background: #0a0f1c !important; }
 [data-theme="dark"] .auth-header h2 { color: #f3f4f6 !important; }
 [data-theme="dark"] .auth-header p,
 [data-theme="dark"] .auth-footer p,
@@ -430,8 +430,8 @@
   border-color: #f59e0b;
 }
 [data-theme="dark"] .theme-toggle {
-  background: #1e293b !important;
-  border-color: #334155 !important;
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
   color: #fbbf24 !important;
 }
 [data-theme="dark"] .theme-toggle:hover {
@@ -440,9 +440,181 @@
 
 /* Make scrollbars less harsh in dark mode */
 [data-theme="dark"] ::-webkit-scrollbar { width: 10px; height: 10px; }
-[data-theme="dark"] ::-webkit-scrollbar-track { background: #0f172a; }
+[data-theme="dark"] ::-webkit-scrollbar-track { background: #0a0f1c; }
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #2a3b53;
   border-radius: 999px;
 }
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* ────────────────────────────────────────────────────────────
+   Refinements pass — better contrast, missed components,
+   richer surfaces for the new pages (eco, social, anatomy)
+   ──────────────────────────────────────────────────────────── */
+
+/* Body uses the deepest tone with a subtle warm tint */
+[data-theme="dark"] body {
+  background: linear-gradient(180deg, #0a0f1c 0%, #0d1424 100%) !important;
+}
+
+/* Hero gradients: deeper greens so they don't blast against dark surfaces */
+[data-theme="dark"] .pd-hero,
+[data-theme="dark"] .pc-hero,
+[data-theme="dark"] .gm-hero,
+[data-theme="dark"] .eco-hero,
+[data-theme="dark"] .social-hero,
+[data-theme="dark"] .tasks-hero,
+[data-theme="dark"] .encyclopedia-hero,
+[data-theme="dark"] .hero-section,
+[data-theme="dark"] .journal-hero,
+[data-theme="dark"] .profile-hero,
+[data-theme="dark"] .profile-banner {
+  background: linear-gradient(135deg, #0d2418 0%, #1f5b27 55%, #2e7d32 100%) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* New page containers */
+[data-theme="dark"] .eco-container,
+[data-theme="dark"] .social-container { background: #0a0f1c !important; }
+
+/* AI Note widget on the dashboard */
+[data-theme="dark"] .ai-note-card {
+  background: linear-gradient(135deg, #0e1f17 0%, #14202f 70%) !important;
+  border-color: #1e3a2a !important;
+}
+[data-theme="dark"] .ai-note-card::before {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(76, 175, 80, 0.15), transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(46, 125, 50, 0.10), transparent 50%) !important;
+}
+[data-theme="dark"] .ai-note-text     { color: #f1f5f9 !important; }
+[data-theme="dark"] .ai-note-text p:last-child:not(:only-child) { color: #cbd5e1 !important; }
+[data-theme="dark"] .ai-note-fallback { color: #94a3b8 !important; }
+[data-theme="dark"] .ai-note-sub      { color: #94a3b8 !important; }
+[data-theme="dark"] .ai-note-title h3 { color: #d1fae5 !important; }
+[data-theme="dark"] .ai-note-refresh {
+  background: #14202f !important;
+  border-color: #1e3a2a !important;
+  color: #4caf50 !important;
+}
+[data-theme="dark"] .ai-skeleton-line {
+  background: linear-gradient(90deg, #1e2d40 0%, #2a3b53 50%, #1e2d40 100%) !important;
+}
+
+/* Plant Doctor result tweaks */
+[data-theme="dark"] .pd-result-section h5 { color: #94a3b8 !important; }
+[data-theme="dark"] .pd-result-meta       { color: #cbd5e1 !important; }
+[data-theme="dark"] .pd-empty,
+[data-theme="dark"] .pd-loading p,
+[data-theme="dark"] .pc-empty p           { color: #cbd5e1 !important; }
+
+/* Garden Map zone canvases */
+[data-theme="dark"] .gm-canvas { filter: brightness(0.6) saturate(0.85); border-color: #2a3b53 !important; }
+[data-theme="dark"] .gm-canvas-empty,
+[data-theme="dark"] .gm-canvas-loading p { color: #cbd5e1 !important; }
+[data-theme="dark"] .gm-canvas-empty h3  { color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-tile-label       { background: rgba(0,0,0,0.85) !important; }
+[data-theme="dark"] .gm-hint {
+  background: rgba(120, 53, 15, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #fde68a !important;
+}
+
+/* Plant Anatomy */
+[data-theme="dark"] .pa-canvas {
+  background: linear-gradient(180deg, #1a2332 0%, #1a2332 50%, #1f2e23 50%, #19281e 100%) !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .pa-info { background: #14202f !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .pa-info h3       { color: #f1f5f9 !important; }
+[data-theme="dark"] .pa-info p        { color: #cbd5e1 !important; }
+[data-theme="dark"] .pa-info .pa-tagline { color: #94a3b8 !important; }
+[data-theme="dark"] .pa-fact { background: #0a0f1c !important; color: #f1f5f9 !important; }
+[data-theme="dark"] .pa-facts h4 { color: #94a3b8 !important; }
+[data-theme="dark"] .pa-empty   { color: #94a3b8 !important; }
+[data-theme="dark"] .pa-chip {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Carbon Offset */
+[data-theme="dark"] .co-stat,
+[data-theme="dark"] .co-section {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .co-stat-value         { color: #f1f5f9 !important; }
+[data-theme="dark"] .co-stat-unit          { color: #cbd5e1 !important; }
+[data-theme="dark"] .co-stat-label         { color: #94a3b8 !important; }
+[data-theme="dark"] .co-stat-note          { color: #64748b !important; }
+[data-theme="dark"] .co-comparison         { background: #0a0f1c !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .co-comparison .num    { color: #f1f5f9 !important; }
+[data-theme="dark"] .co-comparison .desc   { color: #cbd5e1 !important; }
+[data-theme="dark"] .co-plant-row          { background: #0a0f1c !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .co-plant-row .info strong { color: #f1f5f9 !important; }
+[data-theme="dark"] .co-plant-row .info small  { color: #94a3b8 !important; }
+[data-theme="dark"] .co-plant-row .nums    { color: #cbd5e1 !important; }
+[data-theme="dark"] .co-period             { background: #14202f !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .co-period button      { color: #cbd5e1 !important; }
+[data-theme="dark"] .co-disclaimer {
+  background: rgba(120, 53, 15, 0.18) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #fde68a !important;
+}
+
+/* Social pages */
+[data-theme="dark"] .gardener-card,
+[data-theme="dark"] .profile-section,
+[data-theme="dark"] .messages-layout,
+[data-theme="dark"] .conv-list,
+[data-theme="dark"] .chat-panel,
+[data-theme="dark"] .social-empty,
+[data-theme="dark"] .profile-back {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .conv-list                { background: #0d1424 !important; }
+[data-theme="dark"] .conv-item:hover          { background: #14202f !important; }
+[data-theme="dark"] .conv-item.active         { background: rgba(76, 175, 80, 0.12) !important; border-left-color: #4caf50 !important; }
+[data-theme="dark"] .conv-name                { color: #f1f5f9 !important; }
+[data-theme="dark"] .conv-preview, [data-theme="dark"] .conv-time { color: #94a3b8 !important; }
+[data-theme="dark"] .chat-panel-header        { background: #14202f !important; border-bottom-color: #2a3b53 !important; }
+[data-theme="dark"] .chat-panel-header strong { color: #f1f5f9 !important; }
+[data-theme="dark"] .chat-messages            { background: #0a0f1c !important; }
+[data-theme="dark"] .dm-row.dm-theirs .dm-bubble {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .chat-input-row           { background: #14202f !important; border-top-color: #2a3b53 !important; }
+[data-theme="dark"] .chat-input-row textarea  { background: #0a0f1c !important; color: #f1f5f9 !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .gardener-info strong     { color: #f1f5f9 !important; }
+[data-theme="dark"] .gardener-info small      { color: #94a3b8 !important; }
+[data-theme="dark"] .gardener-stats           { color: #cbd5e1 !important; border-top-color: #2a3b53 !important; }
+[data-theme="dark"] .profile-plant-tile       { background: #0a0f1c !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .profile-plant-tile-info strong { color: #f1f5f9 !important; }
+[data-theme="dark"] .profile-plant-tile-info small  { color: #94a3b8 !important; }
+[data-theme="dark"] .profile-journal-item     { background: #0a0f1c !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .profile-journal-item h4  { color: #f1f5f9 !important; }
+[data-theme="dark"] .profile-journal-item .meta { color: #94a3b8 !important; }
+[data-theme="dark"] .profile-journal-item .body { color: #cbd5e1 !important; }
+[data-theme="dark"] .conv-list-header         { background: #0d1424 !important; color: #f1f5f9 !important; border-bottom-color: #2a3b53 !important; }
+
+/* Better placeholder + selection */
+[data-theme="dark"] ::placeholder { color: #64748b !important; }
+[data-theme="dark"] ::selection   { background: rgba(76, 175, 80, 0.4); color: white; }
+
+/* Catch-all for inline white backgrounds and gray text colors */
+[data-theme="dark"] [style*="background: white"],
+[data-theme="dark"] [style*="background:#fff"],
+[data-theme="dark"] [style*="background-color: white"],
+[data-theme="dark"] [style*="background-color: #fff"] {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] [style*="color: #6b7280"],
+[data-theme="dark"] [style*="color:#6b7280"] { color: #cbd5e1 !important; }
+[data-theme="dark"] [style*="color: #9ca3af"],
+[data-theme="dark"] [style*="color:#9ca3af"] { color: #94a3b8 !important; }

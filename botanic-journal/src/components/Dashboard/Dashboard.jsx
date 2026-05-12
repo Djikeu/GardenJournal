@@ -240,7 +240,12 @@ const Dashboard = ({ showNotification, onNavigate }) => {
                   <div className="ai-skeleton-line" style={{ width: '70%' }}></div>
                 </div>
               ) : dailyNote?.note ? (
-                <p className="ai-note-text">{dailyNote.note}</p>
+                <div className="ai-note-text">
+                  {dailyNote.note
+                    .split(/\n\s*\n/)               // split on blank lines
+                    .filter(p => p.trim())
+                    .map((para, i) => <p key={i}>{para.trim()}</p>)}
+                </div>
               ) : (
                 <p className="ai-note-fallback">
                   Take a moment with your plants today — even a quiet check-in counts.
