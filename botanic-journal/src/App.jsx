@@ -28,6 +28,7 @@ import PublicProfile from './components/Social/PublicProfile';
 import Messages from './components/Social/Messages';
 import CarbonOffset from './components/EcoImpact/CarbonOffset';
 import PlantAnatomy from './components/EcoImpact/PlantAnatomy';
+import LiveGarden from './components/LiveGarden/LiveGarden';
 import { apiService } from './services/api';
 import './index.css';
 import './App.css';
@@ -77,7 +78,7 @@ function App() {
         'discussion-detail', 'suggest-plant', 'my-requests', 'plant-requests', 'admin',
         'plant-doctor', 'plant-chat', 'garden-map',
         'gardeners', 'messages', 'public-profile',
-        'carbon', 'anatomy'
+        'carbon', 'anatomy', 'live-garden'
       ];
 
       if (hash && validViews.includes(hash)) {
@@ -289,6 +290,11 @@ function App() {
         return <CarbonOffset showNotification={showNotification} />;
       case 'anatomy':
         return <PlantAnatomy />;
+      case 'live-garden':
+        return <LiveGarden
+          showNotification={showNotification}
+          onShowPlantDetails={showPlantDetails}
+        />;
       case 'encyclopedia':
         return <PlantEncyclopedia
           showNotification={showNotification}

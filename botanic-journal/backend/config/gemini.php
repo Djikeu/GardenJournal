@@ -26,3 +26,4 @@ if (!defined('GEMINI_MODEL')) {
 if (!defined('GEMINI_API_URL_BASE')) {
     define('GEMINI_API_URL_BASE', 'https://generativelanguage.googleapis.com/v1beta/models');
 }
+   

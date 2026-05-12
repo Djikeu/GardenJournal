@@ -1,0 +1,375 @@
+/* ============================================================
+   Live Garden — pixel-art panorama with weather + nature events
+============================================================ */
+
+.lg-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  background: #f9fafb;
+  /* Crisp pixel art rendering for any SVG inside */
+  image-rendering: pixelated;
+}
+
+/* Hero */
+.lg-hero {
+  background: linear-gradient(135deg, #1b3a2b 0%, #2e7d32 55%, #4caf50 100%);
+  color: white;
+  padding: 26px 32px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  box-shadow: 0 10px 24px rgba(46,125,50,0.18);
+}
+.lg-hero h1 {
+  margin: 0 0 6px 0;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 0.04em;
+}
+.lg-hero p { margin: 0; opacity: 0.92; max-width: 560px; font-size: 0.95rem; }
+.lg-hero-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.lg-pill {
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fef9c3;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.lg-btn {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  transition: background 0.2s ease;
+}
+.lg-btn:hover { background: rgba(255,255,255,0.22); }
+.lg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.lg-btn-primary {
+  background: white;
+  color: #2e7d32;
+  border-color: white;
+}
+.lg-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+/* ── The scene ────────────────────────────────────────── */
+.lg-scene {
+  position: relative;
+  height: 540px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.10);
+  transition: background 0.8s ease;
+}
+
+/* Sky variants */
+.lg-sky-dawn  { background: linear-gradient(180deg, #fde68a 0%, #fbbf24 40%, #fb923c 70%, #fda4af 100%); }
+.lg-sky-day   { background: linear-gradient(180deg, #93c5fd 0%, #60a5fa 50%, #bae6fd 100%); }
+.lg-sky-dusk  { background: linear-gradient(180deg, #fb7185 0%, #c084fc 40%, #6366f1 80%, #4338ca 100%); }
+.lg-sky-night { background: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #1e3a8a 100%); }
+
+/* Sun / moon position depending on sky */
+.lg-sun-moon {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  top: 60px;
+  right: 80px;
+  z-index: 1;
+  pointer-events: none;
+  animation: sunPulse 5s ease-in-out infinite;
+}
+.lg-sky-day   .lg-sun-moon { background: radial-gradient(circle, #fff7ed 0%, #fbbf24 70%, #f59e0b 100%); box-shadow: 0 0 50px rgba(251,191,36,0.6); }
+.lg-sky-dawn  .lg-sun-moon { background: radial-gradient(circle, #fff7ed 0%, #fb923c 80%); top: 200px; right: 60px; box-shadow: 0 0 40px rgba(251,146,60,0.5); }
+.lg-sky-dusk  .lg-sun-moon { background: radial-gradient(circle, #fed7aa 0%, #fb7185 80%); top: 200px; left: 80px; right: auto; }
+.lg-sky-night .lg-sun-moon {
+  background: radial-gradient(circle, #f8fafc 0%, #e2e8f0 60%, #cbd5e1 100%);
+  box-shadow: 0 0 40px rgba(255,255,255,0.5);
+  width: 60px; height: 60px;
+}
+@keyframes sunPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+
+/* Add stars to the night sky */
+.lg-sky-night::before {
+  content: '✦  ✦       ✦     ✦   ✦      ✦  ✦       ✦   ✦       ✦  ✦     ✦       ✦  ✦     ✦   ✦';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 30px;
+  padding: 30px 20px;
+  font-size: 0.7rem;
+  line-height: 50px;
+  pointer-events: none;
+}
+
+/* Drifting clouds */
+.lg-cloud {
+  position: absolute;
+  background:
+    radial-gradient(circle at 30% 50%, white 25%, transparent 26%),
+    radial-gradient(circle at 60% 40%, white 30%, transparent 31%),
+    radial-gradient(circle at 80% 60%, white 25%, transparent 26%);
+  width: 140px;
+  height: 50px;
+  opacity: 0.85;
+  filter: drop-shadow(0 2px 0 rgba(0,0,0,0.08));
+  z-index: 1;
+  pointer-events: none;
+}
+.lg-cloud-1 { top: 50px;  animation: cloudDrift 90s linear infinite; }
+.lg-cloud-2 { top: 120px; animation: cloudDrift 120s linear infinite; animation-delay: -40s; opacity: 0.7; }
+.lg-cloud-3 { top: 30px;  animation: cloudDrift 110s linear infinite; animation-delay: -75s; opacity: 0.6; }
+@keyframes cloudDrift {
+  0%   { left: -180px; }
+  100% { left: 110%; }
+}
+.lg-sky-night .lg-cloud { opacity: 0.25; filter: brightness(0.4); }
+
+/* Rain overlay */
+.lg-rain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(110deg, rgba(56, 189, 248, 0.45) 0 1px, transparent 1px 14px);
+  background-size: 100% 100%;
+  animation: rainFall 0.4s linear infinite;
+  z-index: 3;
+}
+@keyframes rainFall {
+  0%   { background-position: 0 0; }
+  100% { background-position: -20px 30px; }
+}
+
+/* Panorama (the scrollable area) */
+.lg-panorama-wrap {
+  position: absolute;
+  inset: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  z-index: 2;
+  scrollbar-color: rgba(255,255,255,0.6) transparent;
+}
+.lg-panorama-wrap::-webkit-scrollbar { height: 10px; }
+.lg-panorama-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.6); border-radius: 999px; }
+.lg-panorama-wrap::-webkit-scrollbar-track { background: transparent; }
+
+.lg-panorama {
+  position: relative;
+  height: 100%;
+}
+
+.lg-hills {
+  position: absolute;
+  bottom: 110px;
+  left: 0;
+  width: 100%;
+  height: 200px;
+}
+
+.lg-soil {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 110px;
+  background:
+    linear-gradient(180deg, #4b8b3b 0%, #3a6b2c 30%, #78350f 30%, #5a2a08 100%);
+}
+.lg-soil::after {
+  /* grass tufts */
+  content: '';
+  position: absolute;
+  top: -2px; left: 0; right: 0;
+  height: 8px;
+  background-image: repeating-linear-gradient(90deg, #65a30d 0 3px, transparent 3px 8px);
+}
+
+/* Plants */
+.lg-plant {
+  position: absolute;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 4;
+  filter: drop-shadow(0 2px 0 rgba(0,0,0,0.2));
+  transform-origin: 50% 100%;
+  transition: transform 0.2s ease;
+}
+.lg-plant:hover { z-index: 999; }
+.lg-plant:hover .lg-plant-tag { opacity: 1; }
+.lg-plant svg { display: block; image-rendering: pixelated; }
+
+.lg-sway { animation: plantSway 4s ease-in-out infinite; transform-origin: 50% 100%; }
+.lg-plant:nth-child(2n) .lg-sway { animation-duration: 5s; animation-delay: -1s; }
+.lg-plant:nth-child(3n) .lg-sway { animation-duration: 4.7s; animation-delay: -2s; }
+@keyframes plantSway {
+  0%, 100% { transform: rotate(-2deg); }
+  50%      { transform: rotate(2deg); }
+}
+
+.lg-plant-tag {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.85);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-family: 'Courier New', Courier, monospace;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+/* Bee */
+.lg-bee {
+  position: absolute;
+  font-size: 1.6rem;
+  top: 200px;
+  z-index: 5;
+  animation: beeFly 14s linear infinite, beeBob 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 2px 1px rgba(0,0,0,0.25));
+}
+@keyframes beeFly {
+  0%   { left: -50px; }
+  100% { left: calc(100% + 50px); }
+}
+@keyframes beeBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+
+/* Butterfly */
+.lg-butterfly {
+  position: absolute;
+  font-size: 1.5rem;
+  top: 150px;
+  z-index: 5;
+  animation: bflyFly 22s linear infinite, bflyBob 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 2px 1px rgba(0,0,0,0.25));
+}
+@keyframes bflyFly {
+  0%   { left: calc(100% + 50px); }
+  100% { left: -50px; }
+}
+@keyframes bflyBob {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50%      { transform: translateY(-25px) rotate(5deg); }
+}
+
+/* ── Event toasts ───────────────────────────────────── */
+.lg-events {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 320px;
+}
+.lg-event {
+  background: rgba(20, 32, 47, 0.92);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.3);
+  backdrop-filter: blur(4px);
+  animation: eventIn 0.35s ease;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+@keyframes eventIn {
+  from { opacity: 0; transform: translateX(40px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(0)   scale(1); }
+}
+.lg-event-icon { font-size: 1.6rem; flex-shrink: 0; }
+.lg-event-text { display: flex; flex-direction: column; }
+.lg-event-text strong {
+  font-size: 0.86rem;
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 0.02em;
+}
+.lg-event-text span { font-size: 0.78rem; color: #cbd5e1; margin-top: 2px; }
+
+/* Empty + loading */
+.lg-loading,
+.lg-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  z-index: 10;
+  text-align: center;
+  padding: 20px;
+}
+.lg-empty h3 { margin: 0 0 6px 0; }
+.lg-empty p  { margin: 0; opacity: 0.9; }
+
+/* Disclaimer */
+.lg-disclaimer {
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  color: #78350f;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+/* Dark mode tweaks */
+[data-theme="dark"] .lg-container { background: #0a0f1c !important; }
+[data-theme="dark"] .lg-disclaimer {
+  background: rgba(120, 53, 15, 0.18) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #fde68a !important;
+}
