@@ -499,6 +499,96 @@
 }
 .gm-tile-remove:hover { background: #b91c1c; transform: scale(1.1); }
 
+/* AI microclimate tip panel */
+.gm-tip {
+  margin-top: 10px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 60%);
+  border: 1px solid #d1fae5;
+  border-radius: 14px;
+  padding: 16px 18px;
+  animation: gmTipIn 0.25s ease-out;
+}
+@keyframes gmTipIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.gm-tip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.gm-tip-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.9rem;
+  color: #1b3a2b;
+}
+.gm-tip-title i {
+  color: #2e7d32;
+  background: #d1fae5;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.gm-tip-title strong { color: #111827; }
+.gm-tip-refresh {
+  background: white;
+  border: 1px solid #d1fae5;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #2e7d32;
+  font-size: 0.82rem;
+}
+.gm-tip-refresh:hover:not(:disabled) { background: #d1fae5; transform: rotate(20deg); }
+.gm-tip-refresh:disabled { opacity: 0.6; cursor: not-allowed; }
+.gm-tip-body { position: relative; }
+.gm-tip-verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.gm-tip-text {
+  margin: 6px 0 0 0;
+  color: #1f2937;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.gm-tip-skeleton {
+  margin: 0;
+  color: #6b7280;
+  font-style: italic;
+  font-size: 0.88rem;
+}
+
+/* Dark mode */
+[data-theme="dark"] .gm-tip {
+  background: linear-gradient(135deg, #0e1f17 0%, #14202f 70%) !important;
+  border-color: #1e3a2a !important;
+}
+[data-theme="dark"] .gm-tip-title       { color: #d1fae5 !important; }
+[data-theme="dark"] .gm-tip-title strong { color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-tip-text        { color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-tip-skeleton    { color: #94a3b8 !important; }
+[data-theme="dark"] .gm-tip-refresh {
+  background: #14202f !important;
+  border-color: #1e3a2a !important;
+  color: #4caf50 !important;
+}
+
 /* Hint under canvas */
 .gm-hint {
   margin: 8px 0 0;

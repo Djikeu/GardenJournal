@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
+import { getAvatarUrl } from '../../utils/avatar';
 import '../../social.css';
 
-const FALLBACK_AVATAR = 'https://i.pravatar.cc/150?img=12';
 const FALLBACK_PLANT  = 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=400';
 
 const PublicProfile = ({ targetUserId, onBack, onOpenChat, showNotification }) => {
@@ -55,6 +55,8 @@ const PublicProfile = ({ targetUserId, onBack, onOpenChat, showNotification }) =
     return `http://localhost${path}`;
   };
 
+  const userAvatar = (u) => getAvatarUrl({ avatar: u?.avatar, name: u?.username });
+
   if (loading) {
     return (
       <div className="social-container">
@@ -98,7 +100,7 @@ const PublicProfile = ({ targetUserId, onBack, onOpenChat, showNotification }) =
 
       {/* Banner */}
       <div className="profile-banner">
-        <img src={buildUrl(u.avatar, FALLBACK_AVATAR)} alt={u.username} className="profile-banner-avatar" />
+        <img src={userAvatar(u)} alt={u.username} className="profile-banner-avatar" />
         <div className="profile-banner-info">
           <h2>{u.username}</h2>
           <span className="joined">

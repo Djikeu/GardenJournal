@@ -31,6 +31,7 @@ register_shutdown_function(function () {
 });
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/user-notifications.php';
 
 function respond($success, $message = '', $data = null, $code = 200) {
     ob_clean();
@@ -202,6 +203,23 @@ function handleFollow($db, $user_id) {
 
     $ins = $db->prepare("INSERT IGNORE INTO user_follows (follower_id, followed_id) VALUES (:f, :t)");
     $ins->execute([':f' => $user_id, ':t' => $target]);
+
+    // Notify the followed user — but only if this is a NEW follow
+    if ($ins->rowCount() > 0) {
+        $actorStmt = $db->prepare("SELECT name FROM users WHERE id = :id");
+        $actorStmt->execute([':id' => $user_id]);
+        $actorName = $actorStmt->fetchColumn() ?: 'A gardener';
+
+        pushNotification(
+            $db,
+            $target,
+            'follow',
+            "{$actorName} started following you",
+            "Check out their profile and follow back.",
+            $user_id,
+            $user_id
+        );
+    }
 
     respond(true, 'Followed', ['target_user_id' => $target, 'is_following' => true]);
 }

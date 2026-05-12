@@ -29,6 +29,7 @@ register_shutdown_function(function () {
 });
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/user-notifications.php';
 
 function respond($success, $message = '', $data = null, $code = 200) {
     ob_clean();
@@ -177,9 +178,26 @@ function handleSend($db, $user_id) {
     $ins = $db->prepare("INSERT INTO direct_messages (sender_id, recipient_id, content)
                          VALUES (:s, :r, :c)");
     $ins->execute([':s' => $user_id, ':r' => $to, ':c' => $content]);
+    $messageId = $db->lastInsertId();
+
+    // Push a notification to the recipient (best-effort, never blocks the response)
+    $actorStmt = $db->prepare("SELECT name FROM users WHERE id = :id");
+    $actorStmt->execute([':id' => $user_id]);
+    $actorName = $actorStmt->fetchColumn() ?: 'A gardener';
+    $preview = mb_substr($content, 0, 80) . (mb_strlen($content) > 80 ? '…' : '');
+
+    pushNotification(
+        $db,
+        $to,
+        'message',
+        "New message from {$actorName}",
+        $preview,
+        $user_id,    // related_id = the sender, so the bell can open the chat with them
+        $user_id
+    );
 
     $row = $db->prepare("SELECT * FROM direct_messages WHERE id = :id");
-    $row->execute([':id' => $db->lastInsertId()]);
+    $row->execute([':id' => $messageId]);
     respond(true, 'Sent', $row->fetch(PDO::FETCH_ASSOC), 201);
 }
 

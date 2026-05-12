@@ -11,6 +11,10 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 24px;
+  /* Lift the whole header above page content so the notification dropdown
+     (which is trapped in this stacking context by `backdrop-filter`) appears on top */
+  position: relative;
+  z-index: 100;
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: var(--shadow-md);
   transition: all 0.3s ease;
@@ -114,7 +118,33 @@
   min-width: 320px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: nowrap;
+}
+
+/* Tight grouping for icon buttons (bell + theme toggle) */
+.header-actions-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Allow weather to compress before the user card does */
+.header-right .weather-mini-card { flex-shrink: 1; min-width: 200px; }
+.header-right .user-profile-card { flex-shrink: 0; }
+
+/* Hide the streak progress bar at moderately narrow widths so the row fits */
+@media (max-width: 1400px) {
+  .user-streak .streak-progress { display: none; }
+}
+
+/* At narrower widths, drop secondary info inside the user card */
+@media (max-width: 1200px) {
+  .header-right { flex-wrap: wrap; justify-content: flex-end; }
+  .user-meta-info,
+  .user-streak { display: none; }
 }
 
 /* XP Progress Card */

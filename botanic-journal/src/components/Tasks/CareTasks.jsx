@@ -114,7 +114,9 @@ const CareTasks = ({ showNotification }) => {
         setTasks(tasks.map(task =>
           task.id === taskId ? { ...task, due_date: newDueDate } : task
         ));
-        showNotification('Task Snoozed', `This task has been postponed until ${new Date(newDueDate).toLocaleDateString()}.`, 'info');
+        const d = new Date(newDueDate);
+        const formatted = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).slice(-2)}`;
+        showNotification('Task Snoozed', `This task has been postponed until ${formatted}.`, 'info');
       } else {
         throw new Error(response.message);
       }
@@ -222,6 +224,17 @@ const CareTasks = ({ showNotification }) => {
     if (task.due_date && new Date(task.due_date) < new Date()) return 'overdue';
     if (task.priority === 'medium') return 'soon';
     return 'normal';
+  };
+
+  // Format dates as DD/MM/YY for the task views
+  const formatDateDMY = (d) => {
+    if (!d) return '';
+    const date = new Date(d);
+    if (isNaN(date)) return '';
+    const day = String(date.getDate()).padStart(2, '0');
+    const mon = String(date.getMonth() + 1).padStart(2, '0');
+    const yr  = String(date.getFullYear()).slice(-2);
+    return `${day}/${mon}/${yr}`;
   };
 
   const taskTypes = [
@@ -539,7 +552,7 @@ const CareTasks = ({ showNotification }) => {
                                   <div>
                                     <span className="meta-label">Due Date</span>
                                     <span className="meta-value">
-                                      {new Date(task.due_date).toLocaleDateString()}
+                                      {formatDateDMY(task.due_date)}
                                     </span>
                                   </div>
                                 </div>

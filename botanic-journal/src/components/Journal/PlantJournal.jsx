@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
+import { formatDateDMY } from '../../utils/dateFormat';
 import '../../journal.css';
 
 const PlantJournal = ({ showNotification, user }) => {
@@ -459,7 +460,7 @@ const PlantJournal = ({ showNotification, user }) => {
                                                         <div className="journal-meta">
                                                             <span className="journal-date">
                                                                 <i className="fas fa-calendar"></i>
-                                                                {new Date(journal.created_at || new Date()).toLocaleDateString()}
+                                                                {formatDateDMY(journal.created_at || new Date())}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -682,7 +683,7 @@ const PlantJournal = ({ showNotification, user }) => {
                                             </div>
                                             <div className="stat">
                                                 <div className="stat-value">
-                                                    {new Date(selectedJournal.created_at || new Date()).toLocaleDateString()}
+                                                    {formatDateDMY(selectedJournal.created_at || new Date())}
                                                 </div>
                                                 <div className="stat-label">Date</div>
                                             </div>

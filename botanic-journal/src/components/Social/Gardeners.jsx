@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { apiService } from '../../services/api';
+import { getAvatarUrl } from '../../utils/avatar';
 import '../../social.css';
 
 const TABS = [
@@ -7,8 +8,6 @@ const TABS = [
   { id: 'following', label: 'Following', icon: 'fa-user-check' },
   { id: 'followers', label: 'Followers', icon: 'fa-users' },
 ];
-
-const FALLBACK_AVATAR = 'https://i.pravatar.cc/150?img=12';
 
 const Gardeners = ({ showNotification, onShowProfile, onOpenChat }) => {
   const [tab, setTab] = useState('discover');
@@ -61,11 +60,7 @@ const Gardeners = ({ showNotification, onShowProfile, onOpenChat }) => {
     }
   };
 
-  const buildAvatarUrl = (path) => {
-    if (!path) return FALLBACK_AVATAR;
-    if (path.startsWith('http')) return path;
-    return `http://localhost${path}`;
-  };
+  const buildAvatarUrl = (user) => getAvatarUrl(user);
 
   return (
     <div className="social-container">
@@ -121,7 +116,7 @@ const Gardeners = ({ showNotification, onShowProfile, onOpenChat }) => {
           {users.map(u => (
             <div key={u.id} className="gardener-card">
               <div className="gardener-head" onClick={() => onShowProfile?.(u.id)}>
-                <img src={buildAvatarUrl(u.avatar)} alt={u.username} className="gardener-avatar" />
+                <img src={buildAvatarUrl({ avatar: u.avatar, name: u.username })} alt={u.username} className="gardener-avatar" />
                 <div className="gardener-info">
                   <strong>{u.username}</strong>
                   <small>

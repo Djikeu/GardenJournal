@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
 import ExportButton from '../Export/ExportButton';
 import { escHtml } from '../../utils/exportReport';
+import { formatDateDMY } from '../../utils/dateFormat';
 import '../../detail.css';
 
 const PlantDetail = ({ showNotification, user, plantId, onClose, onBack }) => {

@@ -26,6 +26,8 @@ const GardenMapDesigner = ({ showNotification }) => {
   const [dirty, setDirty]                   = useState(false);
   const [selectedId, setSelectedId]         = useState(null);
   const [paletteSearch, setPaletteSearch]   = useState('');
+  const [tip, setTip]                       = useState(null);   // { verdict, tip }
+  const [tipLoading, setTipLoading]         = useState(false);
 
   const canvasRef = useRef(null);
   const dragState = useRef({ mode: null, offsetX: 0, offsetY: 0, sourcePlant: null, movingTempId: null });
@@ -179,6 +181,43 @@ const GardenMapDesigner = ({ showNotification }) => {
       }
     } catch (e) {
       showNotification('Error', e.message || 'Failed to clear zone', 'error');
+    }
+  };
+
+  // ── Load AI microclimate tip when a placement is selected ──────
+  useEffect(() => {
+    setTip(null);
+    if (!selectedId) return;
+    const sel = placements.find(p => p._uid === selectedId);
+    if (!sel) return;
+    // Don't query for placements that haven't been saved yet (no plant_id check needed,
+    // but they need a real plant_id from the user's collection — which all do)
+    let cancelled = false;
+    (async () => {
+      try {
+        setTipLoading(true);
+        const res = await apiService.getGardenMapTip(sel.plant_id, zone);
+        if (!cancelled && res.success) setTip(res.data);
+      } catch (e) {
+        if (!cancelled) showNotification('Error', e.message || 'Could not get AI tip', 'error');
+      } finally {
+        if (!cancelled) setTipLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [selectedId, zone]);  // eslint-disable-line react-hooks/exhaustive-deps
+
+  const regenerateTip = async () => {
+    const sel = placements.find(p => p._uid === selectedId);
+    if (!sel) return;
+    try {
+      setTipLoading(true);
+      const res = await apiService.getGardenMapTip(sel.plant_id, zone, true);
+      if (res.success) setTip(res.data);
+    } catch (e) {
+      showNotification('Error', e.message || 'Could not refresh tip', 'error');
+    } finally {
+      setTipLoading(false);
     }
   };
 
@@ -364,6 +403,52 @@ const GardenMapDesigner = ({ showNotification }) => {
             <i className="fas fa-circle-info"></i>
             Drag plants from the palette to the canvas. Click a placed plant to select it, then drag to move or click the × to remove. Don't forget to save.
           </p>
+
+          {/* AI microclimate tip for the currently-selected placement */}
+          {selectedId && (() => {
+            const sel = placements.find(p => p._uid === selectedId);
+            if (!sel) return null;
+            const verdict = tip?.verdict || 'unknown';
+            const verdictMeta = {
+              great:   { color: '#2e7d32', bg: '#d1fae5', icon: 'fa-check-circle', label: 'Great fit' },
+              okay:    { color: '#b45309', bg: '#fef3c7', icon: 'fa-circle-info', label: 'Okay fit' },
+              poor:    { color: '#dc2626', bg: '#fee2e2', icon: 'fa-triangle-exclamation', label: 'Poor fit' },
+              unknown: { color: '#6b7280', bg: '#f3f4f6', icon: 'fa-circle-question', label: 'Unclear' },
+            }[verdict];
+
+            return (
+              <div className="gm-tip">
+                <div className="gm-tip-header">
+                  <div className="gm-tip-title">
+                    <i className="fas fa-wand-magic-sparkles"></i>
+                    <span>AI tip for <strong>{sel.plant_name}</strong> in this {currentZoneMeta?.label.toLowerCase()}</span>
+                  </div>
+                  <button
+                    className="gm-tip-refresh"
+                    onClick={regenerateTip}
+                    disabled={tipLoading}
+                    title="Regenerate tip"
+                  >
+                    <i className={`fas fa-arrows-rotate ${tipLoading ? 'fa-spin' : ''}`}></i>
+                  </button>
+                </div>
+                <div className="gm-tip-body">
+                  {tipLoading && !tip ? (
+                    <p className="gm-tip-skeleton">Reading the microclimate and your plant's needs…</p>
+                  ) : tip ? (
+                    <>
+                      <span className="gm-tip-verdict" style={{ background: verdictMeta.bg, color: verdictMeta.color }}>
+                        <i className={`fas ${verdictMeta.icon}`}></i> {verdictMeta.label}
+                      </span>
+                      <p className="gm-tip-text">{tip.tip}</p>
+                    </>
+                  ) : (
+                    <p className="gm-tip-skeleton">Couldn't generate advice for this combination.</p>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

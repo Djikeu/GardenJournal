@@ -380,7 +380,12 @@ function App() {
         user={currentUser}
       />
       <div className="main-content">
-        <Header onProfileClick={handleProfileClick} user={currentUser} />
+        <Header
+          onProfileClick={handleProfileClick}
+          user={currentUser}
+          onOpenChat={openChatWith}
+          onShowProfile={showPublicProfile}
+        />
         {renderContent()}
       </div>
 

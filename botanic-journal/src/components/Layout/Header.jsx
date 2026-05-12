@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
 import { useTheme } from '../../hooks/useTheme';
+import { getAvatarUrl, getDisplayName } from '../../utils/avatar';
+import NotificationBell from '../Notifications/NotificationBell';
 import '../../Header.css'; // We'll create a new CSS file for the redesigned header
 
-const Header = ({ onProfileClick, user }) => {
+const Header = ({ onProfileClick, user, onOpenChat, onShowProfile }) => {
   const { isDark, toggleTheme } = useTheme();
   const [headerUser, setHeaderUser] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -149,12 +151,7 @@ const Header = ({ onProfileClick, user }) => {
   };
 
 
-  // Add this helper near the top of the component
-  const getAvatarUrl = (avatarPath) => {
-    if (!avatarPath) return 'https://i.pravatar.cc/150?img=12';
-    if (avatarPath.startsWith('http')) return avatarPath;
-    return `http://localhost${avatarPath}`;
-  };
+  // (Avatar resolver now lives in utils/avatar.js and is imported at the top.)
 
 
   const getWeatherData = () => {
@@ -258,7 +255,7 @@ const Header = ({ onProfileClick, user }) => {
           <span className="greeting-emoji">{getSeasonalEmoji()}</span>
           <div className="greeting-text-wrapper">
             <h1 className="greeting-title">
-              {getGreeting()}, {displayUser?.username?.split(' ')[0] || displayUser?.name?.split(' ')[0] || 'Gardener'}!
+              {getGreeting()}, {getDisplayName(displayUser).split(' ')[0]}!
             </h1>
             <div className="greeting-details">
               <span className="date-info">
@@ -298,15 +295,21 @@ const Header = ({ onProfileClick, user }) => {
       </div>
 
       <div className="header-right">
-        {/* Theme toggle */}
-        <button
-          className="theme-toggle"
-          onClick={toggleTheme}
-          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-        >
-          <i className={`fas ${isDark ? 'fa-sun' : 'fa-moon'}`}></i>
-        </button>
+        {/* Compact action cluster (notifications + theme) */}
+        <div className="header-actions-cluster">
+          <NotificationBell
+            onOpenChat={onOpenChat}
+            onShowProfile={onShowProfile}
+          />
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <i className={`fas ${isDark ? 'fa-sun' : 'fa-moon'}`}></i>
+          </button>
+        </div>
 
         {/* Working Weather Mini Card */}
         <div className={`weather-mini-card ${weatherLoading ? 'loading' : getWeatherClass(weather.condition, currentTime.getHours())}`}>
@@ -344,8 +347,8 @@ const Header = ({ onProfileClick, user }) => {
           <div className="user-avatar-container">
             <div className="user-avatar-wrapper">
               <img
-                src={getAvatarUrl(displayUser?.avatar)}
-                alt={displayUser?.name || "User"}
+                src={getAvatarUrl(displayUser)}
+                alt={getDisplayName(displayUser)}
                 className="user-avatar-image"
               />
               <div className="user-status-dot online"></div>
@@ -359,7 +362,7 @@ const Header = ({ onProfileClick, user }) => {
 
           <div className="user-info-details">
             <div className="user-name-section">
-              <h3 className="user-fullname">{displayUser?.name || "User"}</h3>
+              <h3 className="user-fullname">{getDisplayName(displayUser)}</h3>
               {displayUser?.role === 'admin' && (
                 <span className="role-badge-header admin">
                   <i className="fas fa-shield-alt"></i>

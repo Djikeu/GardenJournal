@@ -965,24 +965,37 @@ class ApiService {
     }
 
     // ============================================
-    // PLANT CHAT (Gemini gardening assistant)
+    // PLANT CHAT (Gemini assistant — multi-conversation)
     // ============================================
-    async sendChatMessage(message) {
-        const user_id = this.getCurrentUserId();
-        return this.request(`plant-chat.php?user_id=${user_id}`, {
-            method: 'POST',
-            body: { message }
-        });
-    }
-
-    async getChatHistory() {
+    async getChatConversations() {
         const user_id = this.getCurrentUserId();
         return this.request(`plant-chat.php?user_id=${user_id}`);
     }
 
-    async clearChatHistory() {
+    async getChatMessages(conversationId) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-chat.php?user_id=${user_id}&conversation_id=${conversationId}`);
+    }
+
+    async sendChatMessage(message, conversationId = null) {
         const user_id = this.getCurrentUserId();
         return this.request(`plant-chat.php?user_id=${user_id}`, {
+            method: 'POST',
+            body: { message, conversation_id: conversationId }
+        });
+    }
+
+    async renameChatConversation(conversationId, title) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-chat.php?user_id=${user_id}`, {
+            method: 'PATCH',
+            body: { conversation_id: conversationId, title }
+        });
+    }
+
+    async deleteChatConversation(conversationId) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-chat.php?user_id=${user_id}&conversation_id=${conversationId}`, {
             method: 'DELETE'
         });
     }
@@ -1023,6 +1036,14 @@ class ApiService {
         return this.request(`garden-map.php?user_id=${user_id}&zone=${zone}`, {
             method: 'DELETE'
         });
+    }
+
+    // AI microclimate tip for a single (plant, zone) pair
+    async getGardenMapTip(plantId, zone, force = false) {
+        const user_id = this.getCurrentUserId();
+        const params = new URLSearchParams({ user_id, plant_id: plantId, zone });
+        if (force) params.append('force', '1');
+        return this.request(`garden-map-tip.php?${params}`);
     }
 
     // ============================================
@@ -1097,6 +1118,29 @@ class ApiService {
     // ============================================
     // JOURNAL VISIBILITY
     // ============================================
+    // ============================================
+    // USER NOTIFICATIONS (follows, DMs, etc.)
+    // ============================================
+    async getUserNotifications(limit = 20) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`user-notifications.php?user_id=${user_id}&limit=${limit}`);
+    }
+
+    async getUnreadCount() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`user-notifications.php?user_id=${user_id}&unread=1`);
+    }
+
+    async markAllNotificationsRead() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`user-notifications.php?user_id=${user_id}`, { method: 'PATCH' });
+    }
+
+    async deleteNotification(id) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`user-notifications.php?user_id=${user_id}&id=${id}`, { method: 'DELETE' });
+    }
+
     async setJournalVisibility(journalId, isPublic) {
         const user_id = this.getCurrentUserId();
         return this.request(`journals.php?id=${journalId}&user_id=${user_id}`, {

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { apiService } from '../../services/api';
+import { getAvatarUrl } from '../../utils/avatar';
 import '../../social.css';
-
-const FALLBACK_AVATAR = 'https://i.pravatar.cc/150?img=12';
 
 const Messages = ({ showNotification, initialUserId, user }) => {
   const [conversations, setConversations] = useState([]);
@@ -16,11 +15,7 @@ const Messages = ({ showNotification, initialUserId, user }) => {
   const scrollRef = useRef(null);
   const pollRef   = useRef(null);
 
-  const buildAvatar = (path) => {
-    if (!path) return FALLBACK_AVATAR;
-    if (path.startsWith('http')) return path;
-    return `http://localhost${path}`;
-  };
+  const buildAvatar = (u) => getAvatarUrl(u);
 
   const loadList = useCallback(async () => {
     try {
@@ -149,7 +144,7 @@ const Messages = ({ showNotification, initialUserId, user }) => {
                 className={`conv-item ${activeUserId === c.user_id ? 'active' : ''}`}
                 onClick={() => setActiveUserId(c.user_id)}
               >
-                <img src={buildAvatar(c.avatar)} alt={c.username} />
+                <img src={buildAvatar({ avatar: c.avatar, name: c.username })} alt={c.username} />
                 <div className="conv-info">
                   <div className="conv-name">{c.username}</div>
                   <div className="conv-preview">
@@ -178,7 +173,7 @@ const Messages = ({ showNotification, initialUserId, user }) => {
           ) : (
             <>
               <div className="chat-panel-header">
-                <img src={buildAvatar(activeOther?.avatar)} alt={activeOther?.username || 'User'} />
+                <img src={buildAvatar({ avatar: activeOther?.avatar, name: activeOther?.username })} alt={activeOther?.username || 'User'} />
                 <div>
                   <strong>{activeOther?.username || 'Loading…'}</strong>
                 </div>
