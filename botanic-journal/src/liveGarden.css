@@ -123,18 +123,28 @@
   50%      { transform: scale(1.05); }
 }
 
-/* Add stars to the night sky */
-.lg-sky-night::before {
-  content: '✦  ✦       ✦     ✦   ✦      ✦  ✦       ✦   ✦       ✦  ✦     ✦       ✦  ✦     ✦   ✦';
+/* Stars layer (JSX-rendered, animated twinkle) */
+.lg-stars {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  color: rgba(255,255,255,0.7);
-  letter-spacing: 30px;
-  padding: 30px 20px;
-  font-size: 0.7rem;
-  line-height: 50px;
+  inset: 0;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 1s ease;
+  z-index: 1;
+}
+.lg-sky-night .lg-stars,
+.lg-sky-dusk  .lg-stars { opacity: 1; }
+.lg-sky-dawn  .lg-stars { opacity: 0.4; }
+.lg-star {
+  position: absolute;
+  background: #fff7ed;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(255,255,255,0.8);
+  animation: starTwinkle 2.4s ease-in-out infinite;
+}
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.8); }
+  50%      { opacity: 1;    transform: scale(1.15); }
 }
 
 /* Drifting clouds */
@@ -160,20 +170,53 @@
 }
 .lg-sky-night .lg-cloud { opacity: 0.25; filter: brightness(0.4); }
 
-/* Rain overlay */
+/* ── Rain overlay ─────────────────────────────────────
+   Many individual raindrop elements falling independently.
+   Looks like real rain rather than a solid stripe pattern. */
 .lg-rain {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image:
-    repeating-linear-gradient(110deg, rgba(56, 189, 248, 0.45) 0 1px, transparent 1px 14px);
-  background-size: 100% 100%;
-  animation: rainFall 0.4s linear infinite;
+  overflow: hidden;
   z-index: 3;
+  /* slight blue-grey atmospheric tint */
+  background: linear-gradient(180deg, rgba(15,23,42,0.18) 0%, rgba(15,23,42,0.06) 60%, transparent 100%);
 }
-@keyframes rainFall {
-  0%   { background-position: 0 0; }
-  100% { background-position: -20px 30px; }
+
+.lg-drop {
+  position: absolute;
+  top: 0;
+  background: linear-gradient(to bottom,
+    rgba(186,230,253,0)   0%,
+    rgba(186,230,253,0.6) 40%,
+    rgba(255,255,255,0.9) 100%);
+  border-radius: 999px;
+  transform-origin: 50% 0;
+  animation-name: rainDropFall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+@keyframes rainDropFall {
+  0%   { transform: translateY(-30px) skewX(-12deg); opacity: 0;   }
+  5%   { opacity: 0.9; }
+  95%  { opacity: 0.9; }
+  100% { transform: translateY(110vh) skewX(-12deg); opacity: 0;   }
+}
+
+/* "Far" drops — smaller, slightly blurred, slower */
+.lg-drop.lg-drop-far {
+  filter: blur(0.4px);
+  opacity: 0.5;
+}
+
+/* "Near" drops — bolder white tip, faster */
+.lg-drop.lg-drop-near {
+  background: linear-gradient(to bottom,
+    rgba(255,255,255,0)   0%,
+    rgba(224,242,254,0.7) 30%,
+    rgba(255,255,255,1)   100%);
+  box-shadow: 0 0 2px rgba(186,230,253,0.6);
 }
 
 /* Panorama (the scrollable area) */
@@ -372,4 +415,339 @@
   background: rgba(120, 53, 15, 0.18) !important;
   border-color: rgba(245, 158, 11, 0.3) !important;
   color: #fde68a !important;
+}
+
+
+/* ============================================================
+   ENHANCED VISUALS (parallax hills, fence, fireflies, etc.)
+============================================================ */
+
+/* Parallax hill layers — each layer drifts at a different rate */
+.lg-hills-far  { bottom: 130px; opacity: 0.85; }
+.lg-hills-mid  { bottom: 115px; }
+.lg-hills-near { bottom: 95px;  }
+
+/* Grass tufts strip above the soil */
+.lg-grass {
+  position: absolute;
+  bottom: 108px;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background-image:
+    repeating-linear-gradient(90deg,
+      #65a30d 0 2px,
+      #4d7c0f 2px 4px,
+      #65a30d 4px 7px,
+      transparent 7px 9px);
+  z-index: 1;
+}
+
+/* Wooden fence in the foreground (closer to viewer than soil) */
+.lg-fence {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  z-index: 5;
+  opacity: 0.92;
+  filter: drop-shadow(0 -2px 0 rgba(0,0,0,0.15));
+  pointer-events: none;
+}
+.lg-sky-night .lg-fence { filter: brightness(0.45) drop-shadow(0 -2px 0 rgba(0,0,0,0.2)); }
+.lg-sky-dusk  .lg-fence { filter: brightness(0.7); }
+
+/* Extra drifting cloud — slower for parallax */
+.lg-cloud-4 { top: 80px; animation: cloudDrift 160s linear infinite; animation-delay: -110s; opacity: 0.5; }
+
+/* Distant flying bird that crosses the sky on a long loop */
+.lg-bird-distant {
+  position: absolute;
+  top: 90px;
+  font-size: 0.9rem;
+  z-index: 2;
+  animation: birdFly 60s linear infinite;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
+  opacity: 0.85;
+}
+@keyframes birdFly {
+  0%   { left: -40px;  top: 90px;  transform: rotate(-3deg); }
+  50%  { left: 50%;    top: 60px;  transform: rotate(2deg); }
+  100% { left: 110%;   top: 100px; transform: rotate(-2deg); }
+}
+.lg-sky-night .lg-bird-distant { opacity: 0; }  /* birds sleep at night */
+
+/* Fireflies (visible at night) */
+.lg-fireflies {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  z-index: 4;
+}
+.lg-sky-night .lg-fireflies,
+.lg-sky-dusk  .lg-fireflies { opacity: 1; }
+.lg-firefly {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fde047;
+  box-shadow: 0 0 8px 2px rgba(253,224,71,0.85), 0 0 16px 4px rgba(253,224,71,0.4);
+  animation: fireflyDrift 10s ease-in-out infinite, fireflyBlink 1.6s ease-in-out infinite;
+}
+@keyframes fireflyDrift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(40px, -30px); }
+  50%  { transform: translate(-20px, -50px); }
+  75%  { transform: translate(-50px, -20px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes fireflyBlink {
+  0%, 100% { opacity: 0.2; }
+  50%      { opacity: 1;   }
+}
+
+/* Stronger sway when "wind" event is active */
+.lg-sway-strong { animation-duration: 1.4s !important; }
+.lg-wind-active .lg-bee       { animation-duration: 6s, 0.8s; }
+.lg-wind-active .lg-butterfly { animation-duration: 14s, 0.7s; }
+
+
+/* ============================================================
+   BUTTON FEEDBACK — Pause / Spawn / Cinema
+============================================================ */
+
+/* Toggle (pause) — active state when muted */
+.lg-btn-toggle {
+  position: relative;
+  transition: all 0.2s ease;
+}
+.lg-btn-toggle.is-active {
+  background: rgba(251, 191, 36, 0.25);
+  border-color: rgba(251, 191, 36, 0.6);
+  color: #fef3c7;
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.3) inset, 0 0 12px rgba(251, 191, 36, 0.25);
+}
+.lg-btn-toggle.is-active::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid rgba(251, 191, 36, 0.6);
+  animation: pauseGlow 2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes pauseGlow {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 0.9; }
+}
+
+/* Spawn-event flash animation */
+.lg-btn-primary.is-flashing {
+  animation: spawnFlash 0.6s ease-out;
+}
+@keyframes spawnFlash {
+  0%   { transform: scale(1);   box-shadow: 0 0 0 0   rgba(34,197,94,0.6); }
+  50%  { transform: scale(1.06);box-shadow: 0 0 0 12px rgba(34,197,94,0); }
+  100% { transform: scale(1);   box-shadow: 0 0 0 0   rgba(34,197,94,0); }
+}
+
+/* Cinema/ambient button */
+.lg-btn-cinema {
+  background: linear-gradient(135deg, rgba(99,102,241,0.35), rgba(168,85,247,0.35));
+  border: 1px solid rgba(168,85,247,0.55);
+  color: white;
+  font-weight: 700;
+}
+.lg-btn-cinema:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(99,102,241,0.55), rgba(168,85,247,0.55));
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(99,102,241,0.35);
+}
+
+/* Soft secondary pill (for "Next event in ~Ns" countdown) */
+.lg-pill-soft {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.22);
+  color: #d1fae5;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ============================================================
+   AMBIENT (CINEMA) MODE — fullscreen + Ken Burns pan/zoom
+============================================================ */
+
+/* Container expands to viewport when ambient */
+.lg-container.lg-ambient {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  height: 100vh;
+  background: #000;
+  overflow: hidden;
+}
+
+/* Scene becomes the full viewport when ambient */
+.lg-scene-ambient {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  z-index: 9000;
+  /* Keep cursor visible so the user can scroll the panorama */
+  cursor: default;
+}
+
+/* Hide page-level chrome when ambient is on (consumed by App.css if it wants) */
+body.lg-ambient-active { overflow: hidden; }
+
+/* In ambient mode the panorama is scrollable — user can drag/swipe to see all plants. */
+.lg-scene-ambient .lg-panorama-wrap {
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.45) transparent;
+}
+.lg-scene-ambient .lg-panorama-wrap::-webkit-scrollbar {
+  height: 8px;
+  display: block;
+}
+.lg-scene-ambient .lg-panorama-wrap::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.45);
+  border-radius: 999px;
+}
+.lg-scene-ambient .lg-panorama-wrap::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.7);
+}
+.lg-scene-ambient .lg-panorama-wrap::-webkit-scrollbar-track { background: transparent; }
+
+/* Subtle Ken Burns zoom only — gentle breathing, no horizontal pan
+   (pan is disabled so the user's scroll position isn't fought by an animation). */
+.lg-pano-kenburns .lg-panorama {
+  animation: kenBurnsZoom 60s ease-in-out infinite alternate;
+  transform-origin: 50% 60%;
+  will-change: transform;
+}
+@keyframes kenBurnsZoom {
+  0%   { transform: scale(1.0);  }
+  100% { transform: scale(1.04); }
+}
+
+/* In ambient, plant tags hide and plants are non-interactive */
+.lg-scene-ambient .lg-plant-tag { display: none; }
+.lg-scene-ambient .lg-plant { cursor: default; }
+
+/* Ambient hint overlay (fades after a few seconds) */
+.lg-ambient-hint {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translate(-50%, 20px);
+  background: rgba(0,0,0,0.55);
+  color: #fef3c7;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.12);
+  z-index: 9100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.lg-ambient-hint.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.lg-ambient-hint kbd {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin: 0 4px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: white;
+}
+.lg-ambient-hint span {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Floating exit button (top-right) */
+.lg-ambient-exit {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+  font-size: 1rem;
+  cursor: pointer;
+  z-index: 9100;
+  opacity: 0;
+  transition: opacity 0.3s ease, background 0.3s ease;
+  backdrop-filter: blur(6px);
+}
+.lg-scene-ambient:hover .lg-ambient-exit { opacity: 1; cursor: pointer; }
+.lg-ambient-exit:hover { background: rgba(220, 38, 38, 0.7); }
+
+/* Big clock in the corner (ambient only) */
+.lg-ambient-clock {
+  position: absolute;
+  top: 28px;
+  left: 32px;
+  color: rgba(255,255,255,0.85);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.6);
+  z-index: 9100;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.65;
+}
+
+/* Bring cursor back when hovering exit corner */
+.lg-scene-ambient:hover { cursor: default; }
+
+/* Reveal cursor briefly so user knows interaction is possible */
+@media (hover: none) {
+  .lg-scene-ambient { cursor: default; }
+  .lg-ambient-exit  { opacity: 1; }
+}
+
+
+/* ============================================================
+   DARK MODE tweaks for ambient + new elements
+============================================================ */
+[data-theme="dark"] .lg-container.lg-ambient { background: #000 !important; }
+[data-theme="dark"] .lg-btn-cinema {
+  background: linear-gradient(135deg, rgba(129,140,248,0.40), rgba(192,132,252,0.40)) !important;
+  border-color: rgba(192,132,252,0.6) !important;
+}
+[data-theme="dark"] .lg-pill-soft {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255,255,255,0.15) !important;
 }

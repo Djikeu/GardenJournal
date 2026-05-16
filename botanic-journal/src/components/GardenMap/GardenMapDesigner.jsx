@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { apiService } from '../../services/api';
+import AIDesignerModal from './AIDesignerModal';
 import '../../gardenMap.css';
 
 const ZONES = [
@@ -28,6 +29,7 @@ const GardenMapDesigner = ({ showNotification }) => {
   const [paletteSearch, setPaletteSearch]   = useState('');
   const [tip, setTip]                       = useState(null);   // { verdict, tip }
   const [tipLoading, setTipLoading]         = useState(false);
+  const [aiDesignerOpen, setAiDesignerOpen] = useState(false);
 
   const canvasRef = useRef(null);
   const dragState = useRef({ mode: null, offsetX: 0, offsetY: 0, sourcePlant: null, movingTempId: null });
@@ -170,6 +172,46 @@ const GardenMapDesigner = ({ showNotification }) => {
     }
   };
 
+  // Apply AI-generated suggestions to the canvas
+  const applyAiSuggestions = (suggestions) => {
+    if (!Array.isArray(suggestions) || suggestions.length === 0) return;
+    let added = 0;
+    let skipped = 0;
+    const newItems = [];
+    suggestions.forEach((s) => {
+      // Match by user_plant_id (preferred) or by encyclopedia_id via existing plants
+      let plant = null;
+      if (s.user_plant_id) plant = plants.find(p => p.id === s.user_plant_id);
+      if (!plant && s.encyclopedia_id) plant = plants.find(p => p.encyclopedia_id === s.encyclopedia_id);
+      if (!plant) { skipped++; return; }
+      newItems.push({
+        _uid: `ai-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        plant_id: plant.id,
+        plant_name: plant.name,
+        plant_species: plant.species,
+        plant_type: plant.type,
+        plant_image: plant.image_url || plant.image,
+        x_pos: clamp(s.x_pos, 0, 900 - (s.size || 72)),
+        y_pos: clamp(s.y_pos, 0, 560 - (s.size || 72)),
+        size: s.size || 72,
+        rotation: 0,
+        z_index: placements.length + newItems.length,
+      });
+      added++;
+    });
+    if (newItems.length > 0) {
+      setPlacements(prev => [...prev, ...newItems]);
+      setDirty(true);
+    }
+    if (added > 0 && skipped > 0) {
+      showNotification('AI design applied', `Placed ${added} plants on the canvas. ${skipped} suggestion${skipped > 1 ? 's' : ''} skipped (not in your collection).`, 'success');
+    } else if (added > 0) {
+      showNotification('AI design applied', `Placed ${added} plants on the canvas. Don't forget to save.`, 'success');
+    } else {
+      showNotification('Nothing to apply', 'None of the suggested plants are in your collection yet. Add them from the Encyclopedia first.', 'info');
+    }
+  };
+
   const handleClear = async () => {
     if (!window.confirm(`Clear all plants from the ${ZONES.find(z => z.id === zone)?.label} layout?`)) return;
     try {
@@ -254,6 +296,14 @@ const GardenMapDesigner = ({ showNotification }) => {
         </div>
         <div className="gm-hero-actions">
           {dirty && <span className="gm-dirty-badge"><i className="fas fa-circle"></i> Unsaved changes</span>}
+          <button
+            className="gm-btn gm-btn-outline"
+            onClick={() => setAiDesignerOpen(true)}
+            disabled={saving}
+            title="Describe your space — Gemini suggests plants + layout"
+          >
+            <i className="fas fa-wand-magic-sparkles"></i> AI Designer
+          </button>
           <button className="gm-btn gm-btn-outline" onClick={handleClear} disabled={saving || placements.length === 0}>
             <i className="fas fa-eraser"></i> Clear zone
           </button>
@@ -451,6 +501,17 @@ const GardenMapDesigner = ({ showNotification }) => {
           })()}
         </div>
       </div>
+
+      {/* AI Garden Designer modal */}
+      {aiDesignerOpen && (
+        <AIDesignerModal
+          zone={zone}
+          zoneLabel={currentZoneMeta?.label || zone}
+          showNotification={showNotification}
+          onClose={() => setAiDesignerOpen(false)}
+          onApply={applyAiSuggestions}
+        />
+      )}
     </div>
   );
 };

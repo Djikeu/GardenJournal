@@ -631,3 +631,259 @@
 [data-theme="dark"] [style*="color:#6b7280"] { color: #cbd5e1 !important; }
 [data-theme="dark"] [style*="color: #9ca3af"],
 [data-theme="dark"] [style*="color:#9ca3af"] { color: #94a3b8 !important; }
+
+
+/* ================================================================
+   AI Garden Designer modal — full dark mode coverage
+================================================================ */
+
+/* Overlay backdrop is fine (rgba dark already) */
+[data-theme="dark"] .ai-design-overlay { background: rgba(0,0,0,0.7) !important; }
+
+/* Modal body */
+[data-theme="dark"] .ai-design-modal {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6) !important;
+}
+
+/* Header keeps green gradient — text stays white. No change needed. */
+
+/* Field labels + helpers */
+[data-theme="dark"] .ai-design-field > label { color: #f1f5f9 !important; }
+[data-theme="dark"] .ai-design-optional      { color: #94a3b8 !important; }
+
+/* Textarea */
+[data-theme="dark"] .ai-design-field textarea {
+  background: #0a0f1c !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .ai-design-field textarea:focus {
+  border-color: #4caf50 !important;
+}
+
+/* Prompt helper chips (preset suggestions) */
+[data-theme="dark"] .ai-design-chip {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .ai-design-chip:hover {
+  background: #1e2d40 !important;
+  border-color: #4caf50 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Preference grid pills */
+[data-theme="dark"] .ai-design-pref {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .ai-design-pref:hover { border-color: #4caf50 !important; }
+[data-theme="dark"] .ai-design-pref.active {
+  background: rgba(76, 175, 80, 0.18) !important;
+  border-color: #4caf50 !important;
+  color: #86efac !important;
+}
+[data-theme="dark"] .ai-design-pref.active i { color: #86efac !important; }
+[data-theme="dark"] .ai-design-pref i        { color: #86efac !important; }
+
+/* Range slider labels */
+[data-theme="dark"] .ai-design-range-labels { color: #94a3b8 !important; }
+
+/* Generate button — gradient already on brand greens, keep but boost shadow */
+[data-theme="dark"] .ai-design-generate {
+  box-shadow: 0 6px 16px rgba(76,175,80,0.35) !important;
+}
+[data-theme="dark"] .ai-design-generate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Result section — summary banner */
+[data-theme="dark"] .ai-design-summary {
+  background: rgba(76, 175, 80, 0.10) !important;
+  border-color: rgba(76, 175, 80, 0.35) !important;
+  border-left-color: #4caf50 !important;
+}
+[data-theme="dark"] .ai-design-summary i { color: #86efac !important; }
+[data-theme="dark"] .ai-design-summary p { color: #f1f5f9 !important; }
+
+/* Section title above suggestion list */
+[data-theme="dark"] .ai-design-section-title { color: #f1f5f9 !important; }
+
+/* Individual suggestion cards */
+[data-theme="dark"] .ai-design-suggestion {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .ai-design-suggestion-head strong { color: #f1f5f9 !important; }
+[data-theme="dark"] .ai-design-suggestion-head em     { color: #94a3b8 !important; }
+[data-theme="dark"] .ai-design-suggestion-type        { color: #94a3b8 !important; }
+[data-theme="dark"] .ai-design-suggestion-reason      { color: #cbd5e1 !important; }
+
+/* Badges (In your collection / New) */
+[data-theme="dark"] .ai-design-badge.in-collection {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #86efac !important;
+  border-color: rgba(76, 175, 80, 0.4) !important;
+}
+[data-theme="dark"] .ai-design-badge.new {
+  background: rgba(251, 191, 36, 0.18) !important;
+  color: #fde68a !important;
+  border-color: rgba(251, 191, 36, 0.4) !important;
+}
+
+/* Result action buttons */
+[data-theme="dark"] .ai-design-secondary {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .ai-design-secondary:hover {
+  background: #1e2d40 !important;
+  border-color: #4caf50 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Yellow info note at the bottom */
+[data-theme="dark"] .ai-design-note {
+  background: rgba(120, 53, 15, 0.18) !important;
+  border-color: rgba(245, 158, 11, 0.30) !important;
+  color: #fde68a !important;
+}
+[data-theme="dark"] .ai-design-note em,
+[data-theme="dark"] .ai-design-note strong { color: #fef3c7 !important; }
+
+
+/* ================================================================
+   Plant Doctor — fill gaps in severity badges + result text
+================================================================ */
+
+[data-theme="dark"] .pd-result-section h5     { color: #f1f5f9 !important; }
+[data-theme="dark"] .pd-result-section h5 i   { color: #86efac !important; }
+[data-theme="dark"] .pd-result-text           { color: #cbd5e1 !important; }
+[data-theme="dark"] .pd-result-summary        { color: #f1f5f9 !important; }
+[data-theme="dark"] .pd-history-img           { background: #0a0f1c !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .pd-history-title         { color: #f1f5f9 !important; }
+[data-theme="dark"] .pd-history-time          { color: #94a3b8 !important; }
+
+/* Severity pills */
+[data-theme="dark"] .pd-severity.healthy {
+  background: rgba(34, 197, 94, 0.18) !important;
+  color: #86efac !important;
+  border-color: rgba(34, 197, 94, 0.4) !important;
+}
+[data-theme="dark"] .pd-severity.mild,
+[data-theme="dark"] .pd-severity.moderate {
+  background: rgba(251, 191, 36, 0.18) !important;
+  color: #fde68a !important;
+  border-color: rgba(251, 191, 36, 0.4) !important;
+}
+[data-theme="dark"] .pd-severity.severe {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+}
+
+
+/* ================================================================
+   Garden Map Designer — fill remaining gaps
+================================================================ */
+
+[data-theme="dark"] .gm-zone-tab:hover { background: #1e2d40 !important; color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-canvas {
+  background: #0a0f1c !important;
+  background-image:
+    linear-gradient(to right, rgba(76,175,80,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(76,175,80,0.06) 1px, transparent 1px) !important;
+}
+[data-theme="dark"] .gm-canvas-empty           { color: #94a3b8 !important; }
+[data-theme="dark"] .gm-canvas-empty h3        { color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-placement              { background: #14202f !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .gm-placement-name         { background: rgba(0,0,0,0.85) !important; color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-tip                    { background: #14202f !important; border-color: #2a3b53 !important; color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-tip-text               { color: #cbd5e1 !important; }
+[data-theme="dark"] .gm-tip-loading            { color: #94a3b8 !important; }
+[data-theme="dark"] .gm-tip-empty              { color: #94a3b8 !important; }
+[data-theme="dark"] .gm-canvas-meta            { color: #cbd5e1 !important; }
+[data-theme="dark"] .gm-canvas-title small     { color: #94a3b8 !important; }
+[data-theme="dark"] .gm-canvas-title h4        { color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-dirty-badge            { color: #fde68a !important; }
+[data-theme="dark"] .gm-palette-search input   { background: #0a0f1c !important; color: #f1f5f9 !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .gm-palette-search input::placeholder { color: #64748b !important; }
+[data-theme="dark"] .gm-palette-empty          { color: #94a3b8 !important; }
+
+
+/* ================================================================
+   Eco Impact / Carbon Footprint — fill remaining gaps
+================================================================ */
+
+[data-theme="dark"] .co-period button         {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .co-period button.active  {
+  background: rgba(76, 175, 80, 0.22) !important;
+  color: #86efac !important;
+  border-color: #4caf50 !important;
+}
+[data-theme="dark"] .co-section h3            { color: #f1f5f9 !important; }
+[data-theme="dark"] .co-comparison .emoji     { /* keep emoji */ }
+[data-theme="dark"] .co-plant-row .info strong { color: #f1f5f9 !important; }
+[data-theme="dark"] .co-plant-row .info small  { color: #94a3b8 !important; }
+[data-theme="dark"] .co-plant-row .bar         { background: #2a3b53 !important; }
+
+
+/* ================================================================
+   Dashboard — surface cards + tip notes
+================================================================ */
+
+[data-theme="dark"] .tip-card,
+[data-theme="dark"] .quick-actions,
+[data-theme="dark"] .community-preview,
+[data-theme="dark"] .stats-card,
+[data-theme="dark"] .dashboard-content > div {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .tip-card h2,
+[data-theme="dark"] .tip-card h3,
+[data-theme="dark"] .quick-actions h3,
+[data-theme="dark"] .community-preview h3,
+[data-theme="dark"] .stats-card h3 {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .tip-card p,
+[data-theme="dark"] .quick-actions p,
+[data-theme="dark"] .community-preview p,
+[data-theme="dark"] .stats-card p,
+[data-theme="dark"] .stats-card span {
+  color: #cbd5e1 !important;
+}
+
+
+/* ================================================================
+   Catch-all safety net — any element whose backdrop is white via
+   utility class still gets a dark surface so text remains visible.
+================================================================ */
+
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .white-bg {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+}
+
+/* Text utility classes commonly used for muted gray */
+[data-theme="dark"] .text-gray-500,
+[data-theme="dark"] .text-gray-600,
+[data-theme="dark"] .text-gray-700,
+[data-theme="dark"] .muted,
+[data-theme="dark"] .text-muted { color: #cbd5e1 !important; }
+[data-theme="dark"] .text-gray-400 { color: #94a3b8 !important; }
+[data-theme="dark"] .text-gray-900,
+[data-theme="dark"] .text-dark    { color: #f1f5f9 !important; }

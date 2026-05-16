@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { apiService } from '../../services/api';
 import '../../liveGarden.css';
 
@@ -107,21 +107,20 @@ const getSprite = (type) => SPRITES[type] || SPRITES.outdoor;
 
 /* ─── Nature event templates ─────────────────────────────────── */
 const EVENT_TEMPLATES = [
-  { id: 'bee',          weight: 4, icon: '🐝', title: 'A bee visited',           body: 'Your $PLANT got a pollinator drop-in.', plantFilter: p => ['flowering','vegetable','herb'].includes(p.type) },
-  { id: 'butterfly',    weight: 4, icon: '🦋', title: 'A butterfly stopped by',  body: 'Resting briefly on your $PLANT.', plantFilter: p => ['flowering','outdoor'].includes(p.type) },
-  { id: 'rain',         weight: 3, icon: '🌧️', title: 'Sudden rain',            body: 'Skip outdoor watering today — nature did it for you.', plantFilter: () => true },
-  { id: 'bloom',        weight: 1, icon: '🌸', title: 'Rare bloom incoming',     body: 'Your $PLANT looks ready to flower this week.', plantFilter: p => ['flowering','succulent','tropical'].includes(p.type) },
-  { id: 'fungal',       weight: 2, icon: '🍄', title: 'Watch for fungus',        body: 'Humid spell — inspect $PLANT for spots.', plantFilter: p => ['tropical','indoor','herb'].includes(p.type) },
-  { id: 'bird',         weight: 2, icon: '🐦', title: 'A bird landed',           body: 'A small visitor passed through the garden.', plantFilter: () => true },
-  { id: 'sun',          weight: 3, icon: '☀️', title: 'Perfect light today',     body: 'Conditions are ideal for $PLANT.', plantFilter: () => true },
-  { id: 'wind',         weight: 2, icon: '🌬️', title: 'Gentle breeze',          body: 'Stems are getting a little exercise.', plantFilter: () => true },
-  { id: 'sprout',       weight: 2, icon: '🌱', title: 'New growth spotted',      body: 'A fresh shoot is forming on $PLANT.', plantFilter: () => true },
-  { id: 'ladybug',      weight: 2, icon: '🐞', title: 'A ladybug arrived',       body: 'Free pest control! Welcome aboard.', plantFilter: () => true },
-  { id: 'pest',         weight: 1, icon: '🪲', title: 'Pest sighting',           body: 'Spotted something crawling on $PLANT — investigate.', plantFilter: () => true },
+  { id: 'bee',       weight: 4, icon: '🐝', title: 'A bee visited',           body: 'Your $PLANT got a pollinator drop-in.', plantFilter: p => ['flowering','vegetable','herb'].includes(p.type) },
+  { id: 'butterfly', weight: 4, icon: '🦋', title: 'A butterfly stopped by',  body: 'Resting briefly on your $PLANT.', plantFilter: p => ['flowering','outdoor'].includes(p.type) },
+  { id: 'rain',      weight: 3, icon: '🌧️', title: 'Sudden rain',            body: 'Skip outdoor watering today — nature did it for you.', plantFilter: () => true },
+  { id: 'bloom',     weight: 1, icon: '🌸', title: 'Rare bloom incoming',     body: 'Your $PLANT looks ready to flower this week.', plantFilter: p => ['flowering','succulent','tropical'].includes(p.type) },
+  { id: 'fungal',    weight: 2, icon: '🍄', title: 'Watch for fungus',        body: 'Humid spell — inspect $PLANT for spots.', plantFilter: p => ['tropical','indoor','herb'].includes(p.type) },
+  { id: 'bird',      weight: 2, icon: '🐦', title: 'A bird landed',           body: 'A small visitor passed through the garden.', plantFilter: () => true },
+  { id: 'sun',       weight: 3, icon: '☀️', title: 'Perfect light today',     body: 'Conditions are ideal for $PLANT.', plantFilter: () => true },
+  { id: 'wind',      weight: 2, icon: '🌬️', title: 'Gentle breeze',          body: 'Stems are getting a little exercise.', plantFilter: () => true },
+  { id: 'sprout',    weight: 2, icon: '🌱', title: 'New growth spotted',      body: 'A fresh shoot is forming on $PLANT.', plantFilter: () => true },
+  { id: 'ladybug',   weight: 2, icon: '🐞', title: 'A ladybug arrived',       body: 'Free pest control! Welcome aboard.', plantFilter: () => true },
+  { id: 'pest',      weight: 1, icon: '🪲', title: 'Pest sighting',           body: 'Spotted something crawling on $PLANT — investigate.', plantFilter: () => true },
 ];
 
 const pickEvent = (plants) => {
-  // Build a list of viable events given the user's plants
   const viable = EVENT_TEMPLATES.filter(t => !t.plantFilter || plants.some(t.plantFilter));
   if (viable.length === 0) return null;
   const totalW = viable.reduce((s, t) => s + t.weight, 0);
@@ -129,13 +128,13 @@ const pickEvent = (plants) => {
   let template = viable[0];
   for (const t of viable) { roll -= t.weight; if (roll <= 0) { template = t; break; } }
 
-  // Pick a plant that matches the filter (if any)
   const candidatePlants = template.plantFilter ? plants.filter(template.plantFilter) : plants;
   const plant = candidatePlants[Math.floor(Math.random() * candidatePlants.length)] || null;
 
   const body = template.body.replace('$PLANT', plant?.name || 'one of your plants');
   return {
     uid: `${template.id}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,
+    id: template.id,
     icon: template.icon,
     title: template.title,
     body,
@@ -145,39 +144,107 @@ const pickEvent = (plants) => {
 
 /* ─── Time-of-day helpers ────────────────────────────────────── */
 const skyForHour = (h) => {
-  if (h < 5)  return { sky: 'night',  label: 'Night'   };
-  if (h < 8)  return { sky: 'dawn',   label: 'Dawn'    };
-  if (h < 17) return { sky: 'day',    label: 'Day'     };
-  if (h < 20) return { sky: 'dusk',   label: 'Dusk'    };
-  return        { sky: 'night',  label: 'Night'   };
+  if (h < 5)  return { sky: 'night', label: 'Night' };
+  if (h < 8)  return { sky: 'dawn',  label: 'Dawn'  };
+  if (h < 17) return { sky: 'day',   label: 'Day'   };
+  if (h < 20) return { sky: 'dusk',  label: 'Dusk'  };
+  return        { sky: 'night', label: 'Night' };
+};
+
+/* ─── Deterministic star field for night sky ──────────────────── */
+const STARS = Array.from({ length: 60 }, (_, i) => ({
+  id: i,
+  x: (i * 73) % 100,                // 0-100% horizontal
+  y: ((i * 31) % 40),               // 0-40% vertical (upper sky)
+  size: ((i * 17) % 3) + 1,         // 1-3 px
+  twinkleDelay: ((i * 53) % 30) / 10, // 0-3s
+}));
+
+/* ─── Deterministic firefly positions (only at night) ──────────── */
+const FIREFLIES = Array.from({ length: 12 }, (_, i) => ({
+  id: i,
+  startX: ((i * 89) % 90) + 5,    // 5-95% horizontal
+  startY: ((i * 41) % 30) + 50,   // 50-80% vertical (over the garden)
+  duration: 6 + ((i * 13) % 8),   // 6-14s loop
+  delay: ((i * 23) % 50) / 10,    // 0-5s
+}));
+
+/* ─── Deterministic raindrops (90 of them, distributed across the sky) ── */
+const RAINDROPS = Array.from({ length: 90 }, (_, i) => {
+  // Mix of far / mid / near drops so the rain has depth
+  const variant = i % 3 === 0 ? 'far' : (i % 5 === 0 ? 'near' : 'mid');
+  return {
+    id: i,
+    left: ((i * 53) % 100),                // 0-99 % horizontal
+    delay: ((i * 17) % 200) / 100,         // 0-2 s
+    duration:
+      variant === 'far'  ? 1.1 + ((i * 7) % 8) / 10 :   // 1.1-1.9 s
+      variant === 'near' ? 0.55 + ((i * 7) % 5) / 10 :  // 0.55-1.05 s
+                           0.75 + ((i * 7) % 6) / 10,   // 0.75-1.35 s
+    width:
+      variant === 'far'  ? 1 :
+      variant === 'near' ? 2.5 :
+                           1.5,
+    height:
+      variant === 'far'  ? 10 + ((i * 5) % 6)  :   // 10-15 px
+      variant === 'near' ? 24 + ((i * 5) % 16) :   // 24-40 px
+                           16 + ((i * 5) % 10),    // 16-25 px
+    variant,
+  };
+});
+
+/* ─── Time until next auto event display helper ──────────────── */
+const formatTimeLeft = (ms) => {
+  if (ms <= 0) return 'any moment';
+  const s = Math.ceil(ms / 1000);
+  return `~${s}s`;
 };
 
 /* ─── Main component ────────────────────────────────────────── */
 const LiveGarden = ({ showNotification, onShowPlantDetails }) => {
-  const [plants, setPlants]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [hour, setHour]       = useState(new Date().getHours());
-  const [events, setEvents]   = useState([]);
-  const [muted, setMuted]     = useState(false);
+  const [plants, setPlants]     = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [hour, setHour]         = useState(new Date().getHours());
+  const [events, setEvents]     = useState([]);
+  const [muted, setMuted]       = useState(false);
+  const [ambient, setAmbient]   = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const [nextEventAt, setNextEventAt] = useState(null);  // timestamp ms
+  const [now, setNow]           = useState(Date.now());
+  const [spawnFlash, setSpawnFlash] = useState(false);
+
   const eventTimerRef = useRef(null);
   const clockTimerRef = useRef(null);
+  const tickTimerRef  = useRef(null);
+  const sceneRef      = useRef(null);
 
+  // ── Initial load + clock ──────────────────────────────────
   useEffect(() => {
     loadPlants();
     clockTimerRef.current = setInterval(() => setHour(new Date().getHours()), 60_000);
-    return () => clearInterval(clockTimerRef.current);
+    // Fast ticker so "next event in ~Ns" countdown updates
+    tickTimerRef.current = setInterval(() => setNow(Date.now()), 1000);
+    return () => {
+      clearInterval(clockTimerRef.current);
+      clearInterval(tickTimerRef.current);
+    };
   }, []);
 
-  // Schedule periodic random events (every 18–35 s)
+  // ── Schedule periodic random events (every 18–35 s) ──────────
   useEffect(() => {
-    if (muted || plants.length === 0) return;
+    // Reset any pending timer when deps change
+    clearTimeout(eventTimerRef.current);
+    if (muted || plants.length === 0) {
+      setNextEventAt(null);
+      return;
+    }
     const schedule = () => {
       const delay = 18000 + Math.random() * 17000;
+      setNextEventAt(Date.now() + delay);
       eventTimerRef.current = setTimeout(() => {
         const ev = pickEvent(plants);
         if (ev) {
           setEvents(prev => [...prev.slice(-3), ev]);
-          // Auto-dismiss after 8s
           setTimeout(() => {
             setEvents(prev => prev.filter(e => e.uid !== ev.uid));
           }, 8000);
@@ -189,6 +256,45 @@ const LiveGarden = ({ showNotification, onShowPlantDetails }) => {
     return () => clearTimeout(eventTimerRef.current);
   }, [plants, muted]);
 
+  // ── Ambient mode: ESC to exit, hide page chrome ────────────
+  useEffect(() => {
+    if (!ambient) return;
+    setShowHint(true);
+    const hintTimer = setTimeout(() => setShowHint(false), 4000);
+
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setAmbient(false);
+      } else if (e.key === ' ' || e.key === 'Spacebar') {
+        // Space spawns an event in ambient mode
+        e.preventDefault();
+        triggerEvent();
+      } else if (e.key.toLowerCase() === 'p') {
+        // P toggles pause in ambient mode
+        setMuted(m => !m);
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        // Arrow keys scroll the panorama horizontally
+        e.preventDefault();
+        const wrap = sceneRef.current?.querySelector('.lg-panorama-wrap');
+        if (wrap) {
+          const step = e.shiftKey ? 600 : 200;
+          wrap.scrollBy({ left: e.key === 'ArrowRight' ? step : -step, behavior: 'smooth' });
+        }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+
+    // Add body class so app-level chrome can hide itself if desired
+    document.body.classList.add('lg-ambient-active');
+
+    return () => {
+      clearTimeout(hintTimer);
+      window.removeEventListener('keydown', onKey);
+      document.body.classList.remove('lg-ambient-active');
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ambient]);
+
   const loadPlants = async () => {
     try {
       setLoading(true);
@@ -199,61 +305,153 @@ const LiveGarden = ({ showNotification, onShowPlantDetails }) => {
     } finally { setLoading(false); }
   };
 
-  // Lay plants out across the panorama with deterministic but varied positions
-  const placedPlants = useMemo(() => {
-    const PAN_WIDTH = Math.max(1400, plants.length * 110 + 200);
-    return plants.map((p, i) => {
-      const x = 80 + i * 100 + ((p.id * 17) % 30);  // small per-plant jitter
-      const baseY = 360;
-      const y = baseY + ((p.id * 11) % 40);  // slight vertical variation along the soil
-      return { ...p, _x: x, _y: y, _scale: 0.9 + ((p.id * 7) % 30) / 100 };
-    });
-  }, [plants]);
+  // Track viewport width so ambient mode can fill it
+  const [vpWidth, setVpWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1400);
+  useEffect(() => {
+    const onResize = () => setVpWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
-  const panoramaWidth = Math.max(1400, plants.length * 110 + 200);
+  // Panorama width — keep natural spacing (one plant every ~110px).
+  // In ambient mode we also enforce at least viewport width so the scene fills the screen
+  // when the user has only a few plants. Otherwise scrolling fills the rest.
+  const panoramaWidth = useMemo(() => {
+    const baseW = Math.max(1400, plants.length * 110 + 200);
+    if (ambient) {
+      return Math.max(baseW, vpWidth);
+    }
+    return baseW;
+  }, [plants.length, ambient, vpWidth]);
+
+  // Lay plants out across the panorama with deterministic but varied positions.
+  // X is distributed across the full panorama width so plants don't clump on the left when the canvas widens (fullscreen).
+  // Y is now a "bottom" offset (px above soil) so plants stay anchored to the ground at any scene height.
+  const placedPlants = useMemo(() => {
+    const padding = 80;
+    const usable = Math.max(200, panoramaWidth - padding * 2);
+    const step = plants.length > 1 ? usable / (plants.length - 1) : 0;
+    return plants.map((p, i) => {
+      const jitterX = ((p.id * 17) % 40) - 20;     // ±20 px of horizontal jitter
+      const x = padding + i * step + jitterX;
+      // Soil is 110px tall; plants stand on it. Random small vertical jitter so they're not in a perfect line.
+      const baseBottom = 110;
+      const bottom = baseBottom + ((p.id * 11) % 18);
+      return { ...p, _x: x, _bottom: bottom, _scale: 0.9 + ((p.id * 7) % 30) / 100 };
+    });
+  }, [plants, panoramaWidth]);
 
   const { sky, label: dayLabel } = skyForHour(hour);
+  const isNight = sky === 'night' || sky === 'dusk';
 
-  const triggerEvent = () => {
+  // Active rain/wind state derived from events
+  const rainActive = events.some(e => e.id === 'rain');
+  const windActive = events.some(e => e.id === 'wind');
+
+  const triggerEvent = useCallback(() => {
     if (plants.length === 0) return;
     const ev = pickEvent(plants);
     if (!ev) return;
     setEvents(prev => [...prev.slice(-3), ev]);
+    setSpawnFlash(true);
+    setTimeout(() => setSpawnFlash(false), 600);
     setTimeout(() => setEvents(prev => prev.filter(e => e.uid !== ev.uid)), 8000);
+  }, [plants]);
+
+  const togglePause = () => setMuted(m => !m);
+
+  const toggleAmbient = async () => {
+    if (!ambient) {
+      // Request real browser fullscreen on the scene container
+      try {
+        if (sceneRef.current?.requestFullscreen) {
+          await sceneRef.current.requestFullscreen();
+        }
+      } catch (e) {
+        /* Some browsers block without user gesture — fall back to in-page fullscreen */
+      }
+      setAmbient(true);
+    } else {
+      try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+      } catch (e) { /* ignore */ }
+      setAmbient(false);
+    }
   };
 
-  return (
-    <div className="lg-container">
-      {/* Hero / control bar */}
-      <div className="lg-hero">
-        <div>
-          <h1><i className="fas fa-tree"></i> Live Garden</h1>
-          <p>
-            A pixel-art panorama of your collection. Wind sways. Bees visit. Rain rolls through.
-            Built for procrastinating in style.
-          </p>
-        </div>
-        <div className="lg-hero-actions">
-          <span className="lg-pill">
-            <i className="fas fa-clock"></i> {dayLabel}
-          </span>
-          <button
-            className="lg-btn"
-            onClick={() => setMuted(m => !m)}
-            title={muted ? 'Resume events' : 'Pause events'}
-          >
-            <i className={`fas ${muted ? 'fa-play' : 'fa-pause'}`}></i>
-            {muted ? 'Resume events' : 'Pause events'}
-          </button>
-          <button className="lg-btn lg-btn-primary" onClick={triggerEvent} disabled={plants.length === 0}>
-            <i className="fas fa-wand-magic-sparkles"></i>
-            Spawn event
-          </button>
-        </div>
-      </div>
+  // Listen for fullscreen exit (e.g. user pressed ESC at OS level)
+  useEffect(() => {
+    const onFs = () => {
+      if (!document.fullscreenElement && ambient) {
+        setAmbient(false);
+      }
+    };
+    document.addEventListener('fullscreenchange', onFs);
+    return () => document.removeEventListener('fullscreenchange', onFs);
+  }, [ambient]);
 
-      {/* Panorama */}
-      <div className={`lg-scene lg-sky-${sky}`}>
+  // Countdown to next auto event
+  const nextEventLabel = (muted || !nextEventAt)
+    ? null
+    : formatTimeLeft(nextEventAt - now);
+
+  return (
+    <div className={`lg-container ${ambient ? 'lg-ambient' : ''}`}>
+      {/* Hero / control bar — hidden in ambient */}
+      {!ambient && (
+        <div className="lg-hero">
+          <div>
+            <h1><i className="fas fa-tree"></i> Live Garden</h1>
+            <p>
+              A pixel-art panorama of your collection. Wind sways. Bees visit. Rain rolls through.
+              Built for procrastinating in style — try <strong>Ambient mode</strong> for a screensaver feel.
+            </p>
+          </div>
+          <div className="lg-hero-actions">
+            <span className="lg-pill">
+              <i className="fas fa-clock"></i> {dayLabel}
+            </span>
+            {nextEventLabel && (
+              <span className="lg-pill lg-pill-soft" title="Time until the next automatic event">
+                <i className="fas fa-hourglass-half"></i> Next: {nextEventLabel}
+              </span>
+            )}
+            <button
+              className={`lg-btn lg-btn-toggle ${muted ? 'is-active' : ''}`}
+              onClick={togglePause}
+              title={muted ? 'Resume automatic events' : 'Pause automatic events'}
+              aria-pressed={muted}
+            >
+              <i className={`fas ${muted ? 'fa-play' : 'fa-pause'}`}></i>
+              {muted ? 'Resume events' : 'Pause events'}
+            </button>
+            <button
+              className={`lg-btn lg-btn-primary ${spawnFlash ? 'is-flashing' : ''}`}
+              onClick={triggerEvent}
+              disabled={plants.length === 0}
+              title="Spawn a random event right now"
+            >
+              <i className="fas fa-wand-magic-sparkles"></i>
+              Spawn event
+            </button>
+            <button
+              className="lg-btn lg-btn-cinema"
+              onClick={toggleAmbient}
+              disabled={plants.length === 0}
+              title="Fullscreen ambient mode — perfect for a second monitor"
+            >
+              <i className="fas fa-expand"></i>
+              Ambient mode
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Panorama / Scene */}
+      <div
+        ref={sceneRef}
+        className={`lg-scene lg-sky-${sky} ${ambient ? 'lg-scene-ambient' : ''}`}
+      >
         {loading ? (
           <div className="lg-loading"><i className="fas fa-leaf"></i>  Loading your garden…</div>
         ) : plants.length === 0 ? (
@@ -263,48 +461,120 @@ const LiveGarden = ({ showNotification, onShowPlantDetails }) => {
           </div>
         ) : (
           <>
-            {/* Static decor */}
+            {/* Stars (only visible at night/dusk via CSS) */}
+            <div className="lg-stars" aria-hidden="true">
+              {STARS.map(s => (
+                <span
+                  key={s.id}
+                  className="lg-star"
+                  style={{
+                    left: `${s.x}%`,
+                    top: `${s.y}%`,
+                    width: `${s.size}px`,
+                    height: `${s.size}px`,
+                    animationDelay: `${s.twinkleDelay}s`,
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Sun / moon */}
             <div className="lg-sun-moon"></div>
+
+            {/* Clouds (different speeds = parallax) */}
             <div className="lg-cloud lg-cloud-1"></div>
             <div className="lg-cloud lg-cloud-2"></div>
             <div className="lg-cloud lg-cloud-3"></div>
+            <div className="lg-cloud lg-cloud-4"></div>
 
-            {/* Rain overlay (visible only on rain event) */}
-            {events.some(e => e.title === 'Sudden rain') && <div className="lg-rain"></div>}
+            {/* Rain overlay (visible only on rain event) — 90 individual drops with depth */}
+            {rainActive && (
+              <div className="lg-rain" aria-hidden="true">
+                {RAINDROPS.map(d => (
+                  <span
+                    key={d.id}
+                    className={`lg-drop lg-drop-${d.variant}`}
+                    style={{
+                      left: `${d.left}%`,
+                      width: `${d.width}px`,
+                      height: `${d.height}px`,
+                      animationDuration: `${d.duration}s`,
+                      animationDelay: `${d.delay}s`,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Distant flying bird */}
+            <div className="lg-bird-distant" aria-hidden="true">🐦</div>
 
             {/* Scrolling panorama */}
-            <div className="lg-panorama-wrap">
-              <div className="lg-panorama" style={{ width: panoramaWidth }}>
-                {/* Hills in the background */}
-                <svg className="lg-hills" viewBox={`0 0 ${panoramaWidth} 200`} preserveAspectRatio="none">
-                  <path d={`M0,200 L0,150 Q${panoramaWidth*0.15},80 ${panoramaWidth*0.3},120 T${panoramaWidth*0.6},90 T${panoramaWidth},130 L${panoramaWidth},200 Z`} fill="rgba(46,125,50,0.45)"/>
-                  <path d={`M0,200 L0,170 Q${panoramaWidth*0.2},130 ${panoramaWidth*0.4},150 T${panoramaWidth*0.7},140 T${panoramaWidth},160 L${panoramaWidth},200 Z`} fill="rgba(46,125,50,0.7)"/>
+            <div className={`lg-panorama-wrap ${ambient ? 'lg-pano-kenburns' : ''}`}>
+              <div className={`lg-panorama ${windActive ? 'lg-wind-active' : ''}`} style={{ width: panoramaWidth }}>
+                {/* Multi-layer hills (parallax background) */}
+                <svg className="lg-hills lg-hills-far" viewBox={`0 0 ${panoramaWidth} 200`} preserveAspectRatio="none">
+                  <path d={`M0,200 L0,170 Q${panoramaWidth*0.12},120 ${panoramaWidth*0.25},150 T${panoramaWidth*0.55},130 T${panoramaWidth},150 L${panoramaWidth},200 Z`} fill="rgba(46,125,50,0.30)"/>
+                </svg>
+                <svg className="lg-hills lg-hills-mid" viewBox={`0 0 ${panoramaWidth} 200`} preserveAspectRatio="none">
+                  <path d={`M0,200 L0,150 Q${panoramaWidth*0.15},80 ${panoramaWidth*0.3},120 T${panoramaWidth*0.6},90 T${panoramaWidth},130 L${panoramaWidth},200 Z`} fill="rgba(46,125,50,0.5)"/>
+                </svg>
+                <svg className="lg-hills lg-hills-near" viewBox={`0 0 ${panoramaWidth} 200`} preserveAspectRatio="none">
+                  <path d={`M0,200 L0,170 Q${panoramaWidth*0.2},130 ${panoramaWidth*0.4},150 T${panoramaWidth*0.7},140 T${panoramaWidth},160 L${panoramaWidth},200 Z`} fill="rgba(46,125,50,0.75)"/>
                 </svg>
 
-                {/* Soil strip */}
+                {/* Grass / soil strip */}
+                <div className="lg-grass"></div>
                 <div className="lg-soil"></div>
 
-                {/* Bee + butterfly animated freely */}
-                <div className="lg-bee">🐝</div>
-                <div className="lg-butterfly">🦋</div>
+                {/* Wooden fence in foreground */}
+                <svg className="lg-fence" viewBox={`0 0 ${panoramaWidth} 50`} preserveAspectRatio="none" aria-hidden="true">
+                  <rect x="0" y="22" width={panoramaWidth} height="6" fill="#8b5a2b"/>
+                  <rect x="0" y="36" width={panoramaWidth} height="6" fill="#8b5a2b"/>
+                  {Array.from({ length: Math.ceil(panoramaWidth / 80) }, (_, i) => (
+                    <rect key={i} x={i * 80 + 20} y="10" width="8" height="34" fill="#a0703a"/>
+                  ))}
+                </svg>
+
+                {/* Fireflies (visible at night via CSS) */}
+                <div className="lg-fireflies" aria-hidden="true">
+                  {FIREFLIES.map(f => (
+                    <span
+                      key={f.id}
+                      className="lg-firefly"
+                      style={{
+                        left: `${f.startX}%`,
+                        top: `${f.startY}%`,
+                        animationDelay: `${f.delay}s`,
+                        animationDuration: `${f.duration}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Free-flying bee + butterfly */}
+                <div className="lg-bee" aria-hidden="true">🐝</div>
+                <div className="lg-butterfly" aria-hidden="true">🦋</div>
 
                 {/* Plants */}
                 {placedPlants.map(p => (
                   <button
                     key={p.id}
                     className="lg-plant"
-                    style={{ left: p._x, top: p._y, transform: `scale(${p._scale})` }}
-                    onClick={() => onShowPlantDetails?.(p.id)}
-                    title={`${p.name} — click for details`}
+                    style={{ left: p._x, bottom: p._bottom, transform: `scale(${p._scale})` }}
+                    onClick={() => !ambient && onShowPlantDetails?.(p.id)}
+                    disabled={ambient}
+                    title={`${p.name}${ambient ? '' : ' — click for details'}`}
                   >
-                    <svg viewBox="0 0 64 80" width="64" height="80" shapeRendering="crispEdges" className="lg-sway">
+                    <svg viewBox="0 0 64 80" width="64" height="80" shapeRendering="crispEdges" className={`lg-sway ${windActive ? 'lg-sway-strong' : ''}`}>
                       {getSprite(p.type)}
                     </svg>
-                    <div className="lg-plant-tag">{p.name}</div>
+                    {!ambient && <div className="lg-plant-tag">{p.name}</div>}
                   </button>
                 ))}
               </div>
             </div>
+
 
             {/* Event toasts (top-right of scene) */}
             <div className="lg-events">
@@ -318,14 +588,37 @@ const LiveGarden = ({ showNotification, onShowPlantDetails }) => {
                 </div>
               ))}
             </div>
+
+            {/* Ambient mode HUD overlay */}
+            {ambient && (
+              <>
+                <div className={`lg-ambient-hint ${showHint ? 'is-visible' : ''}`}>
+                  <kbd>ESC</kbd> exit · <kbd>Space</kbd> spawn · <kbd>P</kbd> pause · <kbd>← →</kbd> scroll garden
+                  <br/><span>{dayLabel} · {plants.length} plant{plants.length !== 1 ? 's' : ''} · {muted ? 'paused' : 'events on'}</span>
+                </div>
+                <button
+                  className="lg-ambient-exit"
+                  onClick={toggleAmbient}
+                  title="Exit ambient mode (ESC)"
+                  aria-label="Exit ambient mode"
+                >
+                  <i className="fas fa-compress"></i>
+                </button>
+                <div className="lg-ambient-clock" aria-hidden="true">
+                  {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </>
+            )}
           </>
         )}
       </div>
 
-      <p className="lg-disclaimer">
-        <i className="fas fa-circle-info"></i>
-        Events are playful suggestions, not measurements. Time-of-day follows your local clock. Click a plant to open its details.
-      </p>
+      {!ambient && (
+        <p className="lg-disclaimer">
+          <i className="fas fa-circle-info"></i>
+          Events are playful suggestions, not measurements. Time-of-day follows your local clock. Click a plant to open its details — or press <strong>Ambient mode</strong> to send the panorama into screensaver mode.
+        </p>
+      )}
     </div>
   );
 };

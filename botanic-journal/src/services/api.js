@@ -1038,6 +1038,20 @@ class ApiService {
         });
     }
 
+    // AI Garden Designer — generate plant list + layout from space description
+    async generateGardenDesign({ zone, spaceDescription, preferences = '', count = 6 }) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`garden-map-design.php?user_id=${user_id}`, {
+            method: 'POST',
+            body: {
+                zone,
+                space_description: spaceDescription,
+                preferences,
+                count,
+            },
+        });
+    }
+
     // AI microclimate tip for a single (plant, zone) pair
     async getGardenMapTip(plantId, zone, force = false) {
         const user_id = this.getCurrentUserId();
