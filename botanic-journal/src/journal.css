@@ -1225,3 +1225,95 @@
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
+/* ════════════════════════════════════════════════════
+   JOURNAL PHOTO ATTACHMENTS
+   ════════════════════════════════════════════════════ */
+
+/* Photo picker button (when no photo yet) */
+.journal-photo-picker {
+    width: 100%;
+    padding: 14px;
+    background: #f0fdf4;
+    border: 2px dashed #86efac;
+    border-radius: 10px;
+    color: #047857;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+.journal-photo-picker:hover:not(:disabled) {
+    background: #ecfdf5;
+    border-color: #10b981;
+    color: #065f46;
+}
+.journal-photo-picker:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Photo preview inside forms */
+.journal-photo-preview {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 320px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+.journal-photo-preview img {
+    display: block;
+    width: 100%;
+    max-height: 240px;
+    object-fit: cover;
+}
+.journal-photo-remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background 0.2s ease;
+}
+.journal-photo-remove:hover { background: rgba(220, 38, 38, 0.9); }
+
+/* Photo on journal cards in the listing */
+.journal-card-photo {
+    margin: 0 -2px 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    max-height: 180px;
+    cursor: pointer;
+}
+.journal-card-photo img {
+    display: block;
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+.journal-card-photo:hover img { transform: scale(1.04); }
+
+/* Photo on the full read view */
+.journal-detail-photo {
+    margin: 16px 0;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+.journal-detail-photo img {
+    display: block;
+    width: 100%;
+    max-height: 480px;
+    object-fit: cover;
+}

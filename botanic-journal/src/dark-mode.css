@@ -1902,3 +1902,330 @@
 [data-theme="dark"] .pdet-hist-row-val { color: #f1f5f9 !important; }
 [data-theme="dark"] .pdet-hist-row-val.ok  { color: #34d399 !important; }
 [data-theme="dark"] .pdet-hist-row-val.err { color: #fca5a5 !important; }
+
+/* ───────────────────────────────────────────────
+   WEATHER FORECAST PAGE — dark mode
+   ─────────────────────────────────────────────── */
+
+[data-theme="dark"] .wx-hero {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme="dark"] .wx-rec-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.10) 0%, rgba(16, 185, 129, 0.05) 100%) !important;
+  border-color: rgba(16, 185, 129, 0.30) !important;
+  border-left-color: #10b981 !important;
+}
+[data-theme="dark"] .wx-rec-label { color: #34d399 !important; }
+[data-theme="dark"] .wx-rec-text  { color: #f1f5f9 !important; }
+
+[data-theme="dark"] .wx-metric {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .wx-metric:hover {
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 8px 22px rgba(16, 185, 129, 0.15) !important;
+}
+[data-theme="dark"] .wx-metric-label { color: #94a3b8 !important; }
+[data-theme="dark"] .wx-metric-value { color: #6ee7b7 !important; }
+
+[data-theme="dark"] .wx-section-title { color: #6ee7b7 !important; }
+
+[data-theme="dark"] .wx-forecast-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .wx-forecast-card:hover {
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+[data-theme="dark"] .wx-forecast-day  { color: #94a3b8 !important; }
+[data-theme="dark"] .wx-forecast-cond { color: #cbd5e1 !important; }
+[data-theme="dark"] .wx-temp-max { color: #f1f5f9 !important; }
+[data-theme="dark"] .wx-temp-min { color: #64748b !important; }
+
+/* ───────────────────────────────────────────────
+   GENERAL DARK MODE SWEEP — beige/white catch-all
+   ─────────────────────────────────────────────── */
+
+/* Any element still styled with literal #fff / #ffffff backgrounds via inline style attribute
+   will not be caught by CSS — but anything with these common utility/legacy classes will be. */
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .white-card,
+[data-theme="dark"] .panel-white,
+[data-theme="dark"] .light-panel,
+[data-theme="dark"] .form-card,
+[data-theme="dark"] .info-card,
+[data-theme="dark"] .alert-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Cream / beige class names */
+[data-theme="dark"] .cream-bg,
+[data-theme="dark"] .bg-cream,
+[data-theme="dark"] .beige,
+[data-theme="dark"] .light-bg {
+  background: #0a0f1c !important;
+  color: #f1f5f9 !important;
+}
+
+/* Modal & popup overlays */
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .modal-body,
+[data-theme="dark"] .popup-content,
+[data-theme="dark"] .dialog-box,
+[data-theme="dark"] .overlay-card,
+[data-theme="dark"] .dropdown-menu,
+[data-theme="dark"] .dropdown-content,
+[data-theme="dark"] .popover {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer,
+[data-theme="dark"] .dialog-header,
+[data-theme="dark"] .dialog-footer {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Generic light text on what we just darkened */
+[data-theme="dark"] .modal-content h1,
+[data-theme="dark"] .modal-content h2,
+[data-theme="dark"] .modal-content h3,
+[data-theme="dark"] .modal-content h4,
+[data-theme="dark"] .modal-content p,
+[data-theme="dark"] .modal-content label,
+[data-theme="dark"] .dialog-box h1,
+[data-theme="dark"] .dialog-box h2,
+[data-theme="dark"] .dialog-box h3,
+[data-theme="dark"] .dialog-box p {
+  color: #f1f5f9 !important;
+}
+
+/* Form controls inside modals */
+[data-theme="dark"] .modal-content input,
+[data-theme="dark"] .modal-content textarea,
+[data-theme="dark"] .modal-content select,
+[data-theme="dark"] .dialog-box input,
+[data-theme="dark"] .dialog-box textarea,
+[data-theme="dark"] .dialog-box select {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Tabs / pills */
+[data-theme="dark"] .tab,
+[data-theme="dark"] .tab-button,
+[data-theme="dark"] .pill,
+[data-theme="dark"] .nav-tab {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .tab.active,
+[data-theme="dark"] .tab-button.active,
+[data-theme="dark"] .nav-tab.active,
+[data-theme="dark"] .pill.active {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: #10b981 !important;
+  color: #34d399 !important;
+}
+
+/* Tooltips */
+[data-theme="dark"] .tooltip,
+[data-theme="dark"] [role="tooltip"] {
+  background: #0a0f1c !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+
+/* Loading / skeleton placeholders */
+[data-theme="dark"] .skeleton,
+[data-theme="dark"] .loading-placeholder,
+[data-theme="dark"] .shimmer {
+  background: linear-gradient(90deg, #1e2d40 0%, #2a3b53 50%, #1e2d40 100%) !important;
+}
+
+/* Tables — common selectors that might still be light */
+[data-theme="dark"] table thead {
+  background: #1e2d40 !important;
+}
+[data-theme="dark"] table th {
+  color: #f1f5f9 !important;
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] table td {
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] table tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+[data-theme="dark"] table tr:hover {
+  background: rgba(16, 185, 129, 0.06) !important;
+}
+
+/* "Read more" / "Show more" / outline buttons */
+[data-theme="dark"] .btn-outline,
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark"] .btn-light,
+[data-theme="dark"] .ghost-btn {
+  background: transparent !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .btn-outline:hover,
+[data-theme="dark"] .btn-secondary:hover,
+[data-theme="dark"] .ghost-btn:hover {
+  background: #1e2d40 !important;
+  border-color: #10b981 !important;
+  color: #34d399 !important;
+}
+
+/* Inline-styled white backgrounds (target a few common patterns) */
+[data-theme="dark"] [style*="background: #fff"]:not(button):not(.no-dark-override),
+[data-theme="dark"] [style*="background: white"]:not(button):not(.no-dark-override),
+[data-theme="dark"] [style*="background-color: #fff"]:not(button):not(.no-dark-override),
+[data-theme="dark"] [style*="background-color: white"]:not(button):not(.no-dark-override) {
+  background: #14202f !important;
+}
+
+/* Cream / linen / wheat hex values that might appear in legacy inline styles */
+[data-theme="dark"] [style*="#fafaf6"],
+[data-theme="dark"] [style*="#fdfdfb"],
+[data-theme="dark"] [style*="#fefcf3"],
+[data-theme="dark"] [style*="#f8f9fa"],
+[data-theme="dark"] [style*="#f5f5dc"] {
+  background: #14202f !important;
+}
+
+/* Helper / utility text colors that may still be too dark */
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .text-secondary,
+[data-theme="dark"] .text-gray,
+[data-theme="dark"] .helper-text {
+  color: #94a3b8 !important;
+}
+
+/* Cards inside dashboard grids that were missed */
+[data-theme="dark"] .dashboard-section,
+[data-theme="dark"] .dashboard-widget,
+[data-theme="dark"] .info-section,
+[data-theme="dark"] .summary-card,
+[data-theme="dark"] .feature-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ───────────────────────────────────────────────
+   MESSAGES — emoji picker, attachments, edit/delete
+   ─────────────────────────────────────────────── */
+
+[data-theme="dark"] .chat-attach-btn,
+[data-theme="dark"] .chat-emoji-btn {
+  background: #1e2d40 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .chat-attach-btn:hover,
+[data-theme="dark"] .chat-emoji-btn:hover {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] .chat-pending-row {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border-top-color: rgba(16, 185, 129, 0.25) !important;
+}
+[data-theme="dark"] .chat-pending-file {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] .chat-pending-row img {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+[data-theme="dark"] .emoji-picker {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="dark"] .emoji-tabs { border-bottom-color: #2a3b53 !important; }
+[data-theme="dark"] .emoji-tab {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .emoji-tab:hover {
+  background: #1e2d40 !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] .emoji-tab.on {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] .emoji-btn:hover { background: #1e2d40 !important; }
+
+[data-theme="dark"] .dm-menu-trigger {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .dm-menu-trigger:hover {
+  border-color: #10b981 !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] .dm-menu {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="dark"] .dm-menu button {
+  background: #14202f !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .dm-menu button:hover { background: #1e2d40 !important; }
+[data-theme="dark"] .dm-menu-danger { color: #fca5a5 !important; }
+[data-theme="dark"] .dm-menu-danger:hover { background: rgba(239, 68, 68, 0.12) !important; }
+
+[data-theme="dark"] .dm-attachment-file {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .dm-attachment-file:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* ───────────────────────────────────────────────
+   JOURNAL — photo attachments dark mode
+   ─────────────────────────────────────────────── */
+
+[data-theme="dark"] .journal-photo-picker {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] .journal-photo-picker:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: #10b981 !important;
+  color: #6ee7b7 !important;
+}
+
+[data-theme="dark"] .journal-photo-preview {
+  border-color: #2a3b53 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .journal-detail-photo {
+  border-color: #2a3b53 !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+}

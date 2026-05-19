@@ -7,7 +7,10 @@ const PlantJournal = ({ showNotification, user }) => {
     const [journals, setJournals] = useState([]);
     const [plants, setPlants] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [newEntry, setNewEntry] = useState({ title: '', content: '', plant_id: '' });
+    const [newEntry, setNewEntry] = useState({ title: '', content: '', plant_id: '', image_path: '' });
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const newImageInputRef = React.useRef(null);
+    const editImageInputRef = React.useRef(null);
     const [viewMode, setViewMode] = useState('grid');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedJournal, setSelectedJournal] = useState(null);
@@ -43,6 +46,29 @@ const PlantJournal = ({ showNotification, user }) => {
         }
     };
 
+    const handleImageUpload = async (file, target) => {
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) {
+            showNotification('Too large', 'Max 10 MB per image.', 'error');
+            return;
+        }
+        try {
+            setUploadingImage(true);
+            const path = await apiService.uploadJournalImage(file);
+            if (target === 'new') {
+                setNewEntry(prev => ({ ...prev, image_path: path }));
+            } else {
+                setEditingJournal(prev => ({ ...prev, image_path: path }));
+            }
+        } catch (err) {
+            showNotification('Upload failed', err.message || 'Try again', 'error');
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
+    const journalImageUrl = (path) => path ? `http://localhost/botanic-journal/botanic-journal${path}` : null;
+
     const handleCreateJournal = async () => {
         if (!newEntry.title.trim()) {
             showNotification('Error', 'Please enter a title', 'error');
@@ -58,16 +84,17 @@ const PlantJournal = ({ showNotification, user }) => {
             const journalData = {
                 title: newEntry.title.trim(),
                 content: newEntry.content.trim(),
-                plant_id: newEntry.plant_id || null
+                plant_id: newEntry.plant_id || null,
+                image_path: newEntry.image_path || null,
             };
 
             console.log('➕ Creating journal entry:', journalData);
-            
+
             const response = await apiService.createJournal(journalData);
             if (response.success) {
                 console.log('✅ Journal created:', response.data);
                 showNotification('Success', 'Journal entry created successfully', 'success');
-                setNewEntry({ title: '', content: '', plant_id: '' });
+                setNewEntry({ title: '', content: '', plant_id: '', image_path: '' });
                 setJournals(prev => [response.data, ...prev]);
             } else {
                 throw new Error(response.message || 'Failed to create journal entry');
@@ -114,7 +141,8 @@ const PlantJournal = ({ showNotification, user }) => {
             const response = await apiService.updateJournal(editingJournal.id, {
                 title: editingJournal.title.trim(),
                 content: editingJournal.content.trim(),
-                plant_id: editingJournal.plant_id || null
+                plant_id: editingJournal.plant_id || null,
+                image_path: editingJournal.image_path || null,
             });
             
             if (response.success) {
@@ -379,9 +407,50 @@ const PlantJournal = ({ showNotification, user }) => {
                                 <span>Characters: {countCharacters(newEntry.content)}</span>
                             </div>
                         </div>
-                        
+
+                        <div className="form-group">
+                            <label>Photo (optional)</label>
+                            <input
+                                ref={newImageInputRef}
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={(e) => {
+                                    const f = e.target.files?.[0];
+                                    e.target.value = '';
+                                    handleImageUpload(f, 'new');
+                                }}
+                            />
+                            {newEntry.image_path ? (
+                                <div className="journal-photo-preview">
+                                    <img src={journalImageUrl(newEntry.image_path)} alt="entry preview" />
+                                    <button
+                                        type="button"
+                                        className="journal-photo-remove"
+                                        onClick={() => setNewEntry(prev => ({ ...prev, image_path: '' }))}
+                                        title="Remove photo"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="journal-photo-picker"
+                                    onClick={() => newImageInputRef.current?.click()}
+                                    disabled={uploadingImage}
+                                >
+                                    {uploadingImage ? (
+                                        <><i className="fas fa-spinner fa-spin"></i> Uploading...</>
+                                    ) : (
+                                        <><i className="fas fa-camera"></i> Attach a photo</>
+                                    )}
+                                </button>
+                            )}
+                        </div>
+
                         <div className="form-actions">
-                            <button 
+                            <button
                                 className="btn btn-primary"
                                 onClick={handleCreateJournal}
                                 disabled={!newEntry.title.trim() || !newEntry.content.trim()}
@@ -389,9 +458,9 @@ const PlantJournal = ({ showNotification, user }) => {
                                 <i className="fas fa-save"></i>
                                 Save Entry
                             </button>
-                            <button 
+                            <button
                                 className="btn btn-secondary"
-                                onClick={() => setNewEntry({ title: '', content: '', plant_id: '' })}
+                                onClick={() => setNewEntry({ title: '', content: '', plant_id: '', image_path: '' })}
                             >
                                 <i className="fas fa-times"></i>
                                 Clear
@@ -480,6 +549,17 @@ const PlantJournal = ({ showNotification, user }) => {
                                                         </div>
                                                     )}
                                                 </div>
+
+                                                {/* Photo preview */}
+                                                {journal.image_path && (
+                                                    <div className="journal-card-photo">
+                                                        <img
+                                                            src={journalImageUrl(journal.image_path)}
+                                                            alt={journal.title || 'Journal photo'}
+                                                            onClick={() => handleReadMore(journal)}
+                                                        />
+                                                    </div>
+                                                )}
 
                                                 {/* Content Preview */}
                                                 <div className="journal-content-preview">
@@ -618,6 +698,47 @@ const PlantJournal = ({ showNotification, user }) => {
                                         </div>
                                     </div>
 
+                                    <div className="form-group">
+                                        <label>Photo</label>
+                                        <input
+                                            ref={editImageInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            style={{ display: 'none' }}
+                                            onChange={(e) => {
+                                                const f = e.target.files?.[0];
+                                                e.target.value = '';
+                                                handleImageUpload(f, 'edit');
+                                            }}
+                                        />
+                                        {editingJournal.image_path ? (
+                                            <div className="journal-photo-preview">
+                                                <img src={journalImageUrl(editingJournal.image_path)} alt="entry" />
+                                                <button
+                                                    type="button"
+                                                    className="journal-photo-remove"
+                                                    onClick={() => setEditingJournal(prev => ({ ...prev, image_path: '' }))}
+                                                    title="Remove photo"
+                                                >
+                                                    <i className="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                className="journal-photo-picker"
+                                                onClick={() => editImageInputRef.current?.click()}
+                                                disabled={uploadingImage}
+                                            >
+                                                {uploadingImage ? (
+                                                    <><i className="fas fa-spinner fa-spin"></i> Uploading...</>
+                                                ) : (
+                                                    <><i className="fas fa-camera"></i> Attach a photo</>
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
+
                                     <div className="form-actions">
                                         <button 
                                             className="btn btn-primary"
@@ -661,6 +782,15 @@ const PlantJournal = ({ showNotification, user }) => {
                                                 )}
                                             </div>
                                         </div>
+
+                                        {selectedJournal.image_path && (
+                                            <div className="journal-detail-photo">
+                                                <img
+                                                    src={journalImageUrl(selectedJournal.image_path)}
+                                                    alt={selectedJournal.title || 'Journal photo'}
+                                                />
+                                            </div>
+                                        )}
 
                                         <div className="detail-content">
                                             <div className="content-text">

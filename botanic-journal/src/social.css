@@ -392,8 +392,12 @@
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   overflow: hidden;
-  height: 70vh;
+  /* Bounded height — without this the chat-panel/chat-messages flex children
+     grow with content and the input row gets pushed off-screen.
+     calc reserves space for the hero + page padding. */
+  height: calc(100vh - 240px);
   min-height: 500px;
+  max-height: 800px;
 }
 
 .conv-list {
@@ -558,7 +562,9 @@
   line-height: 1.4;
 }
 .chat-input-row textarea:focus { outline: none; border-color: #2e7d32; box-shadow: 0 0 0 3px rgba(46,125,50,0.10); }
-.chat-input-row button {
+
+/* Send button — only the direct-child button that ISN'T attach/emoji/etc. */
+.chat-input-row > button:not(.chat-attach-btn):not(.chat-emoji-btn) {
   width: 44px;
   height: 44px;
   border: none;
@@ -569,7 +575,9 @@
   cursor: pointer;
   flex-shrink: 0;
 }
-.chat-input-row button:disabled { opacity: 0.5; cursor: not-allowed; }
+.chat-input-row > button:not(.chat-attach-btn):not(.chat-emoji-btn):disabled {
+  opacity: 0.5; cursor: not-allowed;
+}
 
 /* ── Responsive ───────────────────────────────────── */
 @media (max-width: 900px) {
@@ -577,4 +585,393 @@
   .conv-list { max-height: 240px; }
   .profile-banner { flex-direction: column; align-items: flex-start; }
   .profile-banner-stats { width: 100%; justify-content: space-between; }
+}
+
+/* ════════════════════════════════════════════════════
+   MESSAGES: emoji picker, attachments, edit/delete
+   ════════════════════════════════════════════════════ */
+
+/* Position chat input row relatively so the emoji popup can anchor */
+.chat-input-row { position: relative; }
+
+/* Buttons within chat input get a consistent secondary style */
+.chat-attach-btn,
+.chat-emoji-btn {
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s ease;
+}
+.chat-attach-btn:hover,
+.chat-emoji-btn:hover {
+  background: #ecfdf5;
+  color: #047857;
+  transform: translateY(-1px);
+}
+.chat-attach-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Pending attachment preview ──────────────────── */
+.chat-pending-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #f0fdf4;
+  border-top: 1px solid #d1fae5;
+  position: relative;
+}
+.chat-pending-row img {
+  max-width: 120px;
+  max-height: 80px;
+  border-radius: 8px;
+  border: 1px solid #d1fae5;
+  object-fit: cover;
+}
+.chat-pending-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #d1fae5;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #047857;
+}
+.chat-pending-remove {
+  margin-left: auto;
+  width: 32px; height: 32px;
+  border: none;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid; place-items: center;
+}
+.chat-pending-remove:hover { background: rgba(239, 68, 68, 0.2); }
+
+/* ── Emoji picker ─────────────────────────────────── */
+.emoji-picker {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 56px;
+  width: 340px;
+  max-height: 360px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  z-index: 50;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: emojiPopIn 0.18s ease;
+}
+@keyframes emojiPopIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.emoji-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border-bottom: 1px solid #f1f5f9;
+  overflow-x: auto;
+}
+.emoji-tab {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.emoji-tab:hover { background: #f1f5f9; color: #047857; }
+.emoji-tab.on    { background: #ecfdf5; color: #047857; }
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  padding: 8px;
+  overflow-y: auto;
+  flex: 1;
+}
+.emoji-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background 0.1s ease;
+}
+.emoji-btn:hover { background: #f1f5f9; }
+
+/* ── Message attachments in bubbles ──────────────── */
+.dm-attachment-img {
+  display: block;
+  max-width: 240px;
+  max-height: 180px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+.dm-attachment-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: inherit;
+}
+.dm-attachment-file:hover { background: rgba(0, 0, 0, 0.10); }
+
+.dm-text { white-space: pre-wrap; word-break: break-word; }
+
+.dm-edited {
+  font-size: 0.7rem;
+  opacity: 0.65;
+  margin-left: 6px;
+  font-style: italic;
+}
+
+.dm-deleted {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+/* ── Bubble hover menu (edit/delete) ─────────────── */
+.dm-bubble { position: relative; }
+
+.dm-menu-trigger {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.dm-bubble:hover .dm-menu-trigger { display: flex; }
+.dm-menu-trigger:hover { color: #047857; border-color: #10b981; }
+
+.dm-menu {
+  position: absolute;
+  top: 24px;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  z-index: 30;
+  min-width: 130px;
+  overflow: hidden;
+}
+.dm-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: #fff;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #374151;
+  font-family: inherit;
+}
+.dm-menu button:hover { background: #f9fafb; }
+.dm-menu-danger { color: #dc2626 !important; }
+.dm-menu-danger:hover { background: #fef2f2 !important; }
+
+/* ── Inline edit form ────────────────────────────── */
+.dm-edit { min-width: 220px; }
+.dm-edit textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  color: #1f2937;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 60px;
+}
+.dm-edit-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  justify-content: flex-end;
+}
+.dm-edit-actions button {
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.dm-edit-cancel {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.85);
+}
+.dm-edit-save {
+  background: rgba(255, 255, 255, 0.95);
+  color: #047857;
+}
+
+/* Mobile emoji picker repositioning */
+@media (max-width: 540px) {
+  .emoji-picker {
+    width: calc(100vw - 32px);
+    right: 16px;
+    max-height: 280px;
+  }
+  .emoji-grid { grid-template-columns: repeat(7, 1fr); }
+}
+
+/* ════════════════════════════════════════════════════
+   FIXES — emoji picker overflow + input row sizing
+   ════════════════════════════════════════════════════ */
+
+/* Make sure the textarea always has the white background
+   (was previously inheriting from neighboring dark styles). */
+.chat-input-row textarea {
+  background: #ffffff;
+  color: #1f2937;
+}
+
+/* Emoji picker — make the tabs scrollable + the picker narrower so it
+   doesn't blow out of the chat panel. The category labels were getting
+   stuck inside 44px green pills because of the old "any button in
+   chat-input-row" rule. */
+.emoji-picker {
+  width: 320px;
+  max-width: calc(100vw - 40px);
+  max-height: 320px;
+}
+
+/* Tabs: pill shape, NEVER circular, never bigger than they need */
+.emoji-tabs {
+  flex-shrink: 0;
+}
+.emoji-tab {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  border-radius: 6px !important;
+  padding: 6px 10px !important;
+  background: transparent !important;
+  color: #6b7280 !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  flex-shrink: 0;
+}
+.emoji-tab:hover { background: #f1f5f9 !important; color: #047857 !important; }
+.emoji-tab.on    { background: #ecfdf5 !important; color: #047857 !important; }
+
+/* Emoji buttons inside the grid: keep them as TEXT buttons, not circles */
+.emoji-btn {
+  width: auto !important;
+  height: auto !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  color: inherit !important;
+  font-size: 1.4rem !important;
+  padding: 6px !important;
+  flex-shrink: 1;
+  box-shadow: none !important;
+}
+.emoji-btn:hover { background: #f1f5f9 !important; }
+
+/* Attach + emoji input-row buttons: keep them as small light pills, not
+   the big green send button. */
+.chat-attach-btn,
+.chat-emoji-btn {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  font-size: 1rem !important;
+  flex-shrink: 0;
+}
+.chat-attach-btn:hover,
+.chat-emoji-btn:hover {
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+}
+
+/* Ensure the input row never gets vertically clipped at the bottom
+   of the panel (the new buttons made it slightly taller). */
+.messages-layout {
+  min-height: 540px;
+}
+.chat-input-row {
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════════════════
+   FLEX SCROLL FIX — Messages
+   Sticky input + scrolling chat
+   ════════════════════════════════════════════════════ */
+
+/* `min-height: 0` is REQUIRED for a flex child with `flex: 1` and
+   `overflow-y: auto` to actually scroll instead of growing with content. */
+.chat-panel {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.chat-panel-header { flex-shrink: 0; }
+.chat-messages {
+  min-height: 0;
+  flex: 1 1 0;
+}
+.chat-pending-row { flex-shrink: 0; }
+.chat-input-row   { flex-shrink: 0; }
+
+/* On mobile, layout collapses to single column with auto height — let it
+   grow but bound the chat-messages so it still scrolls. */
+@media (max-width: 900px) {
+  .messages-layout {
+    height: auto;
+    max-height: none;
+    grid-template-rows: auto 1fr;
+  }
+  .chat-messages { max-height: 50vh; }
 }

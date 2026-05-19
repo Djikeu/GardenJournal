@@ -4,13 +4,18 @@
  *
  *   GET    ?user_id=X                       → list of conversations (latest msg + other user info)
  *   GET    ?user_id=X&with=Y                → full conversation with user Y (oldest → newest)
- *   POST   ?user_id=X  body { to, content } → send a message
- *   PATCH  ?user_id=X  body { from }        → mark all messages from user `from` as read
+ *   POST   ?user_id=X  body { to, content, attachment_path?, attachment_type? }
+ *                                           → send a message (text and/or attachment)
+ *   POST   ?user_id=X&action=upload  multipart { file, to }
+ *                                           → upload an attachment, returns { path, type }
+ *   PATCH  ?user_id=X  body { from }                                → mark messages from `from` as read
+ *   PATCH  ?user_id=X  body { action:'edit', message_id, content }  → edit own message
+ *   DELETE ?user_id=X&message_id=Y          → soft-delete own message
  */
 
 ob_start();
 header("Access-Control-Allow-Origin: http://localhost:5173");
-header("Access-Control-Allow-Methods: GET, POST, PATCH, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PATCH, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header("Access-Control-Allow-Credentials: true");
 header("Content-Type: application/json");
@@ -52,10 +57,29 @@ if (!$user_id) respond(false, 'user_id required', null, 401);
 
 try {
     switch ($method) {
-        case 'GET':   handleGet($db, $user_id);         break;
-        case 'POST':  handleSend($db, $user_id);        break;
-        case 'PATCH': handleMarkRead($db, $user_id);    break;
-        default:      respond(false, 'Method not allowed', null, 405);
+        case 'GET':
+            handleGet($db, $user_id);
+            break;
+        case 'POST':
+            if (isset($_GET['action']) && $_GET['action'] === 'upload') {
+                handleUpload($db, $user_id);
+            } else {
+                handleSend($db, $user_id);
+            }
+            break;
+        case 'PATCH':
+            $body = json_decode(file_get_contents('php://input'), true) ?: [];
+            if (isset($body['action']) && $body['action'] === 'edit') {
+                handleEdit($db, $user_id, $body);
+            } else {
+                handleMarkRead($db, $user_id, $body);
+            }
+            break;
+        case 'DELETE':
+            handleDelete($db, $user_id);
+            break;
+        default:
+            respond(false, 'Method not allowed', null, 405);
     }
 } catch (Exception $e) {
     respond(false, $e->getMessage(), null, 500);
@@ -69,13 +93,26 @@ function ensureDmTable($db) {
             `sender_id` INT UNSIGNED NOT NULL,
             `recipient_id` INT UNSIGNED NOT NULL,
             `content` TEXT NOT NULL,
+            `attachment_path` VARCHAR(500) DEFAULT NULL,
+            `attachment_type` VARCHAR(50)  DEFAULT NULL,
             `read_at` TIMESTAMP NULL DEFAULT NULL,
+            `edited_at` TIMESTAMP NULL DEFAULT NULL,
+            `deleted_at` TIMESTAMP NULL DEFAULT NULL,
             `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (`id`),
             KEY `idx_pair` (`sender_id`, `recipient_id`, `created_at`),
             KEY `idx_recipient_unread` (`recipient_id`, `read_at`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     } catch (Exception $e) { /* surface downstream */ }
+
+    // Backfill columns on existing installs (idempotent — silent if already present)
+    foreach (['attachment_path VARCHAR(500) DEFAULT NULL',
+              'attachment_type VARCHAR(50)  DEFAULT NULL',
+              'edited_at  TIMESTAMP NULL DEFAULT NULL',
+              'deleted_at TIMESTAMP NULL DEFAULT NULL'] as $col) {
+        try { $db->exec("ALTER TABLE direct_messages ADD COLUMN $col"); }
+        catch (Exception $e) { /* already exists */ }
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -142,8 +179,10 @@ function getConversation($db, $user_id, $other_id) {
     $other = $u->fetch(PDO::FETCH_ASSOC);
     if (!$other) respond(false, 'User not found', null, 404);
 
-    // Messages
-    $stmt = $db->prepare("SELECT id, sender_id, recipient_id, content, read_at, created_at
+    // Messages (include attachment + edited/deleted markers)
+    $stmt = $db->prepare("SELECT id, sender_id, recipient_id, content,
+                                 attachment_path, attachment_type,
+                                 read_at, edited_at, deleted_at, created_at
                           FROM direct_messages
                           WHERE (sender_id = :a AND recipient_id = :b)
                              OR (sender_id = :b AND recipient_id = :a)
@@ -164,9 +203,14 @@ function getConversation($db, $user_id, $other_id) {
 // ─────────────────────────────────────────────────────────────────────
 function handleSend($db, $user_id) {
     $body = json_decode(file_get_contents('php://input'), true);
-    $to      = isset($body['to'])      ? intval($body['to'])      : null;
-    $content = isset($body['content']) ? trim($body['content'])    : '';
-    if (!$to || $content === '') respond(false, 'to and content required', null, 400);
+    $to              = isset($body['to'])              ? intval($body['to'])              : null;
+    $content         = isset($body['content'])         ? trim($body['content'])           : '';
+    $attachmentPath  = isset($body['attachment_path']) ? trim($body['attachment_path'])   : null;
+    $attachmentType  = isset($body['attachment_type']) ? trim($body['attachment_type'])   : null;
+
+    // Either text OR an attachment is required
+    if (!$to)                    respond(false, 'to required', null, 400);
+    if ($content === '' && !$attachmentPath) respond(false, 'content or attachment required', null, 400);
     if ($to === $user_id)        respond(false, "You can't message yourself", null, 400);
     if (mb_strlen($content) > 2000) respond(false, 'Message too long (max 2000 chars)', null, 400);
 
@@ -175,9 +219,16 @@ function handleSend($db, $user_id) {
     $check->execute([':id' => $to]);
     if (!$check->fetchColumn()) respond(false, 'Recipient not found', null, 404);
 
-    $ins = $db->prepare("INSERT INTO direct_messages (sender_id, recipient_id, content)
-                         VALUES (:s, :r, :c)");
-    $ins->execute([':s' => $user_id, ':r' => $to, ':c' => $content]);
+    $ins = $db->prepare("INSERT INTO direct_messages
+        (sender_id, recipient_id, content, attachment_path, attachment_type)
+        VALUES (:s, :r, :c, :ap, :at)");
+    $ins->execute([
+        ':s'  => $user_id,
+        ':r'  => $to,
+        ':c'  => $content,
+        ':ap' => $attachmentPath ?: null,
+        ':at' => $attachmentType ?: null,
+    ]);
     $messageId = $db->lastInsertId();
 
     // Push a notification to the recipient (best-effort, never blocks the response)
@@ -201,8 +252,8 @@ function handleSend($db, $user_id) {
     respond(true, 'Sent', $row->fetch(PDO::FETCH_ASSOC), 201);
 }
 
-function handleMarkRead($db, $user_id) {
-    $body = json_decode(file_get_contents('php://input'), true);
+function handleMarkRead($db, $user_id, $body = null) {
+    if ($body === null) $body = json_decode(file_get_contents('php://input'), true) ?: [];
     $from = isset($body['from']) ? intval($body['from']) : null;
     if (!$from) respond(false, 'from required', null, 400);
 
@@ -210,4 +261,109 @@ function handleMarkRead($db, $user_id) {
                          WHERE recipient_id = :me AND sender_id = :from AND read_at IS NULL");
     $upd->execute([':me' => $user_id, ':from' => $from]);
     respond(true, 'Marked read');
+}
+
+// ─────────────────────────────────────────────────────────────────────
+function handleEdit($db, $user_id, $body) {
+    $msgId   = isset($body['message_id']) ? intval($body['message_id']) : 0;
+    $content = isset($body['content'])    ? trim($body['content'])      : '';
+    if (!$msgId || $content === '')     respond(false, 'message_id and content required', null, 400);
+    if (mb_strlen($content) > 2000)     respond(false, 'Message too long (max 2000 chars)', null, 400);
+
+    // Verify ownership + not deleted
+    $own = $db->prepare("SELECT sender_id, deleted_at, created_at FROM direct_messages WHERE id = :id");
+    $own->execute([':id' => $msgId]);
+    $row = $own->fetch(PDO::FETCH_ASSOC);
+    if (!$row)                                          respond(false, 'Message not found', null, 404);
+    if (intval($row['sender_id']) !== $user_id)         respond(false, 'You can only edit your own messages', null, 403);
+    if (!empty($row['deleted_at']))                     respond(false, 'Cannot edit a deleted message', null, 400);
+
+    // 15-minute edit window
+    $age = time() - strtotime($row['created_at']);
+    if ($age > 15 * 60) respond(false, 'Edit window has passed (15 min)', null, 400);
+
+    $upd = $db->prepare("UPDATE direct_messages
+                         SET content = :c, edited_at = NOW()
+                         WHERE id = :id");
+    $upd->execute([':c' => $content, ':id' => $msgId]);
+
+    $get = $db->prepare("SELECT * FROM direct_messages WHERE id = :id");
+    $get->execute([':id' => $msgId]);
+    respond(true, 'Edited', $get->fetch(PDO::FETCH_ASSOC));
+}
+
+// ─────────────────────────────────────────────────────────────────────
+function handleDelete($db, $user_id) {
+    $msgId = isset($_GET['message_id']) ? intval($_GET['message_id']) : 0;
+    if (!$msgId) respond(false, 'message_id required', null, 400);
+
+    $own = $db->prepare("SELECT sender_id, attachment_path FROM direct_messages WHERE id = :id");
+    $own->execute([':id' => $msgId]);
+    $row = $own->fetch(PDO::FETCH_ASSOC);
+    if (!$row)                                  respond(false, 'Message not found', null, 404);
+    if (intval($row['sender_id']) !== $user_id) respond(false, 'You can only delete your own messages', null, 403);
+
+    // Soft delete — keep the row so the chat layout stays consistent.
+    $upd = $db->prepare("UPDATE direct_messages
+                         SET deleted_at = NOW(), content = '[deleted]', attachment_path = NULL
+                         WHERE id = :id");
+    $upd->execute([':id' => $msgId]);
+
+    // Best-effort: remove the underlying file
+    if (!empty($row['attachment_path'])) {
+        $diskPath = __DIR__ . '/../..' . $row['attachment_path'];
+        if (file_exists($diskPath) && is_writable($diskPath)) @unlink($diskPath);
+    }
+
+    respond(true, 'Deleted', ['message_id' => $msgId]);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+function handleUpload($db, $user_id) {
+    if (empty($_FILES['file'])) respond(false, 'file required', null, 400);
+    $f = $_FILES['file'];
+    if ($f['error'] !== UPLOAD_ERR_OK) respond(false, 'Upload error: ' . $f['error'], null, 400);
+    if ($f['size'] > 10 * 1024 * 1024) respond(false, 'File too large (max 10 MB)', null, 400);
+
+    // Allowed types — images + common documents
+    $allowed = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp',
+        'image/gif'  => 'gif',
+        'application/pdf' => 'pdf',
+    ];
+    $mime = $f['type'];
+    if (!isset($allowed[$mime])) {
+        // Fall back to actual mime detection
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime  = $finfo ? finfo_file($finfo, $f['tmp_name']) : $f['type'];
+        if ($finfo) finfo_close($finfo);
+    }
+    if (!isset($allowed[$mime])) respond(false, 'Unsupported file type', null, 400);
+
+    $ext = $allowed[$mime];
+    $kind = strpos($mime, 'image/') === 0 ? 'image' : 'file';
+
+    // /backend/api → /backend → repo root, then /uploads/messages/
+    $relDir  = '/backend/uploads/messages';
+    $diskDir = realpath(__DIR__ . '/../..') . $relDir;
+    if (!is_dir($diskDir)) @mkdir($diskDir, 0775, true);
+    if (!is_dir($diskDir)) respond(false, 'Upload directory could not be created', null, 500);
+
+    $fileName = $user_id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+    $diskPath = $diskDir . DIRECTORY_SEPARATOR . $fileName;
+    if (!move_uploaded_file($f['tmp_name'], $diskPath)) {
+        respond(false, 'Could not move uploaded file', null, 500);
+    }
+
+    // Return the URL path the frontend can use to render the attachment
+    $publicPath = $relDir . '/' . $fileName;
+    respond(true, 'Uploaded', [
+        'path'        => $publicPath,
+        'type'        => $kind,
+        'mime'        => $mime,
+        'original'    => $f['name'],
+        'size'        => $f['size'],
+    ]);
 }

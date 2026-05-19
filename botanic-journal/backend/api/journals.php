@@ -18,9 +18,12 @@ $database = new Database();
 $db = $database->getConnection();
 $journal = new Journal($db);
 
-// Ensure the is_public column exists (idempotent)
+// Ensure new columns exist (idempotent — silent if already present)
 try {
     $db->exec("ALTER TABLE journals ADD COLUMN is_public TINYINT(1) NOT NULL DEFAULT 0");
+} catch (PDOException $e) { /* already exists, ignore */ }
+try {
+    $db->exec("ALTER TABLE journals ADD COLUMN image_path VARCHAR(500) DEFAULT NULL");
 } catch (PDOException $e) { /* already exists, ignore */ }
 
 // Get user_id from request
@@ -50,6 +53,66 @@ if (!$user_id) {
 }
 
 $journal->user_id = $user_id;
+
+// Handle photo upload action (multipart POST with action=upload-image)
+if ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'upload-image') {
+    handleJournalImageUpload($user_id);
+    exit();
+}
+
+function handleJournalImageUpload($user_id) {
+    if (empty($_FILES['image'])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'image file required']);
+        exit();
+    }
+    $f = $_FILES['image'];
+    if ($f['error'] !== UPLOAD_ERR_OK) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Upload error: ' . $f['error']]);
+        exit();
+    }
+    if ($f['size'] > 10 * 1024 * 1024) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'File too large (max 10 MB)']);
+        exit();
+    }
+
+    $allowed = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp',
+        'image/gif'  => 'gif',
+    ];
+    $mime = $f['type'];
+    if (!isset($allowed[$mime])) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime  = $finfo ? finfo_file($finfo, $f['tmp_name']) : $f['type'];
+        if ($finfo) finfo_close($finfo);
+    }
+    if (!isset($allowed[$mime])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Only JPEG/PNG/WebP/GIF images are allowed']);
+        exit();
+    }
+    $ext = $allowed[$mime];
+
+    $relDir  = '/backend/uploads/journals';
+    $diskDir = realpath(__DIR__ . '/../..') . $relDir;
+    if (!is_dir($diskDir)) @mkdir($diskDir, 0775, true);
+
+    $fileName = $user_id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+    $diskPath = $diskDir . DIRECTORY_SEPARATOR . $fileName;
+    if (!move_uploaded_file($f['tmp_name'], $diskPath)) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Could not save uploaded file']);
+        exit();
+    }
+
+    $publicPath = $relDir . '/' . $fileName;
+    echo json_encode(['success' => true, 'data' => ['image_path' => $publicPath]]);
+    exit();
+}
 
 switch($method) {
     case 'GET':
@@ -98,6 +161,7 @@ switch($method) {
         $journal->title = $data['title'];
         $journal->content = $data['content'];
         $journal->plant_id = isset($data['plant_id']) ? $data['plant_id'] : null;
+        $journal->image_path = isset($data['image_path']) && $data['image_path'] !== '' ? $data['image_path'] : null;
 
         if($journal_id = $journal->create()) {
             // Return the created journal data
@@ -137,6 +201,15 @@ switch($method) {
         $journal->title = $data['title'];
         $journal->content = $data['content'];
         $journal->plant_id = isset($data['plant_id']) ? $data['plant_id'] : null;
+        // image_path: only update if key is present (null = clear photo, omit = keep current)
+        if (array_key_exists('image_path', $data)) {
+            $journal->image_path = $data['image_path'] !== '' ? $data['image_path'] : null;
+        } else {
+            // Pull current value to keep it unchanged
+            $cur = $db->prepare("SELECT image_path FROM journals WHERE id = :id AND user_id = :uid");
+            $cur->execute([':id' => $id, ':uid' => $user_id]);
+            $journal->image_path = $cur->fetchColumn() ?: null;
+        }
 
         if($journal->update()) {
             // Return the updated journal data

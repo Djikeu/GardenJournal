@@ -182,6 +182,17 @@ class ApiService {
         });
     }
 
+    async uploadJournalImage(file) {
+        const user_id = this.getCurrentUserId();
+        const url = `${this.baseURL}/journals.php?user_id=${user_id}&action=upload-image`;
+        const fd = new FormData();
+        fd.append('image', file);
+        const res = await fetch(url, { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Upload failed');
+        return data.data.image_path;
+    }
+
     // Stats
     async getStats() {
         const user_id = this.getCurrentUserId();
@@ -1147,11 +1158,42 @@ class ApiService {
         return this.request(`direct-messages.php?user_id=${user_id}&with=${otherUserId}`);
     }
 
-    async sendDirectMessage(toUserId, content) {
+    async sendDirectMessage(toUserId, content, attachment = null) {
         const user_id = this.getCurrentUserId();
+        const body = { to: toUserId, content };
+        if (attachment) {
+            body.attachment_path = attachment.path;
+            body.attachment_type = attachment.type;
+        }
         return this.request(`direct-messages.php?user_id=${user_id}`, {
             method: 'POST',
-            body: { to: toUserId, content }
+            body,
+        });
+    }
+
+    async uploadMessageAttachment(file) {
+        const user_id = this.getCurrentUserId();
+        const url = `${this.baseURL}/direct-messages.php?user_id=${user_id}&action=upload`;
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await fetch(url, { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Upload failed');
+        return data;
+    }
+
+    async editDirectMessage(messageId, content) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`direct-messages.php?user_id=${user_id}`, {
+            method: 'PATCH',
+            body: { action: 'edit', message_id: messageId, content },
+        });
+    }
+
+    async deleteDirectMessage(messageId) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`direct-messages.php?user_id=${user_id}&message_id=${messageId}`, {
+            method: 'DELETE',
         });
     }
 

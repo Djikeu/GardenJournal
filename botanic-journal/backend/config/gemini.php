@@ -14,7 +14,7 @@
 
 if (!defined('GEMINI_API_KEY')) {
     $envKey = getenv('GEMINI_API_KEY');
-    define('GEMINI_API_KEY', $envKey ?: 'AIzaSyDl2qRV-nWA_eU-IKL2WPtVDSpk8_ysqy4');
+    define('GEMINI_API_KEY', $envKey ?: 'AIzaSyBl9iDLhdn0Kb-nY1n0iKAcadMDhs9uRuY');
 }
 
 if (!defined('GEMINI_MODEL')) {

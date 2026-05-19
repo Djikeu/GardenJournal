@@ -532,25 +532,67 @@
 }
 
 /* ─── Responsive ────────────────────────────────────────────── */
+
+/* Tablet: stack brand on top, more breathing room */
 @media (max-width: 1024px) {
-  .auth-container { grid-template-columns: 1fr; }
-  .auth-brand {
-    padding: 32px 32px 28px;
-    gap: 20px;
+  .auth-container {
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+    overflow-y: auto;
   }
-  .brand-hero h2 { font-size: 1.9rem; }
+  .auth-brand {
+    padding: 28px 32px;
+    min-height: auto;
+    gap: 16px;
+  }
+  .brand-hero { max-width: 100%; }
+  .brand-hero h2 { font-size: 1.85rem; margin-bottom: 12px; }
+  .brand-hero p { font-size: 1rem; }
   .brand-features { display: none; }
   .brand-leaf.l2, .brand-leaf.l3 { display: none; }
-  .auth-panel { padding: 32px 24px; }
+  .brand-leaf.l1 { font-size: 7rem; right: 6%; }
+  .brand-leaf.l4 { display: none; }
+  .auth-panel { padding: 36px 32px 48px; min-height: auto; }
+  .auth-card { max-width: 480px; margin: 0 auto; }
 }
 
-@media (max-width: 540px) {
-  .auth-brand { padding: 24px 22px; }
-  .brand-hero h2 { font-size: 1.55rem; }
-  .brand-hero p { font-size: 0.95rem; }
-  .auth-header h2 { font-size: 1.6rem; }
-  .form-row { grid-template-columns: 1fr; }
-  .auth-panel { padding: 24px 18px 36px; }
+/* Phone: compact everything */
+@media (max-width: 640px) {
+  .auth-brand {
+    padding: 22px 20px 24px;
+  }
+  .brand-top { gap: 10px; }
+  .brand-logo { width: 44px; height: 44px; font-size: 1.3rem; }
+  .brand-title { font-size: 1.1rem; }
+  .brand-title small { font-size: 0.72rem; }
+  .brand-hero h2 { font-size: 1.5rem; line-height: 1.2; margin-bottom: 8px; }
+  .brand-hero p { font-size: 0.9rem; line-height: 1.45; }
+  .brand-leaf.l1 { font-size: 5rem; top: 4%; right: 4%; }
+
+  .auth-header h2 { font-size: 1.45rem; }
+  .auth-header p  { font-size: 0.92rem; }
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+  .form-row .form-group { margin-bottom: 14px; }
+  .form-input { font-size: 1rem; padding: 12px 14px 12px 42px; }
+  .auth-panel { padding: 20px 16px 36px; }
+  .auth-card { padding: 0; }
+  .auth-btn { padding: 13px; font-size: 0.95rem; }
+}
+
+/* Tiny phones (Galaxy Fold etc.) */
+@media (max-width: 380px) {
+  .auth-brand { padding: 18px 16px 20px; }
+  .brand-hero h2 { font-size: 1.3rem; }
+  .auth-panel  { padding: 16px 12px 28px; }
+  .auth-header h2 { font-size: 1.3rem; }
+}
+
+/* Landscape phones: keep things compact vertically */
+@media (max-height: 600px) and (max-width: 1024px) {
+  .auth-brand { padding: 18px 24px; }
+  .brand-hero h2 { font-size: 1.4rem; }
+  .brand-hero p { display: none; }
+  .auth-panel { padding: 20px 24px 32px; }
 }
 
 /* Focus visible for accessibility */
