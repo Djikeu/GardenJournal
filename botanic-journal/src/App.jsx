@@ -29,6 +29,7 @@ import Messages from './components/Social/Messages';
 import CarbonOffset from './components/EcoImpact/CarbonOffset';
 import PlantAnatomy from './components/EcoImpact/PlantAnatomy';
 import LiveGarden from './components/LiveGarden/LiveGarden';
+import PlantDetective from './components/PlantDetective/PlantDetective';
 import { apiService } from './services/api';
 import './index.css';
 import './App.css';
@@ -78,7 +79,7 @@ function App() {
         'discussion-detail', 'suggest-plant', 'my-requests', 'plant-requests', 'admin',
         'plant-doctor', 'plant-chat', 'garden-map',
         'gardeners', 'messages', 'public-profile',
-        'carbon', 'anatomy', 'live-garden'
+        'carbon', 'anatomy', 'live-garden', 'plant-detective'
       ];
 
       if (hash && validViews.includes(hash)) {
@@ -295,6 +296,8 @@ function App() {
           showNotification={showNotification}
           onShowPlantDetails={showPlantDetails}
         />;
+      case 'plant-detective':
+        return <PlantDetective showNotification={showNotification} user={currentUser} />;
       case 'encyclopedia':
         return <PlantEncyclopedia
           showNotification={showNotification}

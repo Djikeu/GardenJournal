@@ -31,6 +31,7 @@ register_shutdown_function(function () {
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/gemini.php';
+require_once __DIR__ . '/../config/http.php';
 
 function respond($success, $message = '', $data = null, $code = 200) {
     ob_clean();
@@ -200,25 +201,7 @@ function callGeminiNote($context) {
 
     $url = GEMINI_API_URL_BASE . '/' . GEMINI_MODEL . ':generateContent?key=' . urlencode(GEMINI_API_KEY);
 
-    $caBundle = ini_get('curl.cainfo') ?: ini_get('openssl.cafile');
-    $hasCaBundle = $caBundle && file_exists($caBundle);
-
-    $ch = curl_init($url);
-    $opts = [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST           => true,
-        CURLOPT_POSTFIELDS     => json_encode($payload),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 45,
-    ];
-    if ($hasCaBundle) $opts[CURLOPT_CAINFO] = $caBundle;
-    else { $opts[CURLOPT_SSL_VERIFYPEER] = false; $opts[CURLOPT_SSL_VERIFYHOST] = 0; }
-    curl_setopt_array($ch, $opts);
-
-    $body = curl_exec($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $cerr = curl_error($ch);
-    curl_close($ch);
+    [$body, $code, $cerr] = httpPostJson($url, $payload, 45);
 
     if ($body === false) throw new Exception('Gemini request failed: ' . $cerr);
     if ($code < 200 || $code >= 300) {

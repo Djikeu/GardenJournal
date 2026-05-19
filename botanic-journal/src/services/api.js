@@ -1001,6 +1001,40 @@ class ApiService {
     }
 
     // ============================================
+    // PLANT DETECTIVE (daily quiz mini-game)
+    // ============================================
+    async getDetectiveSnapshot() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-detective.php?user_id=${user_id}`);
+    }
+
+    async getDetectiveStats() {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-detective.php?user_id=${user_id}&action=stats`);
+    }
+
+    async getDetectiveHistory(limit = 20) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-detective.php?user_id=${user_id}&action=history&limit=${limit}`);
+    }
+
+    async newDetectiveCase(difficulty = null) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-detective.php?user_id=${user_id}&action=new`, {
+            method: 'POST',
+            body: difficulty ? { difficulty } : {},
+        });
+    }
+
+    async submitDetectiveAnswer(caseId, chosenIndex) {
+        const user_id = this.getCurrentUserId();
+        return this.request(`plant-detective.php?user_id=${user_id}&action=submit`, {
+            method: 'POST',
+            body: { case_id: caseId, chosen_index: chosenIndex },
+        });
+    }
+
+    // ============================================
     // DAILY CARE NOTE (Gemini-generated)
     // ============================================
     async getDailyCareNote({ weather = '', temp = '', humidity = '', force = false } = {}) {

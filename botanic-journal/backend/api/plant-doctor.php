@@ -36,6 +36,7 @@ register_shutdown_function(function () {
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/gemini.php';
+require_once __DIR__ . '/../config/http.php';
 
 function respond($success, $message = '', $data = null, $code = 200) {
     ob_clean();
@@ -226,33 +227,7 @@ function callGeminiVision($imagePath, $ext, $userNotes, $plantContext) {
 
     $url = GEMINI_API_URL_BASE . '/' . GEMINI_MODEL . ':generateContent?key=' . urlencode(GEMINI_API_KEY);
 
-    // If the user has a CA bundle configured locally, prefer that.
-    // Otherwise, fall back to disabling peer verification — XAMPP on Windows
-    // ships without a CA bundle and cURL will refuse to talk to HTTPS otherwise.
-    // (Safe in this context: we're calling exactly one known Google endpoint.)
-    $caBundle = ini_get('curl.cainfo') ?: ini_get('openssl.cafile');
-    $hasCaBundle = $caBundle && file_exists($caBundle);
-
-    $ch = curl_init($url);
-    $curlOpts = [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST           => true,
-        CURLOPT_POSTFIELDS     => json_encode($payload),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 60,
-    ];
-    if ($hasCaBundle) {
-        $curlOpts[CURLOPT_CAINFO] = $caBundle;
-    } else {
-        $curlOpts[CURLOPT_SSL_VERIFYPEER] = false;
-        $curlOpts[CURLOPT_SSL_VERIFYHOST] = 0;
-    }
-    curl_setopt_array($ch, $curlOpts);
-
-    $body = curl_exec($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $cerr = curl_error($ch);
-    curl_close($ch);
+    [$body, $code, $cerr] = httpPostJson($url, $payload, 60);
 
     if ($body === false) throw new Exception('Gemini request failed: ' . $cerr);
     if ($code < 200 || $code >= 300) {
