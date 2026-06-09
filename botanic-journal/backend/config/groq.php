@@ -14,8 +14,22 @@
 require_once __DIR__ . '/http.php';
 
 if (!defined('GROQ_API_KEY')) {
-    $envKey = getenv('GROQ_API_KEY');
-    define('GROQ_API_KEY', $envKey ?: '');
+    $key = getenv('GROQ_API_KEY') ?: '';
+    if ($key === '') {
+        // Procitaj kljuc iz backend/.env (ne drzimo ga u kodu)
+        $envFile = __DIR__ . '/../.env';
+        if (is_file($envFile)) {
+            foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+                $line = trim($line);
+                if ($line === '' || $line[0] === '#') continue;
+                if (strpos($line, 'GROQ_API_KEY=') === 0) {
+                    $key = trim(substr($line, 13), " \"'");
+                    break;
+                }
+            }
+        }
+    }
+    define('GROQ_API_KEY', $key);
 }
 
 if (!defined('GROQ_MODEL')) {

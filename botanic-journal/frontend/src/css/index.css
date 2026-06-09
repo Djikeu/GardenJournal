@@ -103,7 +103,6 @@ input[type="search"] {
   color: #4caf50;
 }
 
-/* Fallback kad se slika ne ucita */
 .img-fallback {
   display: flex;
   align-items: center;
