@@ -22,7 +22,6 @@ if (!$current_user_id) {
     exit();
 }
 
-// Verify admin
 $check_stmt = $db->prepare("SELECT role FROM users WHERE id = :id");
 $check_stmt->bindParam(':id', $current_user_id);
 $check_stmt->execute();
@@ -34,32 +33,24 @@ if ($user_role !== 'admin') {
     exit();
 }
 
-// Get stats
-$stats = [];
+function safeCount($db, $sql) {
+    try {
+        $s = $db->query($sql);
+        $r = $s->fetch(PDO::FETCH_ASSOC);
+        return intval($r['count'] ?? 0);
+    } catch (Exception $e) {
+        return 0;
+    }
+}
 
-// Total users
-$stmt = $db->query("SELECT COUNT(*) as count FROM users");
-$stats['totalUsers'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-
-// Total plants
-$stmt = $db->query("SELECT COUNT(*) as count FROM plants");
-$stats['totalPlants'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-
-// Active tasks
-$stmt = $db->query("SELECT COUNT(*) as count FROM tasks WHERE completed = 0");
-$stats['activeTasks'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-
-// Admin users
-$stmt = $db->query("SELECT COUNT(*) as count FROM users WHERE role = 'admin'");
-$stats['adminUsers'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-
-// Total journals
-$stmt = $db->query("SELECT COUNT(*) as count FROM journals");
-$stats['totalJournals'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-
-// Total discussions
-$stmt = $db->query("SELECT COUNT(*) as count FROM community_discussions");
-$stats['totalDiscussions'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+$stats = [
+    'totalUsers'       => safeCount($db, "SELECT COUNT(*) as count FROM users"),
+    'totalPlants'      => safeCount($db, "SELECT COUNT(*) as count FROM plants"),
+    'activeTasks'      => safeCount($db, "SELECT COUNT(*) as count FROM tasks WHERE completed = 0"),
+    'adminUsers'       => safeCount($db, "SELECT COUNT(*) as count FROM users WHERE role = 'admin'"),
+    'totalJournals'    => safeCount($db, "SELECT COUNT(*) as count FROM journals"),
+    'totalDiscussions' => safeCount($db, "SELECT COUNT(*) as count FROM community_discussions"),
+];
 
 echo json_encode(['success' => true, 'data' => $stats]);
 ?>

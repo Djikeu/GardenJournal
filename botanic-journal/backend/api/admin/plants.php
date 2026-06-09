@@ -1,5 +1,4 @@
 <?php
-// Enable error reporting for debugging (remove in production)
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
@@ -16,18 +15,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once '../../config/database.php';
 
-// Session configuration
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_only_cookies', 1);
 ini_set('session.cookie_samesite', 'None');  // Changed from Lax to None
 ini_set('session.cookie_secure', 0);
 session_start();
 
-// Debug: Log session data
 error_log("Session ID: " . session_id());
 error_log("Session Data: " . print_r($_SESSION, true));
 
-// Verify admin authentication
 function checkAdminAuth($db)
 {
     $user_id = $_GET['user_id'] ?? null;
@@ -56,10 +52,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 $database = new Database();
 $db = $database->getConnection();
 
-// Check authentication for all methods
 $admin_id = checkAdminAuth($db);
 
-// Handle _method override for PUT from FormData
 if ($method === 'POST' && isset($_POST['_method']) && $_POST['_method'] === 'PUT') {
     $method = 'PUT';
 }
@@ -115,7 +109,6 @@ switch ($method) {
 
     case 'POST':
         try {
-            // Map form fields to actual DB columns
             $name = $_POST['common_name'] ?? '';
             $species = $_POST['scientific_name'] ?? '';
             $description = $_POST['description'] ?? '';
@@ -124,7 +117,6 @@ switch ($method) {
             $difficulty_raw = $_POST['difficulty_level'] ?? 'beginner';
             $additional_info = $_POST['additional_info'] ?? '';
 
-            // Map growth_rate to match DB enum('Slow','Moderate','Fast')
             $growth_rate_map = [
                 'slow' => 'Slow',
                 'medium' => 'Moderate',
@@ -132,7 +124,6 @@ switch ($method) {
             ];
             $growth_rate = $growth_rate_map[$growth_rate_raw] ?? 'Moderate';
 
-            // Map difficulty to match DB enum('Easy','Moderate','Advanced')
             $difficulty_map = [
                 'beginner' => 'Easy',
                 'intermediate' => 'Moderate',
@@ -140,7 +131,6 @@ switch ($method) {
             ];
             $difficulty = $difficulty_map[$difficulty_raw] ?? 'Easy';
 
-            // Map is_indoor/is_outdoor to DB enum type
             $is_indoor = isset($_POST['is_indoor']) && $_POST['is_indoor'] == '1';
             $is_outdoor = isset($_POST['is_outdoor']) && $_POST['is_outdoor'] == '1';
             if ($is_indoor && $is_outdoor) {
@@ -151,7 +141,6 @@ switch ($method) {
                 $type = 'indoor';
             }
 
-            // Map care instructions JSON to individual columns
             $care = json_decode($care_instructions, true) ?? [];
             $watering_schedule = $care['watering'] ?? '';
             $light_requirements = $care['sunlight'] ?? '';
@@ -162,7 +151,6 @@ switch ($method) {
                 throw new Exception('Plant name is required');
             }
 
-            // Handle image upload
             $main_image = '';
             if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
                 $uploadDir = __DIR__ . '/../../uploads/plants/';
@@ -197,7 +185,6 @@ switch ($method) {
                         throw new Exception('Failed to save uploaded file');
                     }
 
-                    // Only use first image as main image_url
                     if ($i === 0) {
                         $main_image = '/botanic-journal/botanic-journal/backend/uploads/plants/' . $newFileName;
                     }

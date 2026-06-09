@@ -1,0 +1,298 @@
+<?php
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Credentials: true");
+header("Content-Type: application/json; charset=UTF-8");
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once '../../config/database.php';
+
+function sendResponse($success, $message = '', $data = null, $code = 200)
+{
+    http_response_code($code);
+    echo json_encode([
+        'success' => $success,
+        'message' => $message,
+        'data' => $data
+    ]);
+    exit();
+}
+
+try {
+    $database = new Database();
+    $db = $database->getConnection();
+} catch (Exception $e) {
+    sendResponse(false, 'Database connection failed: ' . $e->getMessage(), null, 500);
+}
+
+$method = $_SERVER['REQUEST_METHOD'];
+
+$input = json_decode(file_get_contents("php://input"), true);
+if (json_last_error() !== JSON_ERROR_NONE) {
+    $input = [];
+}
+
+$user_id = null;
+if (isset($_GET['user_id'])) {
+    $user_id = intval($_GET['user_id']);
+} elseif (isset($input['user_id'])) {
+    $user_id = (int)($GLOBALS['AUTH_UID'] ?? $input['user_id']);
+}
+
+if (!$user_id || $user_id <= 0) {
+    sendResponse(false, 'Valid user ID is required', null, 401);
+}
+
+try {
+    switch ($method) {
+        case 'GET':
+            handleGetTasks($db, $user_id);
+            break;
+        case 'POST':
+            handleCreateTask($db, $user_id, $input);
+            break;
+        case 'PATCH':
+            handleUpdateTask($db, $user_id, $input);
+            break;
+        case 'DELETE':
+            handleDeleteTask($db, $user_id);
+            break;
+        default:
+            sendResponse(false, 'Method not allowed', null, 405);
+    }
+} catch (Exception $e) {
+    sendResponse(false, 'Server error: ' . $e->getMessage(), null, 500);
+}
+
+function handleGetTasks($db, $user_id)
+{
+    $task_id = isset($_GET['id']) ? intval($_GET['id']) : null;
+
+    if ($task_id) {
+        $stmt = $db->prepare("
+            SELECT t.*, p.name as plant_name, p.image_url as plant_image
+            FROM tasks t 
+            LEFT JOIN plants p ON t.plant_id = p.id 
+            WHERE t.id = :id AND t.user_id = :user_id
+        ");
+        $stmt->bindParam(':id', $task_id);
+        $stmt->bindParam(':user_id', $user_id);
+    } else {
+        $stmt = $db->prepare("
+            SELECT t.*, p.name as plant_name, p.image_url as plant_image
+            FROM tasks t 
+            LEFT JOIN plants p ON t.plant_id = p.id 
+            WHERE t.user_id = :user_id 
+            ORDER BY 
+                CASE 
+                    WHEN t.completed = 1 THEN 2
+                    WHEN t.priority = 'high' THEN 0
+                    WHEN t.priority = 'medium' THEN 1
+                    ELSE 2
+                END,
+                t.due_date ASC,
+                t.created_at DESC
+        ");
+        $stmt->bindParam(':user_id', $user_id);
+    }
+
+    $stmt->execute();
+    $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    sendResponse(true, 'Tasks retrieved successfully', $tasks);
+}
+
+function handleCreateTask($db, $user_id, $data)
+{
+    if (!isset($data['title']) || empty(trim($data['title']))) {
+        sendResponse(false, 'Task title is required', null, 400);
+    }
+
+    $title = trim($data['title']);
+    $description = isset($data['description']) ? trim($data['description']) : '';
+    $plant_id = isset($data['plant_id']) && !empty($data['plant_id']) ? intval($data['plant_id']) : null;
+    $type = isset($data['type']) ? $data['type'] : 'other';
+    $priority = isset($data['priority']) ? $data['priority'] : 'medium';
+    $due_date = isset($data['due_date']) ? $data['due_date'] : null;
+    $progress = isset($data['progress']) ? intval($data['progress']) : 0;
+    $completed = isset($data['completed']) ? (bool)$data['completed'] : false;
+
+    if ($plant_id) {
+        $checkStmt = $db->prepare("SELECT id FROM plants WHERE id = :plant_id AND user_id = :user_id");
+        $checkStmt->bindParam(':plant_id', $plant_id);
+        $checkStmt->bindParam(':user_id', $user_id);
+        $checkStmt->execute();
+
+        if (!$checkStmt->fetch()) {
+            sendResponse(false, 'Plant not found or access denied', null, 404);
+        }
+    }
+
+    $stmt = $db->prepare("
+        INSERT INTO tasks 
+        (user_id, plant_id, title, description, type, priority, due_date, progress, completed, created_at, updated_at) 
+        VALUES 
+        (:user_id, :plant_id, :title, :description, :type, :priority, :due_date, :progress, :completed, NOW(), NOW())
+    ");
+
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->bindParam(':plant_id', $plant_id);
+    $stmt->bindParam(':title', $title);
+    $stmt->bindParam(':description', $description);
+    $stmt->bindParam(':type', $type);
+    $stmt->bindParam(':priority', $priority);
+    $stmt->bindParam(':due_date', $due_date);
+    $stmt->bindParam(':progress', $progress, PDO::PARAM_INT);
+    $stmt->bindParam(':completed', $completed, PDO::PARAM_BOOL);
+
+    if ($stmt->execute()) {
+        $task_id = $db->lastInsertId();
+
+        $taskStmt = $db->prepare("
+            SELECT t.*, p.name as plant_name, p.image_url as plant_image
+            FROM tasks t 
+            LEFT JOIN plants p ON t.plant_id = p.id 
+            WHERE t.id = :id
+        ");
+        $taskStmt->bindParam(':id', $task_id);
+        $taskStmt->execute();
+        $task = $taskStmt->fetch(PDO::FETCH_ASSOC);
+
+        sendResponse(true, 'Task created successfully', $task, 201);
+    } else {
+        sendResponse(false, 'Failed to create task: ' . implode(', ', $stmt->errorInfo()), null, 500);
+    }
+
+    if (isset($data['reminder_minutes']) && isset($data['task_date'])) {
+        $reminder_minutes = intval($data['reminder_minutes']);
+        $task_date = $data['task_date'];
+
+        if ($reminder_minutes > 0) {
+            $notify_at = date(
+                "Y-m-d H:i:s",
+                strtotime($task_date . " -{$reminder_minutes} minutes")
+            );
+
+            $notif_stmt = $db->prepare("
+            INSERT INTO notifications (user_id, task_id, notify_at)
+            VALUES (:user_id, :task_id, :notify_at)
+        ");
+            $notify_stmt->bindParam(':user_id', $user_id);
+            $notify_stmt->bindParam(':task_id', $task_id);
+            $notify_stmt->bindParam(':notify_at', $notify_at);
+            $notify_stmt->execute();
+        }
+    }
+}
+
+function handleUpdateTask($db, $user_id, $data)
+{
+    if (!isset($data['id'])) {
+        sendResponse(false, 'Task ID is required', null, 400);
+    }
+
+    $task_id = intval($data['id']);
+
+    $checkStmt = $db->prepare("SELECT id FROM tasks WHERE id = :id AND user_id = :user_id");
+    $checkStmt->bindParam(':id', $task_id);
+    $checkStmt->bindParam(':user_id', $user_id);
+    $checkStmt->execute();
+
+    if (!$checkStmt->fetch()) {
+        sendResponse(false, 'Task not found or access denied', null, 404);
+    }
+
+    $updates = [];
+    $params = [':id' => $task_id];
+
+    $allowedFields = [
+        'title',
+        'description',
+        'plant_id',
+        'type',
+        'priority',
+        'due_date',
+        'completed',
+        'progress'
+    ];
+
+    foreach ($allowedFields as $field) {
+        if (isset($data[$field])) {
+            $value = $data[$field];
+            if ($field === 'completed') {
+                $value = ($value === true || $value === 1 || $value === '1' || $value === 'true') ? 1 : 0;
+            }
+            if ($field === 'plant_id' && ($value === '' || $value === 0 || $value === '0')) {
+                $value = null;
+            }
+            $updates[] = "$field = :$field";
+            $params[":$field"] = $value;
+        }
+    }
+
+    if (isset($data['completed']) && !isset($data['progress'])) {
+        $completed_val = ($data['completed'] === true || $data['completed'] === 1 || $data['completed'] === '1' || $data['completed'] === 'true') ? 1 : 0;
+        $updates[] = "progress = :progress";
+        $params[":progress"] = $completed_val ? 100 : 0;
+    }
+
+    if (empty($updates)) {
+        sendResponse(false, 'No valid fields to update', null, 400);
+    }
+
+    $updates[] = "updated_at = NOW()";
+
+    $sql = "UPDATE tasks SET " . implode(', ', $updates) . " WHERE id = :id";
+    $stmt = $db->prepare($sql);
+
+    if ($stmt->execute($params)) {
+        $taskStmt = $db->prepare("
+            SELECT t.*, p.name as plant_name, p.image_url as plant_image
+            FROM tasks t 
+            LEFT JOIN plants p ON t.plant_id = p.id 
+            WHERE t.id = :id
+        ");
+        $taskStmt->bindParam(':id', $task_id);
+        $taskStmt->execute();
+        $task = $taskStmt->fetch(PDO::FETCH_ASSOC);
+
+        sendResponse(true, 'Task updated successfully', $task);
+    } else {
+        sendResponse(false, 'Failed to update task: ' . implode(', ', $stmt->errorInfo()));
+    }
+}
+
+function handleDeleteTask($db, $user_id)
+{
+    $task_id = isset($_GET['id']) ? intval($_GET['id']) : null;
+
+    if (!$task_id) {
+        sendResponse(false, 'Task ID is required', null, 400);
+    }
+
+    $checkStmt = $db->prepare("SELECT id FROM tasks WHERE id = :id AND user_id = :user_id");
+    $checkStmt->bindParam(':id', $task_id);
+    $checkStmt->bindParam(':user_id', $user_id);
+    $checkStmt->execute();
+
+    if (!$checkStmt->fetch()) {
+        sendResponse(false, 'Task not found or access denied', null, 404);
+    }
+
+    $stmt = $db->prepare("DELETE FROM tasks WHERE id = :id");
+    $stmt->bindParam(':id', $task_id);
+
+    if ($stmt->execute()) {
+        sendResponse(true, 'Task deleted successfully');
+    } else {
+        sendResponse(false, 'Failed to delete task');
+    }
+}

@@ -2,28 +2,26 @@
 /**
  * Google Gemini API configuration.
  *
- * SETUP (free, ~30 seconds, no credit card):
- *   1. Visit https://aistudio.google.com/apikey
- *   2. Click "Create API key" (sign in with any Google account)
- *   3. Copy the key and paste it below in place of the placeholder
- *   4. (Recommended) add this file to .gitignore so the key isn't committed
+ * SETUP:
+ * 1. Get an API key from https://aistudio.google.com/app/apikey
+ * 2. Add it to your local .env file as GEMINI_API_KEY=your_key
+ * 3. This file reads from the environment so the key isn't committed.
  *
- * Free tier limits (as of 2026): 15 requests/minute, 1,500 requests/day.
- * Plenty for personal use of Plant Doctor.
+ * The key is read once and exposed via the GEMINI_API_KEY constant.
  */
 
 if (!defined('GEMINI_API_KEY')) {
+    // Prefer environment variable; fall back to empty string if not set.
     $envKey = getenv('GEMINI_API_KEY');
-    define('GEMINI_API_KEY', $envKey ?: 'AIzaSyBl9iDLhdn0Kb-nY1n0iKAcadMDhs9uRuY');
+    define('GEMINI_API_KEY', $envKey ?: ''); 
 }
 
 if (!defined('GEMINI_MODEL')) {
-    // gemini-2.0-flash is the free, fast, vision-capable model.
-    // Alternatives: 'gemini-1.5-flash' (older but stable), 'gemini-1.5-pro' (higher quality).
-    define('GEMINI_MODEL', 'gemini-2.5-flash');
+    // Fast, multimodal Gemini model. Change if you prefer another (e.g. gemini-2.0-pro).
+    define('GEMINI_MODEL', 'gemini-2.0-flash');
 }
 
 if (!defined('GEMINI_API_URL_BASE')) {
+    // Model + ":generateContent?key=..." get appended by the calling code.
     define('GEMINI_API_URL_BASE', 'https://generativelanguage.googleapis.com/v1beta/models');
 }
-   

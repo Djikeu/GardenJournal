@@ -1,6 +1,6 @@
 <?php
 /**
- * Shared HTTP helper used by all Gemini-calling endpoints.
+ * Shared HTTP helper used by all AI-calling endpoints.
  *
  * Prefers curl if loaded; falls back to file_get_contents + stream_context
  * when the curl extension isn't available (or the XAMPP php_curl.dll has a
@@ -10,8 +10,10 @@
  */
 
 if (!function_exists('httpPostJson')) {
-    function httpPostJson($url, $payload, $timeout = 60) {
+    function httpPostJson($url, $payload, $timeout = 60, $extraHeaders = []) {
         $json = json_encode($payload);
+        // Always send JSON content-type; callers can add auth headers (e.g. Bearer token).
+        $headers = array_merge(['Content-Type: application/json'], (array) $extraHeaders);
 
         // ── Prefer curl when it actually works ────────────────────────────
         if (function_exists('curl_init')) {
@@ -23,7 +25,7 @@ if (!function_exists('httpPostJson')) {
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_POST           => true,
                 CURLOPT_POSTFIELDS     => $json,
-                CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+                CURLOPT_HTTPHEADER     => $headers,
                 CURLOPT_TIMEOUT        => $timeout,
             ];
             if ($hasCaBundle) {
@@ -49,7 +51,7 @@ if (!function_exists('httpPostJson')) {
         $context = stream_context_create([
             'http' => [
                 'method'        => 'POST',
-                'header'        => "Content-Type: application/json\r\n",
+                'header'        => implode("\r\n", $headers) . "\r\n",
                 'content'       => $json,
                 'timeout'       => $timeout,
                 'ignore_errors' => true,

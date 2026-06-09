@@ -1,0 +1,60 @@
+<?php
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Methods: GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Content-Type: application/json; charset=UTF-8");
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+require_once '../../config/database.php';
+
+$database = new Database();
+$db = $database->getConnection();
+
+$current_user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+
+if (!$current_user_id) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Authentication required']);
+    exit();
+}
+
+// Verify admin
+$check_stmt = $db->prepare("SELECT role FROM users WHERE id = :id");
+$check_stmt->bindParam(':id', $current_user_id);
+$check_stmt->execute();
+$user_role = $check_stmt->fetchColumn();
+
+if ($user_role !== 'admin') {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Admin access required']);
+    exit();
+}
+
+// Get stats
+// Count helper — returns 0 if a table doesn't exist yet (e.g. community tables
+// are created lazily). Prevents one missing table from 500-ing the whole panel.
+function safeCount($db, $sql) {
+    try {
+        $s = $db->query($sql);
+        $r = $s->fetch(PDO::FETCH_ASSOC);
+        return intval($r['count'] ?? 0);
+    } catch (Exception $e) {
+        return 0;
+    }
+}
+
+$stats = [
+    'totalUsers'       => safeCount($db, "SELECT COUNT(*) as count FROM users"),
+    'totalPlants'      => safeCount($db, "SELECT COUNT(*) as count FROM plants"),
+    'activeTasks'      => safeCount($db, "SELECT COUNT(*) as count FROM tasks WHERE completed = 0"),
+    'adminUsers'       => safeCount($db, "SELECT COUNT(*) as count FROM users WHERE role = 'admin'"),
+    'totalJournals'    => safeCount($db, "SELECT COUNT(*) as count FROM journals"),
+    'totalDiscussions' => safeCount($db, "SELECT COUNT(*) as count FROM community_discussions"),
+];
+
+echo json_encode(['success' => true, 'data' => $stats]);
+?

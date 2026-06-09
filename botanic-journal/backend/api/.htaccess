@@ -1,0 +1,10 @@
+# Run the JWT auth middleware before every API script.
+php_value auto_prepend_file "C:/xampp/htdocs/botanic-journal/botanic-journal/backend/config/auth_bootstrap.php"
+
+# Make sure the Authorization header reaches PHP (Apache sometimes strips it).
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>

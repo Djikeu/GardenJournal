@@ -25,11 +25,11 @@ switch($method) {
     case 'GET':
         $id = isset($_GET['id']) ? intval($_GET['id']) : null;
         $user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : null;
-       
+
         if ($id) {
             $discussion->id = $id;
             $discussion_data = $discussion->readOneWithUser($user_id);
-           
+
             if ($discussion_data) {
                 $discussion->incrementViews();
                 echo json_encode([
@@ -48,11 +48,11 @@ switch($method) {
             $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
             $category = isset($_GET['category']) && $_GET['category'] !== 'All' && $_GET['category'] !== 'null' ? $_GET['category'] : null;
             $search = isset($_GET['search']) && $_GET['search'] !== '' ? $_GET['search'] : null;
-           
+
             try {
                 $discussions = $discussion->readAll($page, $limit, $category, $search);
                 $total = $discussion->getTotalCount($category, $search);
-               
+
                 echo json_encode([
                     'success' => true,
                     'discussions' => $discussions,
@@ -76,7 +76,7 @@ switch($method) {
     case 'POST':
         $rawInput = file_get_contents("php://input");
         $data = json_decode($rawInput, true);
-       
+
         if (!isset($data['user_id']) || !isset($data['title']) || !isset($data['content'])) {
             http_response_code(400);
             echo json_encode([
@@ -85,16 +85,16 @@ switch($method) {
             ]);
             exit();
         }
-       
-        $discussion->user_id = intval($data['user_id']);
+
+        $discussion->user_id = (int)($GLOBALS['AUTH_UID'] ?? $data['user_id']);
         $discussion->title = trim($data['title']);
         $discussion->content = trim($data['content']);
         $discussion->category = isset($data['category']) ? $data['category'] : 'General';
-       
+
         if($discussion_id = $discussion->create()) {
             $discussion->id = $discussion_id;
             $createdDiscussion = $discussion->readOne();
-           
+
             http_response_code(201);
             echo json_encode([
                 'success' => true,

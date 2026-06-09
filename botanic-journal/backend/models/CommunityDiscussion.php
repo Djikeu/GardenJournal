@@ -29,33 +29,32 @@ class CommunityDiscussion
         $this->conn = $db;
     }
 
-    // Create new discussion
     public function create()
     {
         if (empty($this->user_id) || empty($this->title) || empty($this->content)) {
             error_log("Missing required fields: user_id={$this->user_id}, title={$this->title}");
             return false;
         }
-        
+
         $checkUser = $this->conn->prepare("SELECT id FROM users WHERE id = ?");
         $checkUser->execute([$this->user_id]);
         if (!$checkUser->fetch()) {
             error_log("User ID {$this->user_id} does not exist");
             return false;
         }
-        
+
         $query = "INSERT INTO " . $this->table_name . "
              (user_id, title, content, category)
              VALUES
              (:user_id, :title, :content, :category)";
-        
+
         $stmt = $this->conn->prepare($query);
-        
+
         $stmt->bindParam(":user_id", $this->user_id);
         $stmt->bindParam(":title", $this->title);
         $stmt->bindParam(":content", $this->content);
         $stmt->bindParam(":category", $this->category);
-        
+
         try {
             if ($stmt->execute()) {
                 $lastId = $this->conn->lastInsertId();
@@ -72,7 +71,6 @@ class CommunityDiscussion
         }
     }
 
-    // Read discussions with filters
     public function readAll($page = 1, $limit = 10, $category = null, $search = null)
     {
         $offset = ($page - 1) * $limit;
@@ -111,7 +109,6 @@ class CommunityDiscussion
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Get total count
     public function getTotalCount($category = null, $search = null)
     {
         $query = "SELECT COUNT(*) as total FROM " . $this->table_name . " WHERE 1=1";
@@ -139,7 +136,6 @@ class CommunityDiscussion
         return $result['total'];
     }
 
-    // Read single discussion with user interaction
     public function readOneWithUser($user_id = null)
     {
         $query = "SELECT d.*, u.name as author_name, u.avatar as author_avatar
@@ -150,19 +146,18 @@ class CommunityDiscussion
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(1, $this->id);
         $stmt->execute();
-        
+
         $discussion = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if ($discussion && $user_id) {
             $likeCheck = $this->conn->prepare("SELECT id FROM discussion_likes WHERE discussion_id = ? AND user_id = ?");
             $likeCheck->execute([$this->id, $user_id]);
             $discussion['user_has_liked'] = $likeCheck->fetch() ? true : false;
         }
-        
+
         return $discussion;
     }
 
-    // Read single discussion
     public function readOne()
     {
         $query = "SELECT d.*, u.name as author_name, u.avatar as author_avatar
@@ -177,7 +172,6 @@ class CommunityDiscussion
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Update view count
     public function incrementViews()
     {
         $query = "UPDATE " . $this->table_name . "
@@ -189,7 +183,6 @@ class CommunityDiscussion
         return $stmt->execute();
     }
 
-    // Update reply count
     public function updateReplyCount()
     {
         $query = "UPDATE " . $this->table_name . " d
@@ -206,40 +199,38 @@ class CommunityDiscussion
         return $stmt->execute();
     }
 
-    // Like a discussion
     public function like($user_id)
     {
         $check = $this->conn->prepare("SELECT id FROM discussion_likes WHERE discussion_id = ? AND user_id = ?");
         $check->execute([$this->id, $user_id]);
-        
+
         if ($check->fetch()) {
             return false;
         }
-        
+
         $query = "INSERT INTO discussion_likes (discussion_id, user_id) VALUES (?, ?)";
         $stmt = $this->conn->prepare($query);
-        
+
         if ($stmt->execute([$this->id, $user_id])) {
             $update = $this->conn->prepare("UPDATE " . $this->table_name . " SET likes = (SELECT COUNT(*) FROM discussion_likes WHERE discussion_id = ?) WHERE id = ?");
             $update->execute([$this->id, $this->id]);
             return true;
         }
-        
+
         return false;
     }
 
-    // Unlike a discussion
     public function unlike($user_id)
     {
         $query = "DELETE FROM discussion_likes WHERE discussion_id = ? AND user_id = ?";
         $stmt = $this->conn->prepare($query);
-        
+
         if ($stmt->execute([$this->id, $user_id])) {
             $update = $this->conn->prepare("UPDATE " . $this->table_name . " SET likes = (SELECT COUNT(*) FROM discussion_likes WHERE discussion_id = ?) WHERE id = ?");
             $update->execute([$this->id, $this->id]);
             return true;
         }
-        
+
         return false;
     }
 }

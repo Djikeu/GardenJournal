@@ -27,7 +27,7 @@ switch($method) {
             ]);
         }
         break;
-        
+
     default:
         http_response_code(405);
         echo json_encode([

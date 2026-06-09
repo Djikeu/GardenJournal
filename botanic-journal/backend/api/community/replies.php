@@ -18,7 +18,7 @@ switch($method) {
     case 'GET':
         $discussion_id = isset($_GET['discussion_id']) ? intval($_GET['discussion_id']) : null;
         $user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : null;
-       
+
         if (!$discussion_id) {
             http_response_code(400);
             echo json_encode([
@@ -27,14 +27,14 @@ switch($method) {
             ]);
             exit();
         }
-       
+
         $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
         $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 20;
-       
+
         try {
             $replies = $reply->readByDiscussionWithUser($discussion_id, $page, $limit, $user_id);
             $total = $reply->getTotalCount($discussion_id);
-           
+
             echo json_encode([
                 'success' => true,
                 'replies' => $replies,
@@ -56,7 +56,7 @@ switch($method) {
 
     case 'POST':
         $data = json_decode(file_get_contents("php://input"), true);
-       
+
         if (!isset($data['discussion_id']) || !isset($data['user_id']) || !isset($data['content'])) {
             http_response_code(400);
             echo json_encode([
@@ -65,18 +65,18 @@ switch($method) {
             ]);
             exit();
         }
-       
+
         $reply->discussion_id = $data['discussion_id'];
         $reply->user_id = $data['user_id'];
         $reply->content = $data['content'];
-       
+
         if($reply_id = $reply->create()) {
             $discussion->id = $data['discussion_id'];
             $discussion->updateReplyCount();
-           
+
             $reply->id = $reply_id;
             $reply_data = $reply->readOne();
-           
+
             echo json_encode([
                 'success' => true,
                 'message' => 'Reply posted successfully',

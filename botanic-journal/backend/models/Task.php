@@ -28,7 +28,7 @@ class Task {
                  LEFT JOIN plants p ON t.plant_id = p.id 
                  WHERE t.user_id = :user_id 
                  ORDER BY t.priority DESC, t.due_date ASC";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $this->user_id);
         $stmt->execute();

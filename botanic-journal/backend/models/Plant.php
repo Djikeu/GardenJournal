@@ -1,6 +1,7 @@
 <?php
 namespace BotanicJournal;
 
+// Model za dohvat i spremanje biljaka u bazi
 class Plant {
     private $conn;
     private $table = 'plants';
@@ -41,11 +42,9 @@ class Plant {
 
         $stmt = $this->conn->prepare($query);
 
-        // Clean data
         $this->name = htmlspecialchars(strip_tags($this->name));
         $this->species = htmlspecialchars(strip_tags($this->species));
 
-        // Bind data
         $stmt->bindParam(':user_id', $this->user_id);
         $stmt->bindParam(':name', $this->name);
         $stmt->bindParam(':species', $this->species);

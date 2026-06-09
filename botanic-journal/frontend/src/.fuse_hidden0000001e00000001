@@ -1,0 +1,2361 @@
+/* ================================================================
+   Dark Mode — kicks in when <html data-theme="dark"> is set.
+   Single override file: leaves brand greens alone, swaps neutral
+   surfaces, text, borders, and inputs.
+================================================================ */
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Surface tokens — refined for better contrast and depth */
+  --bj-bg:           #0a0f1c;   /* page background — slightly deeper */
+  --bj-surface:      #14202f;   /* card background */
+  --bj-surface-2:    #1e2d40;   /* nested / hover */
+  --bj-surface-3:    #2a3b53;   /* deeper */
+  --bj-border:       #2a3b53;
+  --bj-border-soft:  #1a2536;
+  --bj-text:         #f1f5f9;   /* primary text — brighter */
+  --bj-text-muted:   #cbd5e1;
+  --bj-text-subtle:  #94a3b8;
+  --bj-input-bg:     #0a0f1c;
+}
+
+/* ── Global surfaces ─────────────────────────────────── */
+[data-theme="dark"],
+[data-theme="dark"] body,
+[data-theme="dark"] .container,
+[data-theme="dark"] .app,
+[data-theme="dark"] .main-content {
+  background: #0a0f1c !important;
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] body { background: #0a0f1c !important; }
+
+/* Containers with hardcoded light backgrounds */
+[data-theme="dark"] .my-plants-container,
+[data-theme="dark"] .plant-journal-container,
+[data-theme="dark"] .care-tasks,
+[data-theme="dark"] .plant-encyclopedia,
+[data-theme="dark"] .pd-container,
+[data-theme="dark"] .pc-container,
+[data-theme="dark"] .gm-container,
+[data-theme="dark"] .profile-container-modern,
+[data-theme="dark"] .plant-detail-wrapper {
+  background: #0a0f1c !important;
+}
+
+/* ── Sidebar ─────────────────────────────────────────── */
+[data-theme="dark"] .sidebar,
+[data-theme="dark"] .mobile-drawer {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  color: #e5e7eb;
+}
+[data-theme="dark"] .logo-text h1,
+[data-theme="dark"] .logo-text p,
+[data-theme="dark"] .nav-title {
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .nav-links-item {
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .nav-links-item:hover {
+  background: #14202f !important;
+  color: #ffffff !important;
+}
+[data-theme="dark"] .nav-links-item.active {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #d1fae5 !important;
+}
+[data-theme="dark"] .bottom-nav,
+[data-theme="dark"] .bottom-tab {
+  background: #111827 !important;
+  color: #cbd5e1;
+}
+[data-theme="dark"] .bottom-tab.active { color: #4caf50; }
+
+/* ── Header ──────────────────────────────────────────── */
+[data-theme="dark"] .dashboard-header {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+[data-theme="dark"] .greeting-title,
+[data-theme="dark"] .user-fullname { color: #f3f4f6 !important; }
+[data-theme="dark"] .greeting-details,
+[data-theme="dark"] .user-meta-info,
+[data-theme="dark"] .date-info,
+[data-theme="dark"] .time-info { color: #cbd5e1 !important; }
+[data-theme="dark"] .quick-stat {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .user-profile-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .user-profile-card:hover {
+  background: #1e2d40 !important;
+}
+
+/* ── Cards & generic surfaces ───────────────────────── */
+[data-theme="dark"] .card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .stat-card-compact,
+[data-theme="dark"] .stat-card-modern,
+[data-theme="dark"] .plant-card,
+[data-theme="dark"] .plant-card-enhanced,
+[data-theme="dark"] .plant-card-inner,
+[data-theme="dark"] .task-card,
+[data-theme="dark"] .journal-card,
+[data-theme="dark"] .journal-form-card,
+[data-theme="dark"] .journal-entries-card,
+[data-theme="dark"] .post-item,
+[data-theme="dark"] .health-monitor-card,
+[data-theme="dark"] .spotlight-card,
+[data-theme="dark"] .tasks-card,
+[data-theme="dark"] .wisdom-card,
+[data-theme="dark"] .community-pulse,
+[data-theme="dark"] .growth-summary-card,
+[data-theme="dark"] .pd-card,
+[data-theme="dark"] .pc-panel,
+[data-theme="dark"] .gm-canvas-header,
+[data-theme="dark"] .gm-palette,
+[data-theme="dark"] .gm-zones,
+[data-theme="dark"] .profile-card-modern,
+[data-theme="dark"] .activity-card-modern,
+[data-theme="dark"] .empty-state,
+[data-theme="dark"] .no-results,
+[data-theme="dark"] .plant-detail-container {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Slightly different shade for "inner" or nested cards */
+[data-theme="dark"] .task-card-inner,
+[data-theme="dark"] .plant-card-content,
+[data-theme="dark"] .card-body,
+[data-theme="dark"] .stats-grid-compact,
+[data-theme="dark"] .detail-card,
+[data-theme="dark"] .related-plant-card {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+}
+
+/* Headings & body text */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 { color: #f3f4f6; }
+
+[data-theme="dark"] p,
+[data-theme="dark"] li,
+[data-theme="dark"] span,
+[data-theme="dark"] label {
+  color: inherit;
+}
+
+[data-theme="dark"] .task-title,
+[data-theme="dark"] .plant-name,
+[data-theme="dark"] .journal-title,
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .stat-number,
+[data-theme="dark"] .stat-value,
+[data-theme="dark"] .stat-value-compact,
+[data-theme="dark"] .stat-number-modern { color: #f3f4f6 !important; }
+
+[data-theme="dark"] .task-description,
+[data-theme="dark"] .task-plant,
+[data-theme="dark"] .plant-species,
+[data-theme="dark"] .plant-description,
+[data-theme="dark"] .journal-text,
+[data-theme="dark"] .journal-date,
+[data-theme="dark"] .stat-label,
+[data-theme="dark"] .stat-label-compact,
+[data-theme="dark"] .stat-label-modern,
+[data-theme="dark"] .stat-trend-compact,
+[data-theme="dark"] .meta-label,
+[data-theme="dark"] .meta-value,
+[data-theme="dark"] .info-label,
+[data-theme="dark"] .info-value { color: #cbd5e1 !important; }
+
+[data-theme="dark"] .text-counter,
+[data-theme="dark"] .hero-subtitle,
+[data-theme="dark"] .post-time,
+[data-theme="dark"] .progress-text { color: #94a3b8 !important; }
+
+/* Card headers */
+[data-theme="dark"] .card-header {
+  border-bottom-color: #334155 !important;
+}
+
+/* ── Inputs / forms ──────────────────────────────────── */
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] input[type="search"],
+[data-theme="dark"] input[type="date"],
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] textarea,
+[data-theme="dark"] select,
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .form-textarea,
+[data-theme="dark"] .search-input,
+[data-theme="dark"] .search-input-enhanced,
+[data-theme="dark"] .sort-select {
+  background: #0a0f1c !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .form-select:focus,
+[data-theme="dark"] .form-textarea:focus {
+  border-color: #4caf50 !important;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.18) !important;
+}
+[data-theme="dark"] ::placeholder { color: #64748b !important; }
+
+[data-theme="dark"] .search-box,
+[data-theme="dark"] .search-box-enhanced {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .filter-section,
+[data-theme="dark"] .controls-section,
+[data-theme="dark"] .controls-row,
+[data-theme="dark"] .tasks-controls,
+[data-theme="dark"] .encyclopedia-controls,
+[data-theme="dark"] .journal-controls {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .filter-chip {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .filter-chip:hover {
+  background: #334155 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Buttons (only the neutral ones — leave brand greens alone) */
+[data-theme="dark"] .btn-outline,
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark"] .pc-clear-btn,
+[data-theme="dark"] .pd-icon-btn,
+[data-theme="dark"] .card-btn,
+[data-theme="dark"] .btn-icon,
+[data-theme="dark"] .view-btn {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .btn-outline:hover,
+[data-theme="dark"] .btn-secondary:hover,
+[data-theme="dark"] .pd-icon-btn:hover,
+[data-theme="dark"] .card-btn:hover,
+[data-theme="dark"] .btn-icon:hover,
+[data-theme="dark"] .view-btn:hover {
+  background: #334155 !important;
+  color: #f3f4f6 !important;
+}
+[data-theme="dark"] .view-btn.active {
+  background: linear-gradient(135deg, #2e7d32, #4caf50) !important;
+  color: white !important;
+}
+
+/* ── Modals ──────────────────────────────────────────── */
+[data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.7) !important; }
+[data-theme="dark"] .modal-content {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #334155 !important;
+}
+[data-theme="dark"] .modal-header {
+  border-bottom-color: #334155 !important;
+}
+[data-theme="dark"] .modal-header h3 { color: #f3f4f6 !important; }
+[data-theme="dark"] .modal-close {
+  background: #1e2d40 !important;
+  color: #cbd5e1 !important;
+}
+
+/* ── Notifications ───────────────────────────────────── */
+[data-theme="dark"] .notification {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #334155 !important;
+}
+
+/* ── Plant Doctor ────────────────────────────────────── */
+[data-theme="dark"] .pd-dropzone {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .pd-dropzone:hover {
+  background: #14202f !important;
+  border-color: #4caf50 !important;
+}
+[data-theme="dark"] .pd-result {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .pd-recs li {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  border-left-color: #4caf50 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .pd-history-row:hover { background: #1e2d40 !important; }
+[data-theme="dark"] .pd-history-item.active .pd-history-row { background: rgba(76, 175, 80, 0.12) !important; }
+[data-theme="dark"] .pd-history-detail { background: #1a2436 !important; border-top-color: #334155 !important; }
+[data-theme="dark"] .pd-notes-block p {
+  background: rgba(234, 179, 8, 0.15) !important;
+  color: #fde68a !important;
+}
+
+/* ── Plant Chat ──────────────────────────────────────── */
+[data-theme="dark"] .pc-messages {
+  background: linear-gradient(180deg, #1a2436 0%, #1e293b 100%) !important;
+}
+[data-theme="dark"] .pc-assistant .pc-bubble {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .pc-suggestion {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .pc-suggestion:hover {
+  background: rgba(76, 175, 80, 0.15) !important;
+  border-color: #4caf50 !important;
+}
+[data-theme="dark"] .pc-input-row { background: #14202f !important; border-top-color: #334155 !important; }
+[data-theme="dark"] .pc-input { background: #0a0f1c !important; border-color: #2a3b53 !important; color: #f1f5f9 !important; }
+
+/* Plant Chat sessions sidebar */
+[data-theme="dark"] .pc-sidebar { background: #14202f !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .pc-conv-item { background: #1e2d40 !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .pc-conv-item:hover { background: rgba(76, 175, 80, 0.12) !important; border-color: #4caf50 !important; }
+[data-theme="dark"] .pc-conv-item.active { background: rgba(76, 175, 80, 0.20) !important; border-color: #4caf50 !important; }
+[data-theme="dark"] .pc-conv-title { color: #f1f5f9 !important; }
+[data-theme="dark"] .pc-conv-preview, [data-theme="dark"] .pc-conv-time { color: #94a3b8 !important; }
+[data-theme="dark"] .pc-conv-act { background: #14202f !important; border-color: #2a3b53 !important; color: #cbd5e1 !important; }
+[data-theme="dark"] .pc-conv-empty p { color: #cbd5e1 !important; }
+[data-theme="dark"] .pc-conv-empty small { color: #94a3b8 !important; }
+[data-theme="dark"] .pc-conv-rename { background: #0a0f1c !important; color: #f1f5f9 !important; }
+[data-theme="dark"] .pc-panel-head { background: #1e2d40 !important; border-bottom-color: #2a3b53 !important; color: #f1f5f9 !important; }
+
+/* ── Garden Map ──────────────────────────────────────── */
+[data-theme="dark"] .gm-zone-tab {
+  background: #1e2d40 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .gm-zone-tab:hover { background: #334155 !important; }
+[data-theme="dark"] .gm-palette-item {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .gm-palette-item:hover {
+  background: rgba(76, 175, 80, 0.12) !important;
+  border-color: #4caf50 !important;
+}
+[data-theme="dark"] .gm-palette-search input {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* The zone canvases — keep their playful tints but darken */
+[data-theme="dark"] .gm-canvas { border-color: #2a3b53 !important; filter: brightness(0.7); }
+
+/* ── Tables / forum / discussions ────────────────────── */
+[data-theme="dark"] table {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] th { background: #1e2d40 !important; }
+[data-theme="dark"] td { border-color: #2a3b53 !important; }
+
+[data-theme="dark"] .discussion-card,
+[data-theme="dark"] .reply-card,
+[data-theme="dark"] .community-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ── Plant Detail tabs ───────────────────────────────── */
+[data-theme="dark"] .plant-tabs { background: #14202f !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .tab-btn {
+  color: #cbd5e1 !important;
+  background: transparent !important;
+}
+[data-theme="dark"] .tab-btn.active { color: #4caf50 !important; }
+[data-theme="dark"] .tab-content { background: transparent !important; color: #f1f5f9 !important; }
+[data-theme="dark"] .timeline-content { background: #1e2d40 !important; color: #f1f5f9 !important; }
+
+/* ── Auth pages (Login / Register) ───────────────────── */
+[data-theme="dark"] .auth-container { background: #0a0f1c !important; }
+[data-theme="dark"] .auth-panel     { background: #0a0f1c !important; }
+[data-theme="dark"] .auth-header h2 { color: #f3f4f6 !important; }
+[data-theme="dark"] .auth-header p,
+[data-theme="dark"] .auth-footer p,
+[data-theme="dark"] .terms-text   { color: #94a3b8 !important; }
+[data-theme="dark"] .auth-eyebrow {
+  background: rgba(76, 175, 80, 0.15) !important;
+  color: #6ee7b7 !important;
+}
+[data-theme="dark"] .form-helper,
+[data-theme="dark"] .checkbox-label { color: #cbd5e1 !important; }
+
+/* ── Theme toggle button (lives in Header) ───────────── */
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #f59e0b;
+  transition: all 0.25s ease;
+  /* spacing comes from header-right flex gap */
+}
+.theme-toggle:hover {
+  transform: rotate(20deg);
+  border-color: #f59e0b;
+}
+[data-theme="dark"] .theme-toggle {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #fbbf24 !important;
+}
+[data-theme="dark"] .theme-toggle:hover {
+  border-color: #fbbf24 !important;
+}
+
+/* Make scrollbars less harsh in dark mode */
+[data-theme="dark"] ::-webkit-scrollbar { width: 10px; height: 10px; }
+[data-theme="dark"] ::-webkit-scrollbar-track { background: #0a0f1c; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #2a3b53;
+  border-radius: 999px;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* ────────────────────────────────────────────────────────────
+   Refinements pass — better contrast, missed components,
+   richer surfaces for the new pages (eco, social, anatomy)
+   ──────────────────────────────────────────────────────────── */
+
+/* Body uses the deepest tone with a subtle warm tint */
+[data-theme="dark"] body {
+  background: linear-gradient(180deg, #0a0f1c 0%, #0d1424 100%) !important;
+}
+
+/* Hero gradients: deeper greens so they don't blast against dark surfaces */
+[data-theme="dark"] .pd-hero,
+[data-theme="dark"] .pc-hero,
+[data-theme="dark"] .gm-hero,
+[data-theme="dark"] .eco-hero,
+[data-theme="dark"] .social-hero,
+[data-theme="dark"] .tasks-hero,
+[data-theme="dark"] .encyclopedia-hero,
+[data-theme="dark"] .hero-section,
+[data-theme="dark"] .journal-hero,
+[data-theme="dark"] .profile-hero,
+[data-theme="dark"] .profile-banner {
+  background: linear-gradient(135deg, #0d2418 0%, #1f5b27 55%, #2e7d32 100%) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* New page containers */
+[data-theme="dark"] .eco-container,
+[data-theme="dark"] .social-container { background: #0a0f1c !important; }
+
+/* AI Note widget on the dashboard */
+[data-theme="dark"] .ai-note-card {
+  background: linear-gradient(135deg, #0e1f17 0%, #14202f 70%) !important;
+  border-color: #1e3a2a !important;
+}
+[data-theme="dark"] .ai-note-card::before {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(76, 175, 80, 0.15), transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(46, 125, 50, 0.10), transparent 50%) !important;
+}
+[data-theme="dark"] .ai-note-text     { color: #f1f5f9 !important; }
+[data-theme="dark"] .ai-note-text p:last-child:not(:only-child) { color: #cbd5e1 !important; }
+[data-theme="dark"] .ai-note-fallback { color: #94a3b8 !important; }
+[data-theme="dark"] .ai-note-sub      { color: #94a3b8 !important; }
+[data-theme="dark"] .ai-note-title h3 { color: #d1fae5 !important; }
+[data-theme="dark"] .ai-note-refresh {
+  background: #14202f !important;
+  border-color: #1e3a2a !important;
+  color: #4caf50 !important;
+}
+[data-theme="dark"] .ai-skeleton-line {
+  background: linear-gradient(90deg, #1e2d40 0%, #2a3b53 50%, #1e2d40 100%) !important;
+}
+
+/* Plant Doctor result tweaks */
+[data-theme="dark"] .pd-result-section h5 { color: #94a3b8 !important; }
+[data-theme="dark"] .pd-result-meta       { color: #cbd5e1 !important; }
+[data-theme="dark"] .pd-empty,
+[data-theme="dark"] .pd-loading p,
+[data-theme="dark"] .pc-empty p           { color: #cbd5e1 !important; }
+
+/* Garden Map zone canvases */
+[data-theme="dark"] .gm-canvas { filter: brightness(0.6) saturate(0.85); border-color: #2a3b53 !important; }
+[data-theme="dark"] .gm-canvas-empty,
+[data-theme="dark"] .gm-canvas-loading p { color: #cbd5e1 !important; }
+[data-theme="dark"] .gm-canvas-empty h3  { color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-tile-label       { background: rgba(0,0,0,0.85) !important; }
+[data-theme="dark"] .gm-hint {
+  background: rgba(120, 53, 15, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #fde68a !important;
+}
+
+/* Plant Anatomy */
+[data-theme="dark"] .pa-canvas {
+  background: linear-gradient(180deg, #1a2332 0%, #1a2332 50%, #1f2e23 50%, #19281e 100%) !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .pa-info { background: #14202f !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .pa-info h3       { color: #f1f5f9 !important; }
+[data-theme="dark"] .pa-info p        { color: #cbd5e1 !important; }
+[data-theme="dark"] .pa-info .pa-tagline { color: #94a3b8 !important; }
+[data-theme="dark"] .pa-fact { background: #0a0f1c !important; color: #f1f5f9 !important; }
+[data-theme="dark"] .pa-facts h4 { color: #94a3b8 !important; }
+[data-theme="dark"] .pa-empty   { color: #94a3b8 !important; }
+[data-theme="dark"] .pa-chip {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Carbon Offset */
+[data-theme="dark"] .co-stat,
+[data-theme="dark"] .co-section {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .co-stat-value         { color: #f1f5f9 !important; }
+[data-theme="dark"] .co-stat-unit          { color: #cbd5e1 !important; }
+[data-theme="dark"] .co-stat-label         { color: #94a3b8 !important; }
+[data-theme="dark"] .co-stat-note          { color: #64748b !important; }
+[data-theme="dark"] .co-comparison         { background: #0a0f1c !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .co-comparison .num    { color: #f1f5f9 !important; }
+[data-theme="dark"] .co-comparison .desc   { color: #cbd5e1 !important; }
+[data-theme="dark"] .co-plant-row          { background: #0a0f1c !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .co-plant-row .info strong { color: #f1f5f9 !important; }
+[data-theme="dark"] .co-plant-row .info small  { color: #94a3b8 !important; }
+[data-theme="dark"] .co-plant-row .nums    { color: #cbd5e1 !important; }
+[data-theme="dark"] .co-period             { background: #14202f !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .co-period button      { color: #cbd5e1 !important; }
+[data-theme="dark"] .co-disclaimer {
+  background: rgba(120, 53, 15, 0.18) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #fde68a !important;
+}
+
+/* Social pages */
+[data-theme="dark"] .gardener-card,
+[data-theme="dark"] .profile-section,
+[data-theme="dark"] .messages-layout,
+[data-theme="dark"] .conv-list,
+[data-theme="dark"] .chat-panel,
+[data-theme="dark"] .social-empty,
+[data-theme="dark"] .profile-back {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .conv-list                { background: #0d1424 !important; }
+[data-theme="dark"] .conv-item:hover          { background: #14202f !important; }
+[data-theme="dark"] .conv-item.active         { background: rgba(76, 175, 80, 0.12) !important; border-left-color: #4caf50 !important; }
+[data-theme="dark"] .conv-name                { color: #f1f5f9 !important; }
+[data-theme="dark"] .conv-preview, [data-theme="dark"] .conv-time { color: #94a3b8 !important; }
+[data-theme="dark"] .chat-panel-header        { background: #14202f !important; border-bottom-color: #2a3b53 !important; }
+[data-theme="dark"] .chat-panel-header strong { color: #f1f5f9 !important; }
+[data-theme="dark"] .chat-messages            { background: #0a0f1c !important; }
+[data-theme="dark"] .dm-row.dm-theirs .dm-bubble {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .chat-input-row           { background: #14202f !important; border-top-color: #2a3b53 !important; }
+[data-theme="dark"] .chat-input-row textarea  { background: #0a0f1c !important; color: #f1f5f9 !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .gardener-info strong     { color: #f1f5f9 !important; }
+[data-theme="dark"] .gardener-info small      { color: #94a3b8 !important; }
+[data-theme="dark"] .gardener-stats           { color: #cbd5e1 !important; border-top-color: #2a3b53 !important; }
+[data-theme="dark"] .profile-plant-tile       { background: #0a0f1c !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .profile-plant-tile-info strong { color: #f1f5f9 !important; }
+[data-theme="dark"] .profile-plant-tile-info small  { color: #94a3b8 !important; }
+[data-theme="dark"] .profile-journal-item     { background: #0a0f1c !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .profile-journal-item h4  { color: #f1f5f9 !important; }
+[data-theme="dark"] .profile-journal-item .meta { color: #94a3b8 !important; }
+[data-theme="dark"] .profile-journal-item .body { color: #cbd5e1 !important; }
+[data-theme="dark"] .conv-list-header         { background: #0d1424 !important; color: #f1f5f9 !important; border-bottom-color: #2a3b53 !important; }
+
+/* Better placeholder + selection */
+[data-theme="dark"] ::placeholder { color: #64748b !important; }
+[data-theme="dark"] ::selection   { background: rgba(76, 175, 80, 0.4); color: white; }
+
+/* Catch-all for inline white backgrounds and gray text colors */
+[data-theme="dark"] [style*="background: white"],
+[data-theme="dark"] [style*="background:#fff"],
+[data-theme="dark"] [style*="background-color: white"],
+[data-theme="dark"] [style*="background-color: #fff"] {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] [style*="color: #6b7280"],
+[data-theme="dark"] [style*="color:#6b7280"] { color: #cbd5e1 !important; }
+[data-theme="dark"] [style*="color: #9ca3af"],
+[data-theme="dark"] [style*="color:#9ca3af"] { color: #94a3b8 !important; }
+
+
+/* ================================================================
+   AI Garden Designer modal — full dark mode coverage
+================================================================ */
+
+/* Overlay backdrop is fine (rgba dark already) */
+[data-theme="dark"] .ai-design-overlay { background: rgba(0,0,0,0.7) !important; }
+
+/* Modal body */
+[data-theme="dark"] .ai-design-modal {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6) !important;
+}
+
+/* Header keeps green gradient — text stays white. No change needed. */
+
+/* Field labels + helpers */
+[data-theme="dark"] .ai-design-field > label { color: #f1f5f9 !important; }
+[data-theme="dark"] .ai-design-optional      { color: #94a3b8 !important; }
+
+/* Textarea */
+[data-theme="dark"] .ai-design-field textarea {
+  background: #0a0f1c !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .ai-design-field textarea:focus {
+  border-color: #4caf50 !important;
+}
+
+/* Prompt helper chips (preset suggestions) */
+[data-theme="dark"] .ai-design-chip {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .ai-design-chip:hover {
+  background: #1e2d40 !important;
+  border-color: #4caf50 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Preference grid pills */
+[data-theme="dark"] .ai-design-pref {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .ai-design-pref:hover { border-color: #4caf50 !important; }
+[data-theme="dark"] .ai-design-pref.active {
+  background: rgba(76, 175, 80, 0.18) !important;
+  border-color: #4caf50 !important;
+  color: #86efac !important;
+}
+[data-theme="dark"] .ai-design-pref.active i { color: #86efac !important; }
+[data-theme="dark"] .ai-design-pref i        { color: #86efac !important; }
+
+/* Range slider labels */
+[data-theme="dark"] .ai-design-range-labels { color: #94a3b8 !important; }
+
+/* Generate button — gradient already on brand greens, keep but boost shadow */
+[data-theme="dark"] .ai-design-generate {
+  box-shadow: 0 6px 16px rgba(76,175,80,0.35) !important;
+}
+[data-theme="dark"] .ai-design-generate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Result section — summary banner */
+[data-theme="dark"] .ai-design-summary {
+  background: rgba(76, 175, 80, 0.10) !important;
+  border-color: rgba(76, 175, 80, 0.35) !important;
+  border-left-color: #4caf50 !important;
+}
+[data-theme="dark"] .ai-design-summary i { color: #86efac !important; }
+[data-theme="dark"] .ai-design-summary p { color: #f1f5f9 !important; }
+
+/* Section title above suggestion list */
+[data-theme="dark"] .ai-design-section-title { color: #f1f5f9 !important; }
+
+/* Individual suggestion cards */
+[data-theme="dark"] .ai-design-suggestion {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .ai-design-suggestion-head strong { color: #f1f5f9 !important; }
+[data-theme="dark"] .ai-design-suggestion-head em     { color: #94a3b8 !important; }
+[data-theme="dark"] .ai-design-suggestion-type        { color: #94a3b8 !important; }
+[data-theme="dark"] .ai-design-suggestion-reason      { color: #cbd5e1 !important; }
+
+/* Badges (In your collection / New) */
+[data-theme="dark"] .ai-design-badge.in-collection {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #86efac !important;
+  border-color: rgba(76, 175, 80, 0.4) !important;
+}
+[data-theme="dark"] .ai-design-badge.new {
+  background: rgba(251, 191, 36, 0.18) !important;
+  color: #fde68a !important;
+  border-color: rgba(251, 191, 36, 0.4) !important;
+}
+
+/* Result action buttons */
+[data-theme="dark"] .ai-design-secondary {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .ai-design-secondary:hover {
+  background: #1e2d40 !important;
+  border-color: #4caf50 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Yellow info note at the bottom */
+[data-theme="dark"] .ai-design-note {
+  background: rgba(120, 53, 15, 0.18) !important;
+  border-color: rgba(245, 158, 11, 0.30) !important;
+  color: #fde68a !important;
+}
+[data-theme="dark"] .ai-design-note em,
+[data-theme="dark"] .ai-design-note strong { color: #fef3c7 !important; }
+
+
+/* ================================================================
+   Plant Doctor — fill gaps in severity badges + result text
+================================================================ */
+
+[data-theme="dark"] .pd-result-section h5     { color: #f1f5f9 !important; }
+[data-theme="dark"] .pd-result-section h5 i   { color: #86efac !important; }
+[data-theme="dark"] .pd-result-text           { color: #cbd5e1 !important; }
+[data-theme="dark"] .pd-result-summary        { color: #f1f5f9 !important; }
+[data-theme="dark"] .pd-history-img           { background: #0a0f1c !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .pd-history-title         { color: #f1f5f9 !important; }
+[data-theme="dark"] .pd-history-time          { color: #94a3b8 !important; }
+
+/* Severity pills */
+[data-theme="dark"] .pd-severity.healthy {
+  background: rgba(34, 197, 94, 0.18) !important;
+  color: #86efac !important;
+  border-color: rgba(34, 197, 94, 0.4) !important;
+}
+[data-theme="dark"] .pd-severity.mild,
+[data-theme="dark"] .pd-severity.moderate {
+  background: rgba(251, 191, 36, 0.18) !important;
+  color: #fde68a !important;
+  border-color: rgba(251, 191, 36, 0.4) !important;
+}
+[data-theme="dark"] .pd-severity.severe {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+}
+
+
+/* ================================================================
+   Garden Map Designer — fill remaining gaps
+================================================================ */
+
+[data-theme="dark"] .gm-zone-tab:hover { background: #1e2d40 !important; color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-canvas {
+  background: #0a0f1c !important;
+  background-image:
+    linear-gradient(to right, rgba(76,175,80,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(76,175,80,0.06) 1px, transparent 1px) !important;
+}
+[data-theme="dark"] .gm-canvas-empty           { color: #94a3b8 !important; }
+[data-theme="dark"] .gm-canvas-empty h3        { color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-placement              { background: #14202f !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .gm-placement-name         { background: rgba(0,0,0,0.85) !important; color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-tip                    { background: #14202f !important; border-color: #2a3b53 !important; color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-tip-text               { color: #cbd5e1 !important; }
+[data-theme="dark"] .gm-tip-loading            { color: #94a3b8 !important; }
+[data-theme="dark"] .gm-tip-empty              { color: #94a3b8 !important; }
+[data-theme="dark"] .gm-canvas-meta            { color: #cbd5e1 !important; }
+[data-theme="dark"] .gm-canvas-title small     { color: #94a3b8 !important; }
+[data-theme="dark"] .gm-canvas-title h4        { color: #f1f5f9 !important; }
+[data-theme="dark"] .gm-dirty-badge            { color: #fde68a !important; }
+[data-theme="dark"] .gm-palette-search input   { background: #0a0f1c !important; color: #f1f5f9 !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .gm-palette-search input::placeholder { color: #64748b !important; }
+[data-theme="dark"] .gm-palette-empty          { color: #94a3b8 !important; }
+
+
+/* ================================================================
+   Eco Impact / Carbon Footprint — fill remaining gaps
+================================================================ */
+
+[data-theme="dark"] .co-period button         {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .co-period button.active  {
+  background: rgba(76, 175, 80, 0.22) !important;
+  color: #86efac !important;
+  border-color: #4caf50 !important;
+}
+[data-theme="dark"] .co-section h3            { color: #f1f5f9 !important; }
+[data-theme="dark"] .co-comparison .emoji     { /* keep emoji */ }
+[data-theme="dark"] .co-plant-row .info strong { color: #f1f5f9 !important; }
+[data-theme="dark"] .co-plant-row .info small  { color: #94a3b8 !important; }
+[data-theme="dark"] .co-plant-row .bar         { background: #2a3b53 !important; }
+
+
+/* ================================================================
+   Dashboard — surface cards + tip notes
+================================================================ */
+
+[data-theme="dark"] .tip-card,
+[data-theme="dark"] .quick-actions,
+[data-theme="dark"] .community-preview,
+[data-theme="dark"] .stats-card,
+[data-theme="dark"] .dashboard-content > div {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .tip-card h2,
+[data-theme="dark"] .tip-card h3,
+[data-theme="dark"] .quick-actions h3,
+[data-theme="dark"] .community-preview h3,
+[data-theme="dark"] .stats-card h3 {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .tip-card p,
+[data-theme="dark"] .quick-actions p,
+[data-theme="dark"] .community-preview p,
+[data-theme="dark"] .stats-card p,
+[data-theme="dark"] .stats-card span {
+  color: #cbd5e1 !important;
+}
+
+
+/* ================================================================
+   Catch-all safety net — any element whose backdrop is white via
+   utility class still gets a dark surface so text remains visible.
+================================================================ */
+
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .white-bg {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+}
+
+/* Text utility classes commonly used for muted gray */
+[data-theme="dark"] .text-gray-500,
+[data-theme="dark"] .text-gray-600,
+[data-theme="dark"] .text-gray-700,
+[data-theme="dark"] .muted,
+[data-theme="dark"] .text-muted { color: #cbd5e1 !important; }
+[data-theme="dark"] .text-gray-400 { color: #94a3b8 !important; }
+[data-theme="dark"] .text-gray-900,
+[data-theme="dark"] .text-dark    { color: #f1f5f9 !important; }
+
+
+/* ================================================================
+   DiscussionDetail page (forum thread) — fill gaps
+================================================================ */
+
+[data-theme="dark"] .discussion-detail,
+[data-theme="dark"] .discussion-content,
+[data-theme="dark"] .replies-section,
+[data-theme="dark"] .replies-list,
+[data-theme="dark"] .reply-item {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .reply-content,
+[data-theme="dark"] .reply-content p { color: #cbd5e1 !important; }
+[data-theme="dark"] .back-nav { color: #cbd5e1 !important; }
+[data-theme="dark"] .back-nav:hover { color: #86efac !important; }
+[data-theme="dark"] .discussion-header { background: transparent !important; }
+[data-theme="dark"] .discussion-title { color: #f1f5f9 !important; }
+[data-theme="dark"] .discussion-meta,
+[data-theme="dark"] .author-details,
+[data-theme="dark"] .post-time     { color: #94a3b8 !important; }
+[data-theme="dark"] .author-name   { color: #f1f5f9 !important; }
+[data-theme="dark"] .category-badge {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #86efac !important;
+  border-color: rgba(76, 175, 80, 0.4) !important;
+}
+[data-theme="dark"] .pinned-badge {
+  background: rgba(251, 191, 36, 0.18) !important;
+  color: #fde68a !important;
+}
+[data-theme="dark"] .reply-form textarea {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+
+/* ================================================================
+   Journal — cards + detail
+================================================================ */
+
+[data-theme="dark"] .journal-controls,
+[data-theme="dark"] .journal-content,
+[data-theme="dark"] .journal-card,
+[data-theme="dark"] .journal-detail {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .journal-title { color: #f1f5f9 !important; }
+[data-theme="dark"] .journal-meta,
+[data-theme="dark"] .journal-date,
+[data-theme="dark"] .journal-stats { color: #94a3b8 !important; }
+[data-theme="dark"] .journal-text  { color: #cbd5e1 !important; }
+
+
+/* ================================================================
+   Social (Gardeners + Messages) — wider coverage
+================================================================ */
+
+[data-theme="dark"] .social-tabs {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255,255,255,0.12) !important;
+}
+[data-theme="dark"] .social-tab {
+  background: transparent !important;
+  color: #cbd5e1 !important;
+  border-color: transparent !important;
+}
+[data-theme="dark"] .social-tab:hover {
+  background: rgba(255,255,255,0.10) !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .social-tab.active {
+  background: #14202f !important;
+  color: #86efac !important;
+  border-color: #14202f !important;
+}
+[data-theme="dark"] .social-search input {
+  background: #0a0f1c !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .gardener-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .gardener-card:hover {
+  border-color: #4caf50 !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4) !important;
+}
+[data-theme="dark"] .gardener-info strong { color: #f1f5f9 !important; }
+[data-theme="dark"] .gardener-info small  { color: #94a3b8 !important; }
+[data-theme="dark"] .gardener-stats        { color: #cbd5e1 !important; }
+[data-theme="dark"] .gardener-stats i      { color: #86efac !important; }
+[data-theme="dark"] .social-btn {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .social-btn:hover {
+  background: #1e2d40 !important;
+  border-color: #4caf50 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .social-btn.primary {
+  background: linear-gradient(135deg, #1b3a2b, #2e7d32) !important;
+  border-color: #2e7d32 !important;
+  color: #f1f5f9 !important;
+}
+
+
+/* ================================================================
+   Tasks — hero + cards
+================================================================ */
+
+[data-theme="dark"] .tasks-controls,
+[data-theme="dark"] .tasks-content,
+[data-theme="dark"] .tasks-container,
+[data-theme="dark"] .task-card,
+[data-theme="dark"] .task-form {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .task-title       { color: #f1f5f9 !important; }
+[data-theme="dark"] .task-plant       { color: #86efac !important; }
+[data-theme="dark"] .task-description { color: #cbd5e1 !important; }
+[data-theme="dark"] .task-card.completed { opacity: 0.55; }
+
+
+/* ================================================================
+   Plant Requests (My Requests, Manager, Form)
+================================================================ */
+
+[data-theme="dark"] .my-requests-container,
+[data-theme="dark"] .requests-header,
+[data-theme="dark"] .requests-stats,
+[data-theme="dark"] .request-card,
+[data-theme="dark"] .plant-request-form-container,
+[data-theme="dark"] .pr-manager-container,
+[data-theme="dark"] .pr-card {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .header-title h2 { color: #f1f5f9 !important; }
+[data-theme="dark"] .header-title p  { color: #cbd5e1 !important; }
+[data-theme="dark"] .filter-btn {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .filter-btn:hover {
+  background: #1e2d40 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .filter-btn.active {
+  background: rgba(76, 175, 80, 0.20) !important;
+  color: #86efac !important;
+  border-color: #4caf50 !important;
+}
+[data-theme="dark"] .stat-item        { background: #0a0f1c !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .stat-label       { color: #94a3b8 !important; }
+[data-theme="dark"] .stat-value       { color: #f1f5f9 !important; }
+[data-theme="dark"] .stat-value.pending  { color: #fde68a !important; }
+[data-theme="dark"] .stat-value.approved { color: #86efac !important; }
+[data-theme="dark"] .stat-value.rejected { color: #fca5a5 !important; }
+
+
+/* ================================================================
+   Universal text safety net — ensure dark-on-dark never happens
+   for paragraph + headings inside dark-themed surfaces.
+================================================================ */
+
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 {
+  /* Only force light text on headings that haven't been explicitly themed (gradients/branded
+     headers in green hero cards already keep white via their own rule). */
+  color: inherit;
+}
+
+/* Inputs/textareas not yet covered — final fallback */
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] input[type="search"],
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] input[type="date"],
+[data-theme="dark"] input[type="time"],
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background: #0a0f1c !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder { color: #64748b !important; }
+
+/* ================================================================
+   FULL DARK MODE SWEEP — covers everything in screenshots:
+   Care Tasks, Dashboard widgets, Journal, Encyclopedia, Plant Doctor
+   expanded history, Plant Assistant input row, Analytics, Garden
+   Planner / FullCalendar, Community Forum, Suggest Plant, Profile.
+   Light mode is untouched.
+================================================================ */
+
+/* ── CARE TASKS ──────────────────────────────────────── */
+[data-theme="dark"] .tasks-controls,
+[data-theme="dark"] .tasks-section,
+[data-theme="dark"] .tasks-content,
+[data-theme="dark"] .controls-main,
+[data-theme="dark"] .filter-section,
+[data-theme="dark"] .stat-card-compact {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .task-card,
+[data-theme="dark"] .task-card-inner,
+[data-theme="dark"] .task-card.completed,
+[data-theme="dark"] .task-card.overdue,
+[data-theme="dark"] .task-card.urgent,
+[data-theme="dark"] .task-card.normal,
+[data-theme="dark"] .task-card.soon {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .task-meta-grid,
+[data-theme="dark"] .meta-row,
+[data-theme="dark"] .task-progress-enhanced,
+[data-theme="dark"] .task-actions {
+  background: transparent !important;
+}
+[data-theme="dark"] .meta-item {
+  background: #1e2d40 !important;
+  color: #cbd5e1 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .meta-label { color: #94a3b8 !important; }
+[data-theme="dark"] .meta-value { color: #f1f5f9 !important; }
+[data-theme="dark"] .progress-bar { background: #1e2d40 !important; }
+[data-theme="dark"] .progress-text { color: #cbd5e1 !important; }
+[data-theme="dark"] .btn-primary.task-action-btn {
+  /* keep brand green */
+  color: white !important;
+}
+[data-theme="dark"] .btn-outline.task-action-btn {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .filter-chip {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .filter-chip.active {
+  background: linear-gradient(135deg, #2e7d32, #4caf50) !important;
+  color: white !important;
+  border-color: transparent !important;
+}
+[data-theme="dark"] .chip-count {
+  background: rgba(255,255,255,0.15) !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .search-box-enhanced,
+[data-theme="dark"] .search-input-enhanced {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .view-btn {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .view-btn.active {
+  background: linear-gradient(135deg, #2e7d32, #4caf50) !important;
+  color: white !important;
+}
+[data-theme="dark"] .filter-header h4 { color: #f1f5f9 !important; }
+[data-theme="dark"] .clear-filters,
+[data-theme="dark"] .clear-search {
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .stat-icon-compact {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #4caf50 !important;
+}
+[data-theme="dark"] .stat-value-compact { color: #f1f5f9 !important; }
+[data-theme="dark"] .stat-label-compact { color: #cbd5e1 !important; }
+[data-theme="dark"] .stat-trend-compact { color: #94a3b8 !important; }
+[data-theme="dark"] .tasks-loading,
+[data-theme="dark"] .no-results,
+[data-theme="dark"] .empty-state {
+  background: transparent !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .no-results h3,
+[data-theme="dark"] .empty-state h2,
+[data-theme="dark"] .empty-state h3 { color: #f1f5f9 !important; }
+
+/* ── DASHBOARD WIDGETS ───────────────────────────────── */
+[data-theme="dark"] .tasks-card,
+[data-theme="dark"] .spotlight-card,
+[data-theme="dark"] .health-monitor-card,
+[data-theme="dark"] .wisdom-card,
+[data-theme="dark"] .community-pulse,
+[data-theme="dark"] .growth-summary-card,
+[data-theme="dark"] .dashboard-footer {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .care-type-item,
+[data-theme="dark"] .task-item {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .care-type-item.selected,
+[data-theme="dark"] .care-type-item:hover {
+  background: #273449 !important;
+}
+[data-theme="dark"] .task-name { color: #f1f5f9 !important; }
+[data-theme="dark"] .task-action,
+[data-theme="dark"] .care-description { color: #cbd5e1 !important; }
+[data-theme="dark"] .quote-text,
+[data-theme="dark"] .quote-author,
+[data-theme="dark"] .daily-tip,
+[data-theme="dark"] .health-note { color: #cbd5e1 !important; }
+[data-theme="dark"] .quote-text { color: #f1f5f9 !important; }
+[data-theme="dark"] .quote-icon { color: #4caf50 !important; }
+[data-theme="dark"] .divider { background: #2a3b53 !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .metric-item { color: #cbd5e1 !important; }
+[data-theme="dark"] .metric-label { color: #f1f5f9 !important; }
+[data-theme="dark"] .metric-value { color: #94a3b8 !important; }
+[data-theme="dark"] .post-item {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .post-user { color: #f1f5f9 !important; }
+[data-theme="dark"] .post-message { color: #cbd5e1 !important; }
+[data-theme="dark"] .post-time { color: #94a3b8 !important; }
+[data-theme="dark"] .join-btn {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #d1fae5 !important;
+  border-color: rgba(76, 175, 80, 0.4) !important;
+}
+[data-theme="dark"] .summary-icon,
+[data-theme="dark"] .top-performer {
+  color: #d1fae5 !important;
+}
+[data-theme="dark"] .summary-content h4 { color: #f1f5f9 !important; }
+[data-theme="dark"] .summary-content p { color: #cbd5e1 !important; }
+[data-theme="dark"] .spotlight-plant { color: #f1f5f9 !important; }
+[data-theme="dark"] .spotlight-description { color: #cbd5e1 !important; }
+[data-theme="dark"] .spotlight-tip {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #d1fae5 !important;
+}
+[data-theme="dark"] .date-range,
+[data-theme="dark"] .active-badge {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #d1fae5 !important;
+}
+
+/* ── PLANT JOURNAL ───────────────────────────────────── */
+[data-theme="dark"] .journal-controls,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .journal-form-card,
+[data-theme="dark"] .journal-entries-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .journal-form-card .card-header,
+[data-theme="dark"] .journal-entries-card .card-header {
+  background: rgba(76,175,80,0.12) !important;
+  border-bottom-color: #2a3b53 !important;
+}
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .form-textarea {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .text-counter,
+[data-theme="dark"] .form-group label {
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .journal-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .journal-card-inner { background: #14202f !important; }
+[data-theme="dark"] .journal-title { color: #f1f5f9 !important; }
+[data-theme="dark"] .journal-date { color: #94a3b8 !important; }
+[data-theme="dark"] .journal-text { color: #cbd5e1 !important; }
+[data-theme="dark"] .journal-stats .stat-item {
+  background: #1e2d40 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .journal-plant-tag {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #d1fae5 !important;
+  border-color: rgba(76, 175, 80, 0.4) !important;
+}
+[data-theme="dark"] .plant-name { color: #d1fae5 !important; }
+[data-theme="dark"] .btn.btn-outline,
+[data-theme="dark"] .btn-secondary {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ── ENCYCLOPEDIA ────────────────────────────────────── */
+[data-theme="dark"] .plant-card-enhanced,
+[data-theme="dark"] .plant-card-inner {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .plant-info-section,
+[data-theme="dark"] .plant-details-grid {
+  background: transparent !important;
+}
+[data-theme="dark"] .detail-item.compact {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .plant-name { color: #f1f5f9 !important; }
+[data-theme="dark"] .plant-species { color: #94a3b8 !important; }
+[data-theme="dark"] .detail-label { color: #94a3b8 !important; }
+[data-theme="dark"] .detail-value { color: #f1f5f9 !important; }
+[data-theme="dark"] .care-level-badge { /* keep tinted */ }
+[data-theme="dark"] .btn-outline.btn-sm {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* My Plants page-specific tweaks */
+[data-theme="dark"] .my-plants-container,
+[data-theme="dark"] .controls-section,
+[data-theme="dark"] .controls-row,
+[data-theme="dark"] .results-section,
+[data-theme="dark"] .results-header {
+  background: transparent !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .plant-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .plant-card-content { background: #14202f !important; }
+[data-theme="dark"] .plant-detail {
+  background: #1e2d40 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .sort-control select,
+[data-theme="dark"] .sort-select,
+[data-theme="dark"] .sort-dropdown select {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ── PLANT DOCTOR HISTORY ────────────────────────────── */
+[data-theme="dark"] .pd-card { background: #14202f !important; border-color: #2a3b53 !important; }
+[data-theme="dark"] .pd-history-item {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .pd-history-item.active {
+  background: rgba(76,175,80,0.10) !important;
+}
+[data-theme="dark"] .pd-history-detail {
+  background: #1a2536 !important;
+  border-top-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .pd-history-title { color: #f1f5f9 !important; }
+[data-theme="dark"] .pd-history-meta { color: #94a3b8 !important; }
+[data-theme="dark"] .pd-result.embedded,
+[data-theme="dark"] .pd-result-body {
+  background: transparent !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .pd-result-headline h4 { color: #f1f5f9 !important; }
+[data-theme="dark"] .pd-result-section p { color: #cbd5e1 !important; }
+[data-theme="dark"] .pd-recs li {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  border-left-color: #4caf50 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ── PLANT ASSISTANT — input area ────────────────────── */
+[data-theme="dark"] .pc-input-row {
+  background: #14202f !important;
+  border-top-color: #2a3b53 !important;
+}
+[data-theme="dark"] .pc-input {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ── ANALYTICS ───────────────────────────────────────── */
+[data-theme="dark"] .analytics-container,
+[data-theme="dark"] .analytics-content,
+[data-theme="dark"] .analytics-section,
+[data-theme="dark"] .chart-container,
+[data-theme="dark"] .analytics-card,
+[data-theme="dark"] .analytics-stats,
+[data-theme="dark"] .analytics-hero,
+[data-theme="dark"] .analytics-stat-card,
+[data-theme="dark"] .stats-overview,
+[data-theme="dark"] .plant-analytics,
+[data-theme="dark"] .chart-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .analytics-header h2,
+[data-theme="dark"] .analytics-title,
+[data-theme="dark"] .chart-title { color: #f1f5f9 !important; }
+[data-theme="dark"] .chart-subtitle,
+[data-theme="dark"] .analytics-subtitle { color: #94a3b8 !important; }
+[data-theme="dark"] .stat-number,
+[data-theme="dark"] .stat-big,
+[data-theme="dark"] .big-stat { color: #f1f5f9 !important; }
+[data-theme="dark"] .stat-label { color: #94a3b8 !important; }
+
+/* Chart.js canvases — set background and ensure text legends are readable.
+   We can't recolor canvas content, but the wrapping cards now look dark. */
+[data-theme="dark"] canvas {
+  background: transparent !important;
+}
+
+/* Analytics greeting / mood card / status badges at top */
+[data-theme="dark"] .greeting-card,
+[data-theme="dark"] .top-greeting,
+[data-theme="dark"] .user-mood-card,
+[data-theme="dark"] .top-status,
+[data-theme="dark"] .header-greeting,
+[data-theme="dark"] .greeting-text-wrapper {
+  background: transparent !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .stat-badge {
+  background: #1e2d40 !important;
+  color: #cbd5e1 !important;
+  border-color: #2a3b53 !important;
+}
+
+/* ── GARDEN PLANNER / FullCalendar ───────────────────── */
+[data-theme="dark"] .planner-container,
+[data-theme="dark"] .calendar-container,
+[data-theme="dark"] .planner-card,
+[data-theme="dark"] .planner-hero,
+[data-theme="dark"] .planner-stats {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .fc,
+[data-theme="dark"] .fc-theme-standard,
+[data-theme="dark"] .fc-view-harness {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .fc-toolbar-title { color: #f1f5f9 !important; }
+[data-theme="dark"] .fc .fc-button,
+[data-theme="dark"] .fc .fc-button-primary {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .fc .fc-button:hover,
+[data-theme="dark"] .fc .fc-button-active {
+  background: linear-gradient(135deg, #2e7d32, #4caf50) !important;
+  border-color: transparent !important;
+  color: white !important;
+}
+[data-theme="dark"] .fc .fc-col-header-cell,
+[data-theme="dark"] .fc .fc-col-header-cell-cushion {
+  background: #1a2536 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .fc .fc-daygrid-day,
+[data-theme="dark"] .fc .fc-daygrid-day-frame,
+[data-theme="dark"] .fc .fc-scrollgrid,
+[data-theme="dark"] .fc .fc-scrollgrid-section,
+[data-theme="dark"] .fc .fc-scrollgrid-sync-table,
+[data-theme="dark"] .fc table,
+[data-theme="dark"] .fc td,
+[data-theme="dark"] .fc th {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .fc .fc-day-other,
+[data-theme="dark"] .fc .fc-day-other .fc-daygrid-day-frame {
+  background: #0e1828 !important;
+}
+[data-theme="dark"] .fc .fc-day-today,
+[data-theme="dark"] .fc .fc-day-today .fc-daygrid-day-frame {
+  background: rgba(76, 175, 80, 0.15) !important;
+}
+[data-theme="dark"] .fc .fc-daygrid-day-number {
+  color: #93c5fd !important;
+}
+[data-theme="dark"] .fc-list,
+[data-theme="dark"] .fc-list-event,
+[data-theme="dark"] .fc-list-day-cushion {
+  background: #14202f !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .fc-event {
+  border-color: transparent !important;
+}
+[data-theme="dark"] .planner-stat-card,
+[data-theme="dark"] .calendar-stat,
+[data-theme="dark"] .week-day-btn {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ── COMMUNITY FORUM ─────────────────────────────────── */
+[data-theme="dark"] .community-container,
+[data-theme="dark"] .community-forum,
+[data-theme="dark"] .community-card,
+[data-theme="dark"] .forum-hero,
+[data-theme="dark"] .forum-stats,
+[data-theme="dark"] .forum-search-bar,
+[data-theme="dark"] .categories-section,
+[data-theme="dark"] .discussions-section,
+[data-theme="dark"] .community-stats-grid {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .stat-card-community,
+[data-theme="dark"] .community-stat-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .category-card,
+[data-theme="dark"] .forum-category {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .category-card.active,
+[data-theme="dark"] .category-card.selected {
+  background: rgba(76, 175, 80, 0.18) !important;
+  border-color: #4caf50 !important;
+  color: #d1fae5 !important;
+}
+[data-theme="dark"] .category-name { color: #f1f5f9 !important; }
+[data-theme="dark"] .category-description,
+[data-theme="dark"] .category-desc { color: #cbd5e1 !important; }
+[data-theme="dark"] .discussion-card,
+[data-theme="dark"] .discussion-card-enhanced {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .discussion-title { color: #f1f5f9 !important; }
+[data-theme="dark"] .discussion-preview,
+[data-theme="dark"] .discussion-meta { color: #cbd5e1 !important; }
+[data-theme="dark"] .new-discussion-btn,
+[data-theme="dark"] .start-discussion-btn {
+  /* keep brand green */
+  color: white !important;
+}
+[data-theme="dark"] .search-discussions,
+[data-theme="dark"] .forum-search input {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ── SUGGEST NEW PLANT FORM ──────────────────────────── */
+[data-theme="dark"] .plant-request-form,
+[data-theme="dark"] .request-form-container,
+[data-theme="dark"] .form-container,
+[data-theme="dark"] .suggest-plant-card,
+[data-theme="dark"] .multi-step-form,
+[data-theme="dark"] .step-content,
+[data-theme="dark"] .form-step,
+[data-theme="dark"] .pr-form,
+[data-theme="dark"] .pr-container {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .step-indicator,
+[data-theme="dark"] .form-stepper {
+  background: transparent !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .step-circle,
+[data-theme="dark"] .step-bubble {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .step-circle.active,
+[data-theme="dark"] .step-bubble.active {
+  background: linear-gradient(135deg, #2e7d32, #4caf50) !important;
+  color: white !important;
+  border-color: transparent !important;
+}
+[data-theme="dark"] .step-label { color: #94a3b8 !important; }
+[data-theme="dark"] .step-line { background: #2a3b53 !important; }
+[data-theme="dark"] .pr-title,
+[data-theme="dark"] .form-title { color: #f1f5f9 !important; }
+
+/* ── MY PLANT REQUESTS list ──────────────────────────── */
+[data-theme="dark"] .my-requests-container,
+[data-theme="dark"] .request-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ── PROFILE ─────────────────────────────────────────── */
+[data-theme="dark"] .profile-container-modern,
+[data-theme="dark"] .profile-card-modern,
+[data-theme="dark"] .stats-grid-modern,
+[data-theme="dark"] .stat-card-modern,
+[data-theme="dark"] .info-grid-modern,
+[data-theme="dark"] .info-item-modern,
+[data-theme="dark"] .activity-card-modern,
+[data-theme="dark"] .activity-list-modern,
+[data-theme="dark"] .profile-details-modern,
+[data-theme="dark"] .profile-info-modern {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .stat-card-modern {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .stat-number-modern { color: #f1f5f9 !important; }
+[data-theme="dark"] .stat-label-modern { color: #94a3b8 !important; }
+[data-theme="dark"] .stat-trend-modern { color: #cbd5e1 !important; }
+[data-theme="dark"] .stat-icon-modern.plants { background: rgba(76,175,80,0.18) !important; color: #4caf50 !important; }
+[data-theme="dark"] .stat-icon-modern.tasks { background: rgba(245,158,11,0.18) !important; color: #fbbf24 !important; }
+[data-theme="dark"] .stat-icon-modern.completion { background: rgba(59,130,246,0.18) !important; color: #60a5fa !important; }
+[data-theme="dark"] .stat-icon-modern.streak { background: rgba(249,115,22,0.18) !important; color: #fb923c !important; }
+[data-theme="dark"] .info-icon {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #4caf50 !important;
+}
+[data-theme="dark"] .info-content .info-label { color: #94a3b8 !important; }
+[data-theme="dark"] .info-content .info-value { color: #f1f5f9 !important; }
+[data-theme="dark"] .activity-item-modern {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .activity-title-modern { color: #f1f5f9 !important; }
+[data-theme="dark"] .activity-time-modern { color: #94a3b8 !important; }
+[data-theme="dark"] .activity-icon-modern {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #4caf50 !important;
+}
+[data-theme="dark"] .activity-status-modern {
+  color: #4caf50 !important;
+}
+[data-theme="dark"] .activity-count {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #d1fae5 !important;
+}
+[data-theme="dark"] .user-meta-modern,
+[data-theme="dark"] .user-join-info {
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .empty-activity-modern h4 { color: #f1f5f9 !important; }
+[data-theme="dark"] .empty-activity-modern p { color: #cbd5e1 !important; }
+[data-theme="dark"] .activity-header-modern h3 { color: #f1f5f9 !important; }
+[data-theme="dark"] .empty-icon {
+  background: rgba(76, 175, 80, 0.18) !important;
+  color: #4caf50 !important;
+}
+
+/* ── MODALS (general) ────────────────────────────────── */
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .modal-body,
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.7) !important; }
+
+/* ── CARDS / GENERIC catch-all for missed white backgrounds ── */
+[data-theme="dark"] .card,
+[data-theme="dark"] .card-body,
+[data-theme="dark"] .card-header {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .card-title { color: #f1f5f9 !important; }
+[data-theme="dark"] .card-subtitle { color: #94a3b8 !important; }
+
+/* Catch any remaining elements with explicit white/very-light background */
+[data-theme="dark"] [class*="-card"]:not([class*="severity"]):not(.pd-sev-pill):not(.lg-event):not(.notif-type-pill) {
+  background-color: #14202f !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] [class*="-container"]:not(.eco-container):not(.social-container):not(.pd-container):not(.pc-container):not(.gm-container):not(.lg-container) {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+/* Universal text contrast — make sure all "muted" greys become readable */
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .text-secondary,
+[data-theme="dark"] .text-light,
+[data-theme="dark"] small,
+[data-theme="dark"] .small,
+[data-theme="dark"] .label,
+[data-theme="dark"] .tag,
+[data-theme="dark"] .badge-light {
+  color: #cbd5e1 !important;
+}
+
+/* Generic heading / paragraph text inside dark surfaces should not be black */
+[data-theme="dark"] h3, [data-theme="dark"] h4, [data-theme="dark"] h5 { color: #f1f5f9 !important; }
+
+/* Add Task button etc. — keep brand green */
+[data-theme="dark"] .btn-primary,
+[data-theme="dark"] .card-btn.primary {
+  color: white !important;
+}
+[data-theme="dark"] .card-btn:not(.primary) {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+
+/* Search and sort selectors throughout the app */
+[data-theme="dark"] .search-box,
+[data-theme="dark"] .search-input,
+[data-theme="dark"] .search-bar input,
+[data-theme="dark"] .clear-search-btn {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ───────────────────────────────────────────────
+   PLANT DETECTIVE — dark mode overrides
+   ─────────────────────────────────────────────── */
+
+[data-theme="dark"] .pdet-page { color: #f1f5f9; }
+
+/* Detective / Anatomy mode tabs */
+[data-theme="dark"] .pdet-mode-tab {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .pdet-mode-tab:hover {
+  background: #1e2d40 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .pdet-mode-tab.active {
+  background: linear-gradient(135deg, #047857, #10b981) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+
+/* Hero already uses gradient — keep it but tone the shadow */
+[data-theme="dark"] .pdet-hero {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Difficulty row */
+[data-theme="dark"] .pdet-diff-label { color: #94a3b8 !important; }
+
+[data-theme="dark"] .pdet-diff-chip {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .pdet-diff-chip:hover {
+  border-color: #10b981 !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] .pdet-diff-chip.on {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: #10b981 !important;
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] .pdet-history-toggle { color: #34d399 !important; }
+[data-theme="dark"] .pdet-history-toggle:hover { background: rgba(16, 185, 129, 0.12) !important; }
+
+/* Empty state */
+[data-theme="dark"] .pdet-empty {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
+}
+[data-theme="dark"] .pdet-empty h2 { color: #f1f5f9 !important; }
+[data-theme="dark"] .pdet-empty-tip { color: #94a3b8 !important; }
+[data-theme="dark"] .pdet-empty-icon {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] .pdet-spinner {
+  border-color: #1e2d40 !important;
+  border-top-color: #34d399 !important;
+}
+
+/* Case board */
+[data-theme="dark"] .pdet-case {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+}
+[data-theme="dark"] .pdet-case-plant { color: #6ee7b7 !important; }
+[data-theme="dark"] .pdet-case-tag {
+  background: #1e2d40 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .pdet-symptoms {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border-color: rgba(16, 185, 129, 0.25) !important;
+  border-left-color: #10b981 !important;
+}
+[data-theme="dark"] .pdet-symptoms-label { color: #34d399 !important; }
+[data-theme="dark"] .pdet-symptoms-body  { color: #f1f5f9 !important; }
+[data-theme="dark"] .pdet-symptoms-env   { color: #cbd5e1 !important; }
+
+/* Choices */
+[data-theme="dark"] .pdet-choice {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .pdet-choice:hover:not(.locked) {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: #10b981 !important;
+}
+[data-theme="dark"] .pdet-choice.picked {
+  background: rgba(16, 185, 129, 0.18) !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.20) !important;
+}
+[data-theme="dark"] .pdet-choice.correct {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.20) 0%, rgba(16, 185, 129, 0.10) 100%) !important;
+  border-color: #10b981 !important;
+}
+[data-theme="dark"] .pdet-choice.wrong {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.20) 0%, rgba(239, 68, 68, 0.10) 100%) !important;
+  border-color: #ef4444 !important;
+}
+[data-theme="dark"] .pdet-choice-letter {
+  background: #0a0f1c !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .pdet-choice.picked .pdet-choice-letter,
+[data-theme="dark"] .pdet-choice.correct .pdet-choice-letter {
+  background: #047857 !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .pdet-choice.wrong .pdet-choice-letter {
+  background: #b91c1c !important;
+  color: #fff !important;
+}
+
+/* Feedback */
+[data-theme="dark"] .pdet-feedback.ok {
+  background: rgba(16, 185, 129, 0.10) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+[data-theme="dark"] .pdet-feedback.err {
+  background: rgba(239, 68, 68, 0.10) !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+[data-theme="dark"] .pdet-feedback.ok .pdet-feedback-title  { color: #6ee7b7 !important; }
+[data-theme="dark"] .pdet-feedback.err .pdet-feedback-title { color: #fca5a5 !important; }
+[data-theme="dark"] .pdet-feedback-sub { color: #cbd5e1 !important; }
+[data-theme="dark"] .pdet-feedback-body p { color: #f1f5f9 !important; }
+[data-theme="dark"] .pdet-fun-fact {
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: #cbd5e1 !important;
+  border-left-color: #10b981 !important;
+}
+
+/* History */
+[data-theme="dark"] .pdet-history {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .pdet-history h3 { color: #6ee7b7 !important; }
+[data-theme="dark"] .pdet-history-empty { color: #94a3b8 !important; }
+[data-theme="dark"] .pdet-hist-card {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .pdet-hist-plant { color: #6ee7b7 !important; }
+[data-theme="dark"] .pdet-hist-sym { color: #cbd5e1 !important; }
+[data-theme="dark"] .pdet-hist-row-label { color: #94a3b8 !important; }
+[data-theme="dark"] .pdet-hist-row-val { color: #f1f5f9 !important; }
+[data-theme="dark"] .pdet-hist-row-val.ok  { color: #34d399 !important; }
+[data-theme="dark"] .pdet-hist-row-val.err { color: #fca5a5 !important; }
+
+/* ───────────────────────────────────────────────
+   WEATHER FORECAST PAGE — dark mode
+   ─────────────────────────────────────────────── */
+
+[data-theme="dark"] .wx-hero {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme="dark"] .wx-rec-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.10) 0%, rgba(16, 185, 129, 0.05) 100%) !important;
+  border-color: rgba(16, 185, 129, 0.30) !important;
+  border-left-color: #10b981 !important;
+}
+[data-theme="dark"] .wx-rec-label { color: #34d399 !important; }
+[data-theme="dark"] .wx-rec-text  { color: #f1f5f9 !important; }
+
+[data-theme="dark"] .wx-metric {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .wx-metric:hover {
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 8px 22px rgba(16, 185, 129, 0.15) !important;
+}
+[data-theme="dark"] .wx-metric-label { color: #94a3b8 !important; }
+[data-theme="dark"] .wx-metric-value { color: #6ee7b7 !important; }
+
+[data-theme="dark"] .wx-section-title { color: #6ee7b7 !important; }
+
+[data-theme="dark"] .wx-forecast-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .wx-forecast-card:hover {
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+[data-theme="dark"] .wx-forecast-day  { color: #94a3b8 !important; }
+[data-theme="dark"] .wx-forecast-cond { color: #cbd5e1 !important; }
+[data-theme="dark"] .wx-temp-max { color: #f1f5f9 !important; }
+[data-theme="dark"] .wx-temp-min { color: #64748b !important; }
+
+/* ───────────────────────────────────────────────
+   GENERAL DARK MODE SWEEP — beige/white catch-all
+   ─────────────────────────────────────────────── */
+
+/* Any element still styled with literal #fff / #ffffff backgrounds via inline style attribute
+   will not be caught by CSS — but anything with these common utility/legacy classes will be. */
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .white-card,
+[data-theme="dark"] .panel-white,
+[data-theme="dark"] .light-panel,
+[data-theme="dark"] .form-card,
+[data-theme="dark"] .info-card,
+[data-theme="dark"] .alert-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Cream / beige class names */
+[data-theme="dark"] .cream-bg,
+[data-theme="dark"] .bg-cream,
+[data-theme="dark"] .beige,
+[data-theme="dark"] .light-bg {
+  background: #0a0f1c !important;
+  color: #f1f5f9 !important;
+}
+
+/* Modal & popup overlays */
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .modal-body,
+[data-theme="dark"] .popup-content,
+[data-theme="dark"] .dialog-box,
+[data-theme="dark"] .overlay-card,
+[data-theme="dark"] .dropdown-menu,
+[data-theme="dark"] .dropdown-content,
+[data-theme="dark"] .popover {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer,
+[data-theme="dark"] .dialog-header,
+[data-theme="dark"] .dialog-footer {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Generic light text on what we just darkened */
+[data-theme="dark"] .modal-content h1,
+[data-theme="dark"] .modal-content h2,
+[data-theme="dark"] .modal-content h3,
+[data-theme="dark"] .modal-content h4,
+[data-theme="dark"] .modal-content p,
+[data-theme="dark"] .modal-content label,
+[data-theme="dark"] .dialog-box h1,
+[data-theme="dark"] .dialog-box h2,
+[data-theme="dark"] .dialog-box h3,
+[data-theme="dark"] .dialog-box p {
+  color: #f1f5f9 !important;
+}
+
+/* Form controls inside modals */
+[data-theme="dark"] .modal-content input,
+[data-theme="dark"] .modal-content textarea,
+[data-theme="dark"] .modal-content select,
+[data-theme="dark"] .dialog-box input,
+[data-theme="dark"] .dialog-box textarea,
+[data-theme="dark"] .dialog-box select {
+  background: #0a0f1c !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Tabs / pills */
+[data-theme="dark"] .tab,
+[data-theme="dark"] .tab-button,
+[data-theme="dark"] .pill,
+[data-theme="dark"] .nav-tab {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .tab.active,
+[data-theme="dark"] .tab-button.active,
+[data-theme="dark"] .nav-tab.active,
+[data-theme="dark"] .pill.active {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: #10b981 !important;
+  color: #34d399 !important;
+}
+
+/* Tooltips */
+[data-theme="dark"] .tooltip,
+[data-theme="dark"] [role="tooltip"] {
+  background: #0a0f1c !important;
+  color: #f1f5f9 !important;
+  border-color: #2a3b53 !important;
+}
+
+/* Loading / skeleton placeholders */
+[data-theme="dark"] .skeleton,
+[data-theme="dark"] .loading-placeholder,
+[data-theme="dark"] .shimmer {
+  background: linear-gradient(90deg, #1e2d40 0%, #2a3b53 50%, #1e2d40 100%) !important;
+}
+
+/* Tables — common selectors that might still be light */
+[data-theme="dark"] table thead {
+  background: #1e2d40 !important;
+}
+[data-theme="dark"] table th {
+  color: #f1f5f9 !important;
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] table td {
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] table tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+[data-theme="dark"] table tr:hover {
+  background: rgba(16, 185, 129, 0.06) !important;
+}
+
+/* "Read more" / "Show more" / outline buttons */
+[data-theme="dark"] .btn-outline,
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark"] .btn-light,
+[data-theme="dark"] .ghost-btn {
+  background: transparent !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .btn-outline:hover,
+[data-theme="dark"] .btn-secondary:hover,
+[data-theme="dark"] .ghost-btn:hover {
+  background: #1e2d40 !important;
+  border-color: #10b981 !important;
+  color: #34d399 !important;
+}
+
+/* Inline-styled white backgrounds (target a few common patterns) */
+[data-theme="dark"] [style*="background: #fff"]:not(button):not(.no-dark-override),
+[data-theme="dark"] [style*="background: white"]:not(button):not(.no-dark-override),
+[data-theme="dark"] [style*="background-color: #fff"]:not(button):not(.no-dark-override),
+[data-theme="dark"] [style*="background-color: white"]:not(button):not(.no-dark-override) {
+  background: #14202f !important;
+}
+
+/* Cream / linen / wheat hex values that might appear in legacy inline styles */
+[data-theme="dark"] [style*="#fafaf6"],
+[data-theme="dark"] [style*="#fdfdfb"],
+[data-theme="dark"] [style*="#fefcf3"],
+[data-theme="dark"] [style*="#f8f9fa"],
+[data-theme="dark"] [style*="#f5f5dc"] {
+  background: #14202f !important;
+}
+
+/* Helper / utility text colors that may still be too dark */
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .text-secondary,
+[data-theme="dark"] .text-gray,
+[data-theme="dark"] .helper-text {
+  color: #94a3b8 !important;
+}
+
+/* Cards inside dashboard grids that were missed */
+[data-theme="dark"] .dashboard-section,
+[data-theme="dark"] .dashboard-widget,
+[data-theme="dark"] .info-section,
+[data-theme="dark"] .summary-card,
+[data-theme="dark"] .feature-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ───────────────────────────────────────────────
+   MESSAGES — emoji picker, attachments, edit/delete
+   ─────────────────────────────────────────────── */
+
+[data-theme="dark"] .chat-attach-btn,
+[data-theme="dark"] .chat-emoji-btn {
+  background: #1e2d40 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .chat-attach-btn:hover,
+[data-theme="dark"] .chat-emoji-btn:hover {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] .chat-pending-row {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border-top-color: rgba(16, 185, 129, 0.25) !important;
+}
+[data-theme="dark"] .chat-pending-file {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] .chat-pending-row img {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+[data-theme="dark"] .emoji-picker {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="dark"] .emoji-tabs { border-bottom-color: #2a3b53 !important; }
+[data-theme="dark"] .emoji-tab {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .emoji-tab:hover {
+  background: #1e2d40 !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] .emoji-tab.on {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] .emoji-btn:hover { background: #1e2d40 !important; }
+
+[data-theme="dark"] .dm-menu-trigger {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .dm-menu-trigger:hover {
+  border-color: #10b981 !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] .dm-menu {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="dark"] .dm-menu button {
+  background: #14202f !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .dm-menu button:hover { background: #1e2d40 !important; }
+[data-theme="dark"] .dm-menu-danger { color: #fca5a5 !important; }
+[data-theme="dark"] .dm-menu-danger:hover { background: rgba(239, 68, 68, 0.12) !important; }
+
+[data-theme="dark"] .dm-attachment-file {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .dm-attachment-file:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* ───────────────────────────────────────────────
+   JOURNAL — photo attachments dark mode
+   ─────────────────────────────────────────────── */
+
+[data-theme="dark"] .journal-photo-picker {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] .journal-photo-picker:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: #10b981 !important;
+  color: #6ee7b7 !important;
+}
+
+[data-theme="dark"] .journal-photo-preview {
+  border-color: #2a3b53 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .journal-detail-photo {
+  border-color: #2a3b53 !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ================================================================
+   GARDEN MAP — top-level mode tabs (Designer / Live Garden)
+================================================================ */
+[data-theme="dark"] .gm-mode-tab {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .gm-mode-tab:hover {
+  background: #1e2d40 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .gm-mode-tab.active {
+  background: linear-gradient(135deg, #2e7d32, #4caf50) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+
+/* ================================================================
+   ANALYTICS (AnalyticsChart) — inline-styled cards that React
+   serializes to rgb(), so the [style*=...] catch-alls miss them.
+   These classNames are added directly on the elements.
+================================================================ */
+[data-theme="dark"] .ac-card {
+  background: #14202f !important;
+  border-color: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .ac-statcard,
+[data-theme="dark"] .ac-section,
+[data-theme="dark"] .ac-minicard {
+  background: #0f1a28 !important;
+  border: 1px solid #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .ac-card-title { color: #f1f5f9 !important; }
+[data-theme="dark"] .ac-section-title { color: #cbd5e1 !important; }
+[data-theme="dark"] .ac-typepill {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+}
+[data-theme="dark"] .ac-typepill span { color: #cbd5e1 !important; }
+[data-theme="dark"] .ac-pillbadge {
+  background: #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ================================================================
+   GARDEN PLANNER — real class names (garden-planner-container,
+   calendar-wrapper, calendar-legend = "Task Types", quick-actions)
+================================================================ */
+[data-theme="dark"] .garden-planner-container {
+  background: #0a0f1c !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .planner-header h1 { color: #6ee7b7 !important; }
+[data-theme="dark"] .planner-header .subtitle { color: #94a3b8 !important; }
+[data-theme="dark"] .calendar-wrapper,
+[data-theme="dark"] .calendar-legend,
+[data-theme="dark"] .quick-actions {
+  background: #14202f !important;
+  border: 1px solid #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .calendar-legend h4,
+[data-theme="dark"] .quick-actions h4 { color: #f1f5f9 !important; }
+[data-theme="dark"] .legend-item,
+[data-theme="dark"] .legend-item span { color: #cbd5e1 !important; }
+[data-theme="dark"] .legend-note {
+  color: #94a3b8 !important;
+  border-top-color: #2a3b53 !important;
+}
+[data-theme="dark"] .action-btn {
+  background: #1e2d40 !important;
+  border-color: #2a3b53 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .action-btn:hover {
+  background: linear-gradient(135deg, #2e7d32, #4caf50) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+[data-theme="dark"] .calendar-stats .stat-card {
+  background: #14202f !important;
+  border: 1px solid #2a3b53 !important;
+}
+[data-theme="dark"] .calendar-stats .stat-card h3 { color: #f1f5f9 !important; }
+[data-theme="dark"] .calendar-stats .stat-card p { color: #94a3b8 !important; }
+[data-theme="dark"] .refresh-btn { color: #fff !important; }
+
+/* ================================================================
+   PLANT DETAIL — white header box with image + description,
+   description preview, and full description block
+================================================================ */
+[data-theme="dark"] .plant-header-section {
+  background: #14202f !important;
+  border: 1px solid #2a3b53 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+[data-theme="dark"] .plant-name { color: #f1f5f9 !important; }
+[data-theme="dark"] .plant-species { color: #94a3b8 !important; }
+  background: #0f1a28 !important;
+  border: 1px solid #2a3b53 !important;
+}
+[data-theme="dark"] .plant-description-preview p { color: #cbd5e1 !important; }
+[data-theme="dark"] .full-description {
+  background: #14202f !important;
+  border: 1px solid #2a3b53 !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .full-description h3 { color: #f1f5f9 !important; }
+[data-theme="dark"] .description-content p { color: #cbd5e1 !important; }
+[data-theme="dark"] .feature { color: #cbd5e1 !important; }

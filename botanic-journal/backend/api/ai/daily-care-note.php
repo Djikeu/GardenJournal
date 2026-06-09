@@ -1,0 +1,186 @@
+<?php
+/**
+ * Daily Care Note — Gemini-generated personalized note shown on the dashboard
+ *
+ *   GET    ?user_id=X[&weather=clear&temp=22&humidity=60][&force=1]
+ *           Returns today's note (cached) or generates a fresh one.
+ *           Optional weather params provide context; if absent the note focuses on
+ *           the user's plants & pending tasks.
+ *           force=1 bypasses the cache (useful for a manual "regenerate" button).
+ */
+
+ob_start();
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Methods: GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Credentials: true");
+header("Content-Type: application/json");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit(); }
+
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR])) {
+        ob_clean();
+        echo json_encode(['success' => false, 'message' => 'Fatal: ' . $error['message']]);
+    }
+});
+
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../config/groq.php';
+require_once __DIR__ . '/../../config/http.php';
+
+function respond($success, $message = '', $data = null, $code = 200) {
+    ob_clean();
+    http_response_code($code);
+    echo json_encode(['success' => $success, 'message' => $message, 'data' => $data]);
+    exit();
+}
+
+$db = (new Database())->getConnection();
+if (!$db) respond(false, 'Database connection failed', null, 500);
+ensureNoteTable($db);
+
+$user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : null;
+if (!$user_id) respond(false, 'user_id required', null, 401);
+
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') respond(false, 'Method not allowed', null, 405);
+
+$today = date('Y-m-d');
+$force = !empty($_GET['force']);
+
+// Cached?
+if (!$force) {
+    $stmt = $db->prepare("SELECT * FROM daily_care_notes
+                          WHERE user_id = :uid AND for_date = :d
+                          ORDER BY id DESC LIMIT 1");
+    $stmt->execute([':uid' => $user_id, ':d' => $today]);
+    $cached = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($cached) respond(true, 'Cached', $cached);
+}
+
+// Build context
+$weather  = isset($_GET['weather'])  ? trim($_GET['weather'])  : '';
+$temp     = isset($_GET['temp'])     ? trim($_GET['temp'])     : '';
+$humidity = isset($_GET['humidity']) ? trim($_GET['humidity']) : '';
+
+$context = buildContext($db, $user_id, $weather, $temp, $humidity);
+
+try {
+    $note = callGeminiNote($context);
+} catch (Exception $e) {
+    respond(false, $e->getMessage(), null, 500);
+}
+
+// Save (overwriting any existing for today via INSERT then optional cleanup)
+$db->prepare("DELETE FROM daily_care_notes WHERE user_id = :uid AND for_date = :d")
+   ->execute([':uid' => $user_id, ':d' => $today]);
+
+$ins = $db->prepare("INSERT INTO daily_care_notes (user_id, for_date, note, weather_summary, created_at)
+                     VALUES (:uid, :d, :n, :w, NOW())");
+$ins->execute([
+    ':uid' => $user_id,
+    ':d'   => $today,
+    ':n'   => $note,
+    ':w'   => $weather ? "$weather, $temp" . "°C, $humidity% humidity" : '',
+]);
+
+$row = $db->prepare("SELECT * FROM daily_care_notes WHERE id = :id");
+$row->execute([':id' => $db->lastInsertId()]);
+respond(true, 'Generated', $row->fetch(PDO::FETCH_ASSOC));
+
+// ─────────────────────────────────────────────────────────────────────
+function ensureNoteTable($db) {
+    try {
+        $db->exec("CREATE TABLE IF NOT EXISTS `daily_care_notes` (
+            `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            `user_id` INT UNSIGNED NOT NULL,
+            `for_date` DATE NOT NULL,
+            `note` TEXT NOT NULL,
+            `weather_summary` VARCHAR(200) DEFAULT NULL,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `uniq_user_date` (`user_id`, `for_date`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    } catch (Exception $e) { /* surface downstream */ }
+}
+
+function buildContext($db, $user_id, $weather, $temp, $humidity) {
+    // Plants summary
+    $stmt = $db->prepare("SELECT name, species, type, light_requirements, watering_schedule, status, last_watered
+                          FROM plants WHERE user_id = :uid
+                          ORDER BY created_at DESC LIMIT 25");
+    $stmt->execute([':uid' => $user_id]);
+    $plants = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Pending tasks (today + overdue)
+    $stmt = $db->prepare("SELECT t.title, t.type, t.priority, t.due_date, p.name AS plant_name
+                          FROM tasks t LEFT JOIN plants p ON t.plant_id = p.id
+                          WHERE t.user_id = :uid AND t.completed = 0
+                            AND (t.due_date IS NULL OR t.due_date <= CURDATE())
+                          ORDER BY t.priority = 'high' DESC, t.due_date ASC
+                          LIMIT 10");
+    $stmt->execute([':uid' => $user_id]);
+    $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $lines = [];
+
+    if ($weather || $temp || $humidity) {
+        $lines[] = "Today's weather: " . trim("$weather $temp" . ($temp !== '' ? '°C' : '') . ($humidity !== '' ? ", $humidity% humidity" : ''));
+    }
+
+    if (empty($plants)) {
+        $lines[] = "The user has not added any plants yet — encourage them gently to start a collection.";
+    } else {
+        $lines[] = "User's plants (" . count($plants) . "):";
+        foreach ($plants as $p) {
+            $bits = [$p['name']];
+            if (!empty($p['type']))               $bits[] = '(' . $p['type'] . ')';
+            if (!empty($p['watering_schedule']))  $bits[] = 'water: ' . $p['watering_schedule'];
+            if (!empty($p['last_watered']))       $bits[] = 'last watered: ' . $p['last_watered'];
+            if (!empty($p['status']) && $p['status'] !== 'healthy') $bits[] = 'status: ' . $p['status'];
+            $lines[] = '  • ' . implode(' ', $bits);
+        }
+    }
+
+    if (!empty($tasks)) {
+        $lines[] = "Pending tasks for today/overdue:";
+        foreach ($tasks as $t) {
+            $bits = ['"' . $t['title'] . '"'];
+            if (!empty($t['plant_name'])) $bits[] = 'for ' . $t['plant_name'];
+            if (!empty($t['priority']))   $bits[] = '[' . $t['priority'] . ']';
+            $lines[] = '  • ' . implode(' ', $bits);
+        }
+    }
+
+    return implode("\n", $lines);
+}
+
+function callGeminiNote($context) {
+    $systemText =
+        "You are writing a warm, personal daily care note for a plant owner. The note appears " .
+        "in a prominent widget at the top of their dashboard, so it should feel like a thoughtful, " .
+        "knowledgeable friend dropping by their kitchen with garden advice.\n\n" .
+        "FORMAT:\n" .
+        "  • Two short paragraphs separated by a blank line.\n" .
+        "  • Paragraph 1 (3-4 sentences): the priority for today — reference the weather if given, " .
+        "    name 2-3 of their actual plants by name, and give specific concrete actions tied to those plants.\n" .
+        "  • Paragraph 2 (2-3 sentences): a softer observation — could be an interesting plant fact " .
+        "    relevant to one of their plants, a seasonal tip, an encouraging note about progress, " .
+        "    or a small ritual to enjoy (rotating a pot, wiping leaves, checking new growth).\n\n" .
+        "RULES:\n" .
+        "  • Reference 2-3 plants from the user's actual collection by name. Don't invent species they don't own.\n" .
+        "  • Be specific: instead of 'water your plants', say 'give the snake plant a soak'.\n" .
+        "  • Hot/dry weather → watering, misting, shade. Rainy → skip outdoor watering, watch for fungus. " .
+        "    Cold → protect tropicals from drafts. Mild → pruning, repotting, propagation suggestions.\n" .
+        "  • Tone: warm, observant, never bossy or alarming. Like a friend, not a checklist.\n" .
+        "  • No greeting (\"Hi!\", \"Hello!\") and no signoff (\"Happy gardening!\"). Just dive in.\n" .
+        "  • Plain text only — no markdown, no headings, no bullet points, no emoji.";
+
+    $turns = [['role' => 'user', 'content' => "Context for today:\n" . $context]];
+    $text = groqChat($systemText, $turns, ['temperature' => 0.85, 'max_tokens' => 1500, 'timeout' => 45]);
+    return $text !== '' ? $text : "Take a moment with your plants today — even a quiet check-in counts.";
+}
